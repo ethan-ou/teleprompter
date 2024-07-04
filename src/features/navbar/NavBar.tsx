@@ -57,7 +57,8 @@ export const NavBar = () => {
           justifyContent: "space-between",
           alignItems: "center",
           width: "100%",
-          padding: "0.5rem",
+          paddingLeft: "0.5rem",
+          paddingRight: "0.5rem",
         }}
       >
         <div style={{ alignItems: "center", display: "flex", gap: "0.25rem" }}>
