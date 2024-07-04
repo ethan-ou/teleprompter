@@ -62,7 +62,12 @@ export const Content = () => {
   });
 
   return (
-    <main className="content-area">
+    <main
+      style={{
+        height: status === "editing" ? "100%" : "inherit",
+        overflowY: status === "editing" ? "inherit" : "auto",
+      }}
+    >
       {status === "editing" ? (
         <textarea
           className="content"
