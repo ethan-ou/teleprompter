@@ -2,8 +2,9 @@ import React from "react";
 import { createRoot } from "react-dom/client";
 import { Provider } from "react-redux";
 import App from "./App";
-import { store } from "./app/store";
+import { persistor, store } from "./app/store";
 import "./index.scss";
+import { PersistGate } from "redux-persist/integration/react";
 
 const container = document.getElementById("root");
 
@@ -13,12 +14,21 @@ if (container) {
   root.render(
     <React.StrictMode>
       <Provider store={store}>
-        <App />
+        <PersistGate
+          loading={
+            <div
+              style={{ height: "100%", width: "100%", backgroundColor: "#000" }}
+            />
+          }
+          persistor={persistor}
+        >
+          <App />
+        </PersistGate>
       </Provider>
-    </React.StrictMode>,
+    </React.StrictMode>
   );
 } else {
   throw new Error(
-    "Root element with ID 'root' was not found in the document. Ensure there is a corresponding HTML element with the ID 'root' in your HTML file.",
+    "Root element with ID 'root' was not found in the document. Ensure there is a corresponding HTML element with the ID 'root' in your HTML file."
   );
 }

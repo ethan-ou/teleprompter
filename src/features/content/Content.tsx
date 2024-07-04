@@ -3,6 +3,7 @@ import { escape } from "@/lib/html-escaper";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import {
   setContent,
+  setTextContent,
   setFinalTranscriptIndex,
   setInterimTranscriptIndex,
 } from "./contentSlice";
@@ -60,6 +61,10 @@ export const Content = () => {
       }
     }
   });
+
+  useEffect(() => {
+    dispatch(setTextContent());
+  }, [setTextContent, dispatch]);
 
   return (
     <main

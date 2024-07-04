@@ -33,16 +33,20 @@ export const contentSlice = createAppSlice({
       state.interimTranscriptIndex = -1;
     }),
 
+    setTextContent: create.reducer((state) => {
+      state.textElements = tokenize(state.rawText);
+    }),
+
     setFinalTranscriptIndex: create.reducer(
       (state, action: PayloadAction<number>) => {
         state.finalTranscriptIndex = action.payload;
-      },
+      }
     ),
 
     setInterimTranscriptIndex: create.reducer(
       (state, action: PayloadAction<number>) => {
         state.interimTranscriptIndex = action.payload;
-      },
+      }
     ),
 
     resetTranscriptionIndices: create.reducer((state) => {
@@ -66,6 +70,7 @@ export const contentSlice = createAppSlice({
 
 export const {
   setContent,
+  setTextContent,
   setFinalTranscriptIndex,
   setInterimTranscriptIndex,
   resetTranscriptionIndices,

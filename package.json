@@ -13,9 +13,11 @@
   "dependencies": {
     "@reduxjs/toolkit": "^2.2.6",
     "lucide-react": "^0.400.0",
+    "merge": "^2.1.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "react-redux": "^9.1.2"
+    "react-redux": "^9.1.2",
+    "redux-persist": "^6.0.0"
   },
   "devDependencies": {
     "@types/dom-speech-recognition": "^0.0.4",
