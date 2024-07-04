@@ -79,6 +79,7 @@ export const Content = () => {
           style={style}
           value={rawText}
           onChange={(e) => dispatch(setContent(e.target.value || ""))}
+          placeholder="Enter your content here..."
         />
       ) : (
         <div

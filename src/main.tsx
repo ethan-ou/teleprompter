@@ -14,14 +14,7 @@ if (container) {
   root.render(
     <React.StrictMode>
       <Provider store={store}>
-        <PersistGate
-          loading={
-            <div
-              style={{ height: "100%", width: "100%", backgroundColor: "#000" }}
-            />
-          }
-          persistor={persistor}
-        >
+        <PersistGate loading={null} persistor={persistor}>
           <App />
         </PersistGate>
       </Provider>
