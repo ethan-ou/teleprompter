@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { escape } from "../../lib/html-escaper";
+import { escape } from "@/lib/html-escaper";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import {
   setContent,
