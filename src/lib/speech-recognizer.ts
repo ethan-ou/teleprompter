@@ -1,6 +1,6 @@
 type SubscriberFunction = (
   final_transcript: string,
-  interim_transcript: string
+  interim_transcript: string,
 ) => void;
 
 export default class SpeechRecognizer {

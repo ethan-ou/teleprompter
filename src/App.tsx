@@ -1,5 +1,5 @@
-import { NavBar } from "./features/navbar/NavBar"
-import { Content } from "./features/content/Content"
+import { NavBar } from "./features/navbar/NavBar";
+import { Content } from "./features/content/Content";
 
 const App = () => {
   return (
@@ -7,7 +7,7 @@ const App = () => {
       <NavBar />
       <Content />
     </div>
-  )
-}
+  );
+};
 
-export default App
+export default App;

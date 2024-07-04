@@ -48,6 +48,6 @@ export const useFullScreen = () => {
       exit,
       node,
     }),
-    [active, enter, exit]
+    [active, enter, exit],
   );
 };

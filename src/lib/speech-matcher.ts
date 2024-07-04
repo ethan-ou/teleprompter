@@ -1,5 +1,5 @@
-import { type TextElement, tokenize } from "./word-tokenizer"
-import { levenshteinDistance } from "./levenshtein"
+import { type TextElement, tokenize } from "./word-tokenizer";
+import { levenshteinDistance } from "./levenshtein";
 
 // This is the "secret sauce" of this whole project: a robust algorithm to match
 // the reference text and the speech recognized text using the levenshtein distance.
@@ -10,8 +10,8 @@ export const computeSpeechRecognitionTokenIndex = (
 ) => {
   // Tokenize the recognized input:
   const recognized_tokens = tokenize(recognized).filter(
-    element => element.type === "TOKEN",
-  )
+    (element) => element.type === "TOKEN",
+  );
 
   // Convert the tokens back to a string:
   const comparison_string = recognized_tokens
@@ -20,10 +20,10 @@ export const computeSpeechRecognitionTokenIndex = (
       "",
     )
     .replace(/\s+/, " ")
-    .trim()
+    .trim();
 
   if (lastRecognizedTokenIndex < 0) {
-    lastRecognizedTokenIndex = 0
+    lastRecognizedTokenIndex = 0;
   }
 
   // Now, let's pick the next few tokens from the reference text starting at the last recognized token index.
@@ -33,13 +33,13 @@ export const computeSpeechRecognitionTokenIndex = (
       lastRecognizedTokenIndex,
       lastRecognizedTokenIndex + recognized_tokens.length * 2 + 10,
     )
-    .filter(element => element.type === "TOKEN")
+    .filter((element) => element.type === "TOKEN");
 
   // Now, compute the levenshtein distances between the comparison string
   // and each possible substring created from the reference tokens:
-  const distances: number[] = []
+  const distances: number[] = [];
 
-  let i = 0
+  let i = 0;
 
   while (++i <= reference_tokens.length) {
     const reference_substring = reference_tokens
@@ -49,19 +49,19 @@ export const computeSpeechRecognitionTokenIndex = (
         "",
       )
       .replace(/\s+/, " ")
-      .trim()
-    distances.push(levenshteinDistance(comparison_string, reference_substring))
+      .trim();
+    distances.push(levenshteinDistance(comparison_string, reference_substring));
   }
 
   // Find the index of the minimum distance:
-  const index = distances.indexOf(Math.min(...distances))
+  const index = distances.indexOf(Math.min(...distances));
 
   // Trace that back to the token object:
-  const token = reference_tokens[index]
+  const token = reference_tokens[index];
 
   if (token) {
-    return token.index
+    return token.index;
   }
 
-  return lastRecognizedTokenIndex
-}
+  return lastRecognizedTokenIndex;
+};

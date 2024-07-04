@@ -181,7 +181,7 @@ export const NavBar = () => {
             disabled={status === "editing"}
             onClick={() =>
               dispatch(
-                status === "stopped" ? startTeleprompter() : stopTeleprompter()
+                status === "stopped" ? startTeleprompter() : stopTeleprompter(),
               )
             }
             title={
