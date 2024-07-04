@@ -112,7 +112,11 @@ export const NavBar = () => {
                 title="Edit"
               >
                 <span className="icon is-small">
-                  {status === "editing" ? <PencilOff /> : <Pencil />}
+                  {status === "editing" ? (
+                    <PencilOff style={{ color: "yellow" }} />
+                  ) : (
+                    <Pencil />
+                  )}
                 </span>
               </button>
               <button
@@ -122,7 +126,11 @@ export const NavBar = () => {
                 title="Flip Text Horizontally"
               >
                 <span className="icon is-small">
-                  <MoveHorizontal />
+                  {horizontallyFlipped ? (
+                    <MoveHorizontal style={{ color: "yellow" }} />
+                  ) : (
+                    <MoveHorizontal />
+                  )}
                 </span>
               </button>
               <button
@@ -132,7 +140,11 @@ export const NavBar = () => {
                 title="Flip Text Vertically"
               >
                 <span className="icon is-small">
-                  <MoveVertical />
+                  {verticallyFlipped ? (
+                    <MoveVertical style={{ color: "yellow" }} />
+                  ) : (
+                    <MoveVertical />
+                  )}
                 </span>
               </button>
               <button
@@ -144,7 +156,11 @@ export const NavBar = () => {
                 title={fullscreen.active ? "Exit Fullscreen" : "Fullscreen"}
               >
                 <span className="icon is-small">
-                  {fullscreen.active ? <Shrink /> : <Expand />}
+                  {fullscreen.active ? (
+                    <Shrink style={{ color: "yellow" }} />
+                  ) : (
+                    <Expand />
+                  )}
                 </span>
               </button>
               <button
