@@ -15,23 +15,21 @@
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
-    "@reduxjs/toolkit": "^2.0.1",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "react-redux": "^9.1.0"
+    "@reduxjs/toolkit": "^2.2.6",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-redux": "^9.1.2"
   },
   "devDependencies": {
     "@types/dom-speech-recognition": "^0.0.4",
-    "@types/html-escaper": "^3.0.2",
-    "@types/node": "^20.11.24",
-    "@types/react": "^18.2.47",
-    "@types/react-dom": "^18.2.18",
-    "@vitejs/plugin-react": "^4.2.1",
+    "@types/node": "^20.14.9",
+    "@types/react": "^18.3.3",
+    "@types/react-dom": "^18.3.0",
+    "@vitejs/plugin-react": "^4.3.1",
     "bulma": "^0.9.4",
-    "jsdom": "^23.2.0",
-    "prettier": "^3.2.1",
-    "sass": "^1.71.1",
-    "typescript": "^5.3.3",
-    "vite": "^5.0.11"
+    "prettier": "^3.3.2",
+    "sass": "^1.77.6",
+    "typescript": "^5.5.3",
+    "vite": "^5.3.3"
   }
 }
