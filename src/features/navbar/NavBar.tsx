@@ -1,6 +1,6 @@
-import { useAppDispatch, useAppSelector } from "../../app/hooks"
+import { useAppDispatch, useAppSelector } from "../../app/hooks";
 
-import { startTeleprompter, stopTeleprompter } from "../../app/thunks"
+import { startTeleprompter, stopTeleprompter } from "../../app/thunks";
 
 import {
   toggleEdit,
@@ -15,19 +15,19 @@ import {
   selectFontSize,
   selectMargin,
   selectOpacity,
-} from "./navbarSlice"
+} from "./navbarSlice";
 
-import { resetTranscriptionIndices } from "../content/contentSlice"
+import { resetTranscriptionIndices } from "../content/contentSlice";
 
 export const NavBar = () => {
-  const dispatch = useAppDispatch()
+  const dispatch = useAppDispatch();
 
-  const status = useAppSelector(selectStatus)
-  const fontSize = useAppSelector(selectFontSize)
-  const margin = useAppSelector(selectMargin)
-  const opacity = useAppSelector(selectOpacity)
-  const horizontallyFlipped = useAppSelector(selectHorizontallyFlipped)
-  const verticallyFlipped = useAppSelector(selectVerticallyFlipped)
+  const status = useAppSelector(selectStatus);
+  const fontSize = useAppSelector(selectFontSize);
+  const margin = useAppSelector(selectMargin);
+  const opacity = useAppSelector(selectOpacity);
+  const horizontallyFlipped = useAppSelector(selectHorizontallyFlipped);
+  const verticallyFlipped = useAppSelector(selectVerticallyFlipped);
 
   return (
     <nav
@@ -55,7 +55,7 @@ export const NavBar = () => {
                 min="10"
                 max="200"
                 value={fontSize}
-                onChange={e =>
+                onChange={(e) =>
                   dispatch(setFontSize(parseInt(e.currentTarget.value, 10)))
                 }
               />
@@ -68,7 +68,7 @@ export const NavBar = () => {
                 min="0"
                 max="500"
                 value={margin}
-                onChange={e =>
+                onChange={(e) =>
                   dispatch(setMargin(parseInt(e.currentTarget.value, 10)))
                 }
               />
@@ -81,7 +81,7 @@ export const NavBar = () => {
                 min="0"
                 max="100"
                 value={opacity}
-                onChange={e =>
+                onChange={(e) =>
                   dispatch(setOpacity(parseInt(e.currentTarget.value, 10)))
                 }
               />
@@ -139,7 +139,7 @@ export const NavBar = () => {
             disabled={status === "editing"}
             onClick={() =>
               dispatch(
-                status === "stopped" ? startTeleprompter() : stopTeleprompter(),
+                status === "stopped" ? startTeleprompter() : stopTeleprompter()
               )
             }
             title={
@@ -155,5 +155,5 @@ export const NavBar = () => {
         </div>
       </div>
     </nav>
-  )
-}
+  );
+};
