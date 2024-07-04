@@ -17,7 +17,11 @@ import {
   selectOpacity,
 } from "./navbarSlice";
 
-import { resetTranscriptionIndices } from "../content/contentSlice";
+import {
+  resetTranscriptionIndices,
+  setContent,
+  setTextContent,
+} from "../content/contentSlice";
 import {
   Pencil,
   MoveHorizontal,
@@ -28,6 +32,7 @@ import {
   Expand,
   PencilOff,
   Shrink,
+  Trash2,
 } from "lucide-react";
 
 export const NavBar = () => {
@@ -120,6 +125,20 @@ export const NavBar = () => {
                 </span>
               </button>
               <button
+                className={`button`}
+                onClick={() => {
+                  if (confirm("Are you sure you want to clear your script?")) {
+                    dispatch(setContent(""));
+                    dispatch(setTextContent());
+                  }
+                }}
+                title="Clear"
+              >
+                <span className="icon is-small">
+                  <Trash2 />
+                </span>
+              </button>
+              <button
                 className={`button ${horizontallyFlipped ? "horizontally-flipped" : ""}`}
                 disabled={status !== "stopped"}
                 onClick={() => dispatch(flipHorizontally())}
@@ -181,7 +200,7 @@ export const NavBar = () => {
             disabled={status === "editing"}
             onClick={() =>
               dispatch(
-                status === "stopped" ? startTeleprompter() : stopTeleprompter(),
+                status === "stopped" ? startTeleprompter() : stopTeleprompter()
               )
             }
             title={

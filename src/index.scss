@@ -55,7 +55,8 @@ input[type="range"] {
   height: 100%;
   color: $white;
   padding: 0;
-  line-height: inherit;
+  line-height: 1.25;
+
 }
 
 .content:focus {
