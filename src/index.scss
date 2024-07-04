@@ -31,10 +31,6 @@ body {
 
 /* NavBar styles */
 
-.navbar .title {
-  font-size: 2em;
-}
-
 .button,
 .button:focus {
   background-color: $black;
@@ -45,30 +41,6 @@ body {
 .button:hover {
   border-color: $grey;
   color: $grey;
-}
-
-.fa-play {
-  color: $green;
-}
-
-.fa-stop {
-  color: $red;
-}
-
-.fa-up-down,
-.fa-left-right {
-  color: $grey;
-}
-
-.editing .fa-pencil,
-.vertically-flipped .fa-up-down,
-.horizontally-flipped .fa-left-right {
-  color: $yellow;
-}
-
-.slider > span {
-  margin-right: 0.5em;
-  color: $grey-light;
 }
 
 input[type="range"] {

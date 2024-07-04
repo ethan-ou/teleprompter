@@ -1,6 +1,6 @@
-import { useAppDispatch, useAppSelector } from "../../app/hooks";
+import { useAppDispatch, useAppSelector, useFullScreen } from "@/app/hooks";
 
-import { startTeleprompter, stopTeleprompter } from "../../app/thunks";
+import { startTeleprompter, stopTeleprompter } from "@/app/thunks";
 
 import {
   toggleEdit,
@@ -18,6 +18,17 @@ import {
 } from "./navbarSlice";
 
 import { resetTranscriptionIndices } from "../content/contentSlice";
+import {
+  Pencil,
+  MoveHorizontal,
+  MoveVertical,
+  RefreshCw,
+  Play,
+  Pause,
+  Expand,
+  PencilOff,
+  Shrink,
+} from "lucide-react";
 
 export const NavBar = () => {
   const dispatch = useAppDispatch();
@@ -28,6 +39,7 @@ export const NavBar = () => {
   const opacity = useAppSelector(selectOpacity);
   const horizontallyFlipped = useAppSelector(selectHorizontallyFlipped);
   const verticallyFlipped = useAppSelector(selectVerticallyFlipped);
+  const fullscreen = useFullScreen();
 
   return (
     <nav
@@ -87,7 +99,9 @@ export const NavBar = () => {
               />
             </div>
           </div>
-        ) : null}
+        ) : (
+          <div />
+        )}
 
         <div style={{ alignItems: "center", display: "flex", gap: "0.25rem" }}>
           {status !== "started" ? (
@@ -98,7 +112,7 @@ export const NavBar = () => {
                 title="Edit"
               >
                 <span className="icon is-small">
-                  <i className="fa-solid fa-pencil" />
+                  {status === "editing" ? <PencilOff /> : <Pencil />}
                 </span>
               </button>
               <button
@@ -108,7 +122,7 @@ export const NavBar = () => {
                 title="Flip Text Horizontally"
               >
                 <span className="icon is-small">
-                  <i className="fa-solid fa-left-right" />
+                  <MoveHorizontal />
                 </span>
               </button>
               <button
@@ -118,7 +132,19 @@ export const NavBar = () => {
                 title="Flip Text Vertically"
               >
                 <span className="icon is-small">
-                  <i className="fa-solid fa-up-down" />
+                  <MoveVertical />
+                </span>
+              </button>
+              <button
+                className={`button`}
+                disabled={status !== "stopped"}
+                onClick={() =>
+                  fullscreen.active ? fullscreen.exit() : fullscreen.enter()
+                }
+                title={fullscreen.active ? "Exit Fullscreen" : "Fullscreen"}
+              >
+                <span className="icon is-small">
+                  {fullscreen.active ? <Shrink /> : <Expand />}
                 </span>
               </button>
               <button
@@ -128,7 +154,7 @@ export const NavBar = () => {
                 title="Restart from the beginning"
               >
                 <span className="icon is-small">
-                  <i className="fa-solid fa-arrows-rotate" />
+                  <RefreshCw />
                 </span>
               </button>
             </>
@@ -147,9 +173,14 @@ export const NavBar = () => {
             }
           >
             <span className="icon is-small">
-              <i
+              {status === "stopped" || status === "editing" ? (
+                <Play style={{ color: "green", fill: "green" }} />
+              ) : (
+                <Pause style={{ color: "maroon", fill: "maroon" }} />
+              )}
+              {/* <i
                 className={`fa-solid ${status === "stopped" || status === "editing" ? "fa-play" : "fa-stop"}`}
-              />
+              /> */}
             </span>
           </button>
         </div>
