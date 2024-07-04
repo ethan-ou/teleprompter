@@ -30,8 +30,6 @@ import {
   Play,
   Pause,
   Expand,
-  PencilOff,
-  Shrink,
   Trash2,
 } from "lucide-react";
 
@@ -62,53 +60,27 @@ export const NavBar = () => {
           padding: "0.5rem",
         }}
       >
-        {status === "stopped" ? (
-          <div style={{ display: "flex", gap: "1rem", flexWrap: "wrap" }}>
-            <div style={{ display: "flex", gap: "1rem" }}>
-              <span>Size:</span>
-              <input
-                type="range"
-                step="5"
-                min="10"
-                max="200"
-                value={fontSize}
-                onChange={(e) =>
-                  dispatch(setFontSize(parseInt(e.currentTarget.value, 10)))
-                }
-              />
-            </div>
-            <div style={{ display: "flex", gap: "1rem", alignItems: "center" }}>
-              <span>Margin:</span>
-              <input
-                type="range"
-                step="10"
-                min="0"
-                max="500"
-                value={margin}
-                onChange={(e) =>
-                  dispatch(setMargin(parseInt(e.currentTarget.value, 10)))
-                }
-              />
-            </div>
-            <div style={{ display: "flex", gap: "1rem", alignItems: "center" }}>
-              <span>Brightness:</span>
-              <input
-                type="range"
-                step="10"
-                min="0"
-                max="100"
-                value={opacity}
-                onChange={(e) =>
-                  dispatch(setOpacity(parseInt(e.currentTarget.value, 10)))
-                }
-              />
-            </div>
-          </div>
-        ) : (
-          <div />
-        )}
-
         <div style={{ alignItems: "center", display: "flex", gap: "0.25rem" }}>
+          <button
+            className="button"
+            disabled={status === "editing"}
+            onClick={() =>
+              dispatch(
+                status === "stopped" ? startTeleprompter() : stopTeleprompter()
+              )
+            }
+            title={
+              status === "stopped" || status === "editing" ? "Start" : "Stop"
+            }
+          >
+            <span className="icon is-small">
+              {status === "stopped" || status === "editing" ? (
+                <Play style={{ color: "green", fill: "green" }} />
+              ) : (
+                <Pause style={{ color: "maroon", fill: "maroon" }} />
+              )}
+            </span>
+          </button>
           {status !== "started" ? (
             <>
               <button
@@ -118,7 +90,7 @@ export const NavBar = () => {
               >
                 <span className="icon is-small">
                   {status === "editing" ? (
-                    <PencilOff style={{ color: "yellow" }} />
+                    <Pencil style={{ color: "yellow" }} />
                   ) : (
                     <Pencil />
                   )}
@@ -176,7 +148,7 @@ export const NavBar = () => {
               >
                 <span className="icon is-small">
                   {fullscreen.active ? (
-                    <Shrink style={{ color: "yellow" }} />
+                    <Expand style={{ color: "yellow" }} />
                   ) : (
                     <Expand />
                   )}
@@ -194,31 +166,52 @@ export const NavBar = () => {
               </button>
             </>
           ) : null}
-
-          <button
-            className="button"
-            disabled={status === "editing"}
-            onClick={() =>
-              dispatch(
-                status === "stopped" ? startTeleprompter() : stopTeleprompter()
-              )
-            }
-            title={
-              status === "stopped" || status === "editing" ? "Start" : "Stop"
-            }
-          >
-            <span className="icon is-small">
-              {status === "stopped" || status === "editing" ? (
-                <Play style={{ color: "green", fill: "green" }} />
-              ) : (
-                <Pause style={{ color: "maroon", fill: "maroon" }} />
-              )}
-              {/* <i
-                className={`fa-solid ${status === "stopped" || status === "editing" ? "fa-play" : "fa-stop"}`}
-              /> */}
-            </span>
-          </button>
         </div>
+        {status === "stopped" ? (
+          <div style={{ display: "flex", gap: "1rem", flexWrap: "wrap" }}>
+            <div style={{ display: "flex", gap: "1rem" }}>
+              <span>Size:</span>
+              <input
+                type="range"
+                step="5"
+                min="10"
+                max="200"
+                value={fontSize}
+                onChange={(e) =>
+                  dispatch(setFontSize(parseInt(e.currentTarget.value, 10)))
+                }
+              />
+            </div>
+            <div style={{ display: "flex", gap: "1rem", alignItems: "center" }}>
+              <span>Margin:</span>
+              <input
+                type="range"
+                step="10"
+                min="0"
+                max="500"
+                value={margin}
+                onChange={(e) =>
+                  dispatch(setMargin(parseInt(e.currentTarget.value, 10)))
+                }
+              />
+            </div>
+            <div style={{ display: "flex", gap: "1rem", alignItems: "center" }}>
+              <span>Brightness:</span>
+              <input
+                type="range"
+                step="10"
+                min="0"
+                max="100"
+                value={opacity}
+                onChange={(e) =>
+                  dispatch(setOpacity(parseInt(e.currentTarget.value, 10)))
+                }
+              />
+            </div>
+          </div>
+        ) : (
+          <div />
+        )}
       </div>
     </nav>
   );
