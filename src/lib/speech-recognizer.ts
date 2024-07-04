@@ -1,14 +1,17 @@
 type SubscriberFunction = (
   final_transcript: string,
-  interim_transcript: string,
+  interim_transcript: string
 ) => void;
+
+const SpeechRecognition =
+  window.SpeechRecognition || window.webkitSpeechRecognition;
 
 export default class SpeechRecognizer {
   private recognizer: SpeechRecognition;
   private subscribers: SubscriberFunction[] = [];
 
   constructor() {
-    this.recognizer = new SpeechRecognition() || new webkitSpeechRecognition();
+    this.recognizer = new SpeechRecognition();
 
     this.recognizer.lang = "en-US";
     this.recognizer.continuous = true;
