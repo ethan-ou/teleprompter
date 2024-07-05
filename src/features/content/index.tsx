@@ -2,10 +2,20 @@ import { useEffect, useRef } from "react";
 import { escape } from "@/lib/html-escaper";
 import { useNavbarStore } from "../navbar/store";
 import { useContentStore } from "./store";
+import { useShallow } from "zustand/react/shallow";
 
 export function Content() {
   const { fontSize, margin, status, opacity, horizontallyFlipped, verticallyFlipped } =
-    useNavbarStore((state) => state);
+    useNavbarStore(
+      useShallow((state) => ({
+        fontSize: state.fontSize,
+        margin: state.margin,
+        status: state.status,
+        opacity: state.opacity,
+        horizontallyFlipped: state.horizontallyFlipped,
+        verticallyFlipped: state.verticallyFlipped,
+      }))
+    );
 
   const {
     rawText,
@@ -20,7 +30,7 @@ export function Content() {
   const style = {
     fontSize: `${fontSize}px`,
     paddingLeft: `${margin}vw`,
-    paddingRight: `${margin * 0.75}vw`,
+    paddingRight: `${margin * 0.66}vw`,
   };
 
   const containerRef = useRef<null | HTMLDivElement>(null);
@@ -28,7 +38,7 @@ export function Content() {
 
   useEffect(() => {
     if (containerRef.current) {
-      if (lastRef.current) {
+      if (lastRef.current && interimTranscriptIndex > 0) {
         containerRef.current.scrollTo({
           top: lastRef.current.offsetTop - 100,
           behavior: "smooth",
@@ -84,7 +94,7 @@ export function Content() {
                   finalTranscriptIndex > 0 && textElement.index <= finalTranscriptIndex + 1
                     ? "final-transcript"
                     : interimTranscriptIndex > 0 && textElement.index <= interimTranscriptIndex + 1
-                      ? "yellow"
+                      ? "interim-transcript"
                       : "has-text-white"
                 }
                 {...itemProps}

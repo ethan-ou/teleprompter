@@ -8,6 +8,7 @@ export interface NavbarState {
   fontSize: number;
   margin: number;
   opacity: number;
+  timer: number;
 }
 
 export interface NavbarActions {
@@ -19,6 +20,8 @@ export interface NavbarActions {
   setFontSize: (value: number) => void;
   setMargin: (value: number) => void;
   setOpacity: (value: number) => void;
+  incrementTimer: () => void;
+  resetTimer: () => void;
 }
 
 export const useNavbarStore = create<NavbarState & NavbarActions>()(
@@ -30,6 +33,7 @@ export const useNavbarStore = create<NavbarState & NavbarActions>()(
       fontSize: 30,
       margin: 10,
       opacity: 80,
+      timer: 0,
       toggleEdit: () =>
         set((state) => ({ status: state.status === "editing" ? "stopped" : "editing" })),
       start: () => set(() => ({ status: "started" })),
@@ -39,6 +43,8 @@ export const useNavbarStore = create<NavbarState & NavbarActions>()(
       setFontSize: (value: number) => set(() => ({ fontSize: value })),
       setMargin: (value: number) => set(() => ({ margin: value })),
       setOpacity: (value: number) => set(() => ({ opacity: value })),
+      incrementTimer: () => set((state) => ({ timer: state.timer + 1 })),
+      resetTimer: () => set(() => ({ timer: 0 })),
     }),
     {
       name: "navbar",

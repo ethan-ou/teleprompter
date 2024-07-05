@@ -6,10 +6,10 @@ import { useContentStore } from "@/features/content/store";
 let speechRecognizer: SpeechRecognizer | null = null;
 
 export const startTeleprompter = () => {
-  const { start } = useNavbarStore.getState();
+  const { start, status } = useNavbarStore.getState();
   start();
 
-  speechRecognizer = new SpeechRecognizer();
+  speechRecognizer = speechRecognizer ? speechRecognizer : new SpeechRecognizer();
 
   speechRecognizer.onresult((final_transcript: string, interim_transcript: string) => {
     const {
