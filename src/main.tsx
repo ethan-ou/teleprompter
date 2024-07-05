@@ -1,5 +1,6 @@
 import React from "react";
-import { createRoot } from "react-dom/client";
+import { render } from "preact";
+
 import { Provider } from "react-redux";
 import App from "./App";
 import { persistor, store } from "./app/store";
@@ -10,16 +11,15 @@ import { PersistGate } from "redux-persist/integration/react";
 const container = document.getElementById("root");
 
 if (container) {
-  const root = createRoot(container);
-
-  root.render(
+  render(
     <React.StrictMode>
       <Provider store={store}>
         <PersistGate loading={null} persistor={persistor}>
           <App />
         </PersistGate>
       </Provider>
-    </React.StrictMode>
+    </React.StrictMode>,
+    container
   );
 } else {
   throw new Error(

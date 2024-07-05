@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import { escape } from "@/lib/html-escaper";
-import { useAppDispatch, useAppSelector } from "../../app/hooks";
+import { useAppDispatch, useAppSelector } from "@/app/hooks";
 import {
   setContent,
   setTextContent,
@@ -41,7 +41,7 @@ export const Content = () => {
   const style = {
     fontSize: `${fontSize}px`,
     paddingLeft: `${margin}vw`,
-    paddingRight: `${margin}vw`,
+    paddingRight: `${margin * 0.75}vw`,
   };
 
   const containerRef = useRef<null | HTMLDivElement>(null);
