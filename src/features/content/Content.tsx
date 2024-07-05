@@ -40,7 +40,8 @@ export const Content = () => {
 
   const style = {
     fontSize: `${fontSize}px`,
-    padding: `0 ${margin}px`,
+    paddingLeft: `${margin}vw`,
+    paddingRight: `${margin}vw`,
   };
 
   const containerRef = useRef<null | HTMLDivElement>(null);
@@ -105,11 +106,9 @@ export const Content = () => {
                   dispatch(setInterimTranscriptIndex(index - 1));
                 }}
                 className={
-                  finalTranscriptIndex > 0 &&
-                  textElement.index <= finalTranscriptIndex + 1
+                  finalTranscriptIndex > 0 && textElement.index <= finalTranscriptIndex + 1
                     ? "final-transcript"
-                    : interimTranscriptIndex > 0 &&
-                        textElement.index <= interimTranscriptIndex + 1
+                    : interimTranscriptIndex > 0 && textElement.index <= interimTranscriptIndex + 1
                       ? "interim-transcript"
                       : "has-text-white"
                 }

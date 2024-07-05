@@ -17,11 +17,7 @@ import {
   selectOpacity,
 } from "./navbarSlice";
 
-import {
-  resetTranscriptionIndices,
-  setContent,
-  setTextContent,
-} from "../content/contentSlice";
+import { resetTranscriptionIndices, setContent, setTextContent } from "../content/contentSlice";
 import {
   Pencil,
   MoveHorizontal,
@@ -46,9 +42,13 @@ export const NavBar = () => {
 
   return (
     <nav
-      className="navbar is-black has-text-light is-unselectable"
       role="navigation"
       aria-label="main navigation"
+      style={{
+        padding: "0.25rem",
+        color: "white",
+        borderBottom: "solid 1px #222",
+      }}
     >
       <div
         style={{
@@ -66,19 +66,15 @@ export const NavBar = () => {
             className="button"
             disabled={status === "editing"}
             onClick={() =>
-              dispatch(
-                status === "stopped" ? startTeleprompter() : stopTeleprompter()
-              )
+              dispatch(status === "stopped" ? startTeleprompter() : stopTeleprompter())
             }
-            title={
-              status === "stopped" || status === "editing" ? "Start" : "Stop"
-            }
+            title={status === "stopped" || status === "editing" ? "Start" : "Stop"}
           >
             <span className="icon is-small">
               {status === "stopped" || status === "editing" ? (
-                <Play style={{ color: "green", fill: "green" }} />
+                <Play style={{ color: "#0ea44d", fill: "#0ea44d" }} />
               ) : (
-                <Pause style={{ color: "maroon", fill: "maroon" }} />
+                <Pause style={{ color: "#d03739", fill: "#d03739" }} />
               )}
             </span>
           </button>
@@ -90,11 +86,7 @@ export const NavBar = () => {
                 title="Edit"
               >
                 <span className="icon is-small">
-                  {status === "editing" ? (
-                    <Pencil style={{ color: "yellow" }} />
-                  ) : (
-                    <Pencil />
-                  )}
+                  {status === "editing" ? <Pencil style={{ color: "yellow" }} /> : <Pencil />}
                 </span>
               </button>
               <button
@@ -140,19 +132,13 @@ export const NavBar = () => {
                 </span>
               </button>
               <button
-                className={`button`}
+                className="button"
                 disabled={status !== "stopped"}
-                onClick={() =>
-                  fullscreen.active ? fullscreen.exit() : fullscreen.enter()
-                }
+                onClick={() => (fullscreen.active ? fullscreen.exit() : fullscreen.enter())}
                 title={fullscreen.active ? "Exit Fullscreen" : "Fullscreen"}
               >
                 <span className="icon is-small">
-                  {fullscreen.active ? (
-                    <Expand style={{ color: "yellow" }} />
-                  ) : (
-                    <Expand />
-                  )}
+                  {fullscreen.active ? <Expand style={{ color: "yellow" }} /> : <Expand />}
                 </span>
               </button>
               <button
@@ -169,44 +155,46 @@ export const NavBar = () => {
           ) : null}
         </div>
         {status === "stopped" ? (
-          <div style={{ display: "flex", gap: "1rem", flexWrap: "wrap" }}>
-            <div style={{ display: "flex", gap: "1rem" }}>
-              <span>Size:</span>
+          <div
+            style={{
+              display: "flex",
+              columnGap: "1rem",
+              rowGap: "0.25rem",
+              flexWrap: "wrap",
+              color: "#ccc",
+            }}
+          >
+            <div style={{ display: "flex", gap: "0.5rem" }}>
+              <span>Size</span>
               <input
                 type="range"
                 step="5"
                 min="10"
                 max="200"
                 value={fontSize}
-                onChange={(e) =>
-                  dispatch(setFontSize(parseInt(e.currentTarget.value, 10)))
-                }
+                onChange={(e) => dispatch(setFontSize(parseInt(e.currentTarget.value, 10)))}
               />
             </div>
-            <div style={{ display: "flex", gap: "1rem", alignItems: "center" }}>
-              <span>Margin:</span>
+            <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
+              <span>Margin</span>
               <input
                 type="range"
-                step="10"
+                step="1"
                 min="0"
-                max="500"
+                max="30"
                 value={margin}
-                onChange={(e) =>
-                  dispatch(setMargin(parseInt(e.currentTarget.value, 10)))
-                }
+                onChange={(e) => dispatch(setMargin(parseInt(e.currentTarget.value, 10)))}
               />
             </div>
-            <div style={{ display: "flex", gap: "1rem", alignItems: "center" }}>
-              <span>Brightness:</span>
+            <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
+              <span>Opacity</span>
               <input
                 type="range"
                 step="10"
                 min="0"
                 max="100"
                 value={opacity}
-                onChange={(e) =>
-                  dispatch(setOpacity(parseInt(e.currentTarget.value, 10)))
-                }
+                onChange={(e) => dispatch(setOpacity(parseInt(e.currentTarget.value, 10)))}
               />
             </div>
           </div>
