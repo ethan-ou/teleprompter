@@ -1,42 +1,21 @@
 import { useEffect, useRef } from "react";
 import { escape } from "@/lib/html-escaper";
-import { useAppDispatch, useAppSelector } from "@/app/hooks";
-import {
-  setContent,
-  setTextContent,
-  setFinalTranscriptIndex,
-  setInterimTranscriptIndex,
-} from "./contentSlice";
+import { useNavbarStore } from "../navbar/store";
+import { useContentStore } from "./store";
 
-import {
-  selectStatus,
-  selectHorizontallyFlipped,
-  selectVerticallyFlipped,
-  selectFontSize,
-  selectMargin,
-  selectOpacity,
-} from "../navbar/navbarSlice";
+export function Content() {
+  const { fontSize, margin, status, opacity, horizontallyFlipped, verticallyFlipped } =
+    useNavbarStore((state) => state);
 
-import {
-  selectRawText,
-  selectTextElements,
-  selectFinalTranscriptIndex,
-  selectInterimTranscriptIndex,
-} from "./contentSlice";
-
-export const Content = () => {
-  const dispatch = useAppDispatch();
-
-  const status = useAppSelector(selectStatus);
-  const fontSize = useAppSelector(selectFontSize);
-  const margin = useAppSelector(selectMargin);
-  const opacity = useAppSelector(selectOpacity);
-  const horizontallyFlipped = useAppSelector(selectHorizontallyFlipped);
-  const verticallyFlipped = useAppSelector(selectVerticallyFlipped);
-  const rawText = useAppSelector(selectRawText);
-  const textElements = useAppSelector(selectTextElements);
-  const finalTranscriptIndex = useAppSelector(selectFinalTranscriptIndex);
-  const interimTranscriptIndex = useAppSelector(selectInterimTranscriptIndex);
+  const {
+    rawText,
+    setContent,
+    textElements,
+    interimTranscriptIndex,
+    setInterimTranscriptIndex,
+    finalTranscriptIndex,
+    setFinalTranscriptIndex,
+  } = useContentStore((state) => state);
 
   const style = {
     fontSize: `${fontSize}px`,
@@ -63,10 +42,6 @@ export const Content = () => {
     }
   });
 
-  useEffect(() => {
-    dispatch(setTextContent());
-  }, [setTextContent, dispatch]);
-
   return (
     <main
       style={{
@@ -79,7 +54,7 @@ export const Content = () => {
           className="content"
           style={style}
           value={rawText}
-          onChange={(e) => dispatch(setContent(e.target.value || ""))}
+          onChange={(e) => setContent(e.target.value || "")}
           placeholder="Enter your content here..."
         />
       ) : (
@@ -102,14 +77,14 @@ export const Content = () => {
               <span
                 key={textElement.index}
                 onClick={() => {
-                  dispatch(setFinalTranscriptIndex(index - 1));
-                  dispatch(setInterimTranscriptIndex(index - 1));
+                  setFinalTranscriptIndex(index - 1);
+                  setInterimTranscriptIndex(index - 1);
                 }}
                 className={
                   finalTranscriptIndex > 0 && textElement.index <= finalTranscriptIndex + 1
                     ? "final-transcript"
                     : interimTranscriptIndex > 0 && textElement.index <= interimTranscriptIndex + 1
-                      ? "interim-transcript"
+                      ? "yellow"
                       : "has-text-white"
                 }
                 {...itemProps}
@@ -123,4 +98,4 @@ export const Content = () => {
       )}
     </main>
   );
-};
+}

@@ -1,10 +1,11 @@
-type SubscriberFunction = (
-  final_transcript: string,
-  interim_transcript: string
-) => void;
+type SubscriberFunction = (final_transcript: string, interim_transcript: string) => void;
 
-const SpeechRecognition =
-  window.SpeechRecognition || window.webkitSpeechRecognition;
+const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+if (!SpeechRecognition)
+  alert(
+    `This browser doesn't support speech recognition. Try using Google Chrome to run this app.`
+  );
 
 export default class SpeechRecognizer {
   private recognizer: SpeechRecognition;
@@ -35,6 +36,10 @@ export default class SpeechRecognizer {
       for (let subscriber of this.subscribers) {
         subscriber(final_transcript, interim_transcript);
       }
+    };
+
+    this.recognizer.onerror = (e) => {
+      alert(`Speech recognition error found: ${e.error}.${e.message && ` Message: ${e.message}`}`);
     };
   }
 

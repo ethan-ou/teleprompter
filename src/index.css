@@ -1,8 +1,16 @@
+:root {
+  --gray-900: hsl(0, 0%, 4%);
+  --gray-800: hsl(0, 0%, 14%);
+  --gray-700: hsl(0, 0%, 29%);
+  --gray-500: hsl(0, 0%, 48%);
+  --yellow: #c1ac15;
+}
+
 html,
 body {
   height: 100vh;
   overflow: hidden;
-  background-color: hsl(0, 0%, 4%);
+  background-color: var(--gray-900);
   font-family: sans-serif;
   color: white;
   color-scheme: dark;
@@ -15,38 +23,47 @@ body {
   flex-direction: column;
 }
 
+.yellow {
+  color: var(--yellow);
+}
+
 /* NavBar styles */
 
 .button,
 .button:focus {
-  background-color: hsl(0, 0%, 4%);
-  border-color: hsl(0, 0%, 29%);
-  color: hsl(0, 0%, 29%);
+  background-color: var(--gray-900);
+  border-color: var(--gray-700);
+  color: var(--gray-700);
   padding: 0.25rem;
 }
 
 .button:disabled {
-  color: hsl(0, 0%, 14%);
+  color: var(--gray-800);
 }
 
 .button:hover {
-  border-color: hsl(0, 0%, 48%);
-  color: hsl(0, 0%, 48%);
+  border-color: var(--gray-500);
+  color: var(--gray-500);
 }
 
 .button:disabled:hover {
-  color: hsl(0, 0%, 14%);
+  color: var(--gray-800);
+}
+
+.icon {
+  width: 2rem;
+  height: 2rem;
 }
 
 input[type="range"] {
-  width: 80px;
+  width: 6rem;
 }
 
 /* Content styles */
 
 .content {
   overflow: auto;
-  background-color: hsl(0, 0%, 4%);
+  background-color: var(--gray-900);
   border: none;
   outline: none;
   width: 100%;
@@ -54,7 +71,7 @@ input[type="range"] {
   padding: 0;
   line-height: 1.25;
   cursor: default;
-  padding-top: 2vh;
+  padding-top: 0.25rem;
   padding-bottom: 75vh;
 }
 
@@ -64,10 +81,6 @@ input[type="range"] {
 
 .final-transcript {
   color: hsl(0, 0%, 21%);
-}
-
-.interim-transcript {
-  color: hsl(48, 100%, 67%);
 }
 
 .content > span:hover {

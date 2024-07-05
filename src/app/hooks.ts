@@ -1,16 +1,4 @@
-// This file serves as a central hub for re-exporting pre-typed Redux hooks.
-// These imports are restricted elsewhere to ensure consistent
-// usage of typed hooks throughout the application.
-// We disable the ESLint rule here because this is the designated place
-// for importing and re-exporting the typed versions of hooks.
-/* eslint-disable @typescript-eslint/no-restricted-imports */
-import { useDispatch, useSelector } from "react-redux";
-import type { AppDispatch, RootState } from "./store";
 import { useState, useRef, useEffect, useCallback, useMemo } from "react";
-
-// Use throughout your app instead of plain `useDispatch` and `useSelector`
-export const useAppDispatch = useDispatch.withTypes<AppDispatch>();
-export const useAppSelector = useSelector.withTypes<RootState>();
 
 export const useFullScreen = () => {
   const [active, setActive] = useState<boolean>(false);
@@ -48,6 +36,32 @@ export const useFullScreen = () => {
       exit,
       node,
     }),
-    [active, enter, exit],
+    [active, enter, exit]
   );
 };
+
+export function useInterval(callback: () => void, delay: number | null) {
+  const savedCallback = useRef(callback);
+
+  // Remember the latest callback if it changes.
+  useEffect(() => {
+    savedCallback.current = callback;
+  }, [callback]);
+
+  // Set up the interval.
+  useEffect(() => {
+    // Don't schedule if no delay is specified.
+    // Note: 0 is a valid value for delay.
+    if (delay === null) {
+      return;
+    }
+
+    const id = setInterval(() => {
+      savedCallback.current();
+    }, delay);
+
+    return () => {
+      clearInterval(id);
+    };
+  }, [delay]);
+}

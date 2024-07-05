@@ -1,10 +1,10 @@
-import { NavBar } from "./features/navbar/NavBar";
-import { Content } from "./features/content/Content";
+import { Navbar } from "./features/navbar";
+import { Content } from "./features/content";
 
 const App = () => {
   return (
     <div className="app">
-      <NavBar />
+      <Navbar />
       <Content />
     </div>
   );

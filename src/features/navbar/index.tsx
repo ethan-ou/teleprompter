@@ -1,23 +1,9 @@
-import { useAppDispatch, useAppSelector, useFullScreen } from "@/app/hooks";
+import { useFullScreen } from "@/app/hooks";
 
-import { startTeleprompter, stopTeleprompter } from "@/app/thunks";
+import { startTeleprompter, stopTeleprompter } from "@/app/recognizer";
+import { useNavbarStore } from "./store";
+import { useContentStore } from "../content/store";
 
-import {
-  toggleEdit,
-  flipHorizontally,
-  flipVertically,
-  setFontSize,
-  setMargin,
-  setOpacity,
-  selectStatus,
-  selectHorizontallyFlipped,
-  selectVerticallyFlipped,
-  selectFontSize,
-  selectMargin,
-  selectOpacity,
-} from "./navbarSlice";
-
-import { resetTranscriptionIndices, setContent, setTextContent } from "../content/contentSlice";
 import {
   Pencil,
   MoveHorizontal,
@@ -28,16 +14,32 @@ import {
   Expand,
   Trash2,
 } from "lucide-react";
+import { useShallow } from "zustand/react/shallow";
 
-export const NavBar = () => {
-  const dispatch = useAppDispatch();
+export function Navbar() {
+  const {
+    status,
+    toggleEdit,
+    horizontallyFlipped,
+    flipHorizontally,
+    verticallyFlipped,
+    flipVertically,
+    fontSize,
+    setFontSize,
+    margin,
+    setMargin,
+    opacity,
+    setOpacity,
+  } = useNavbarStore((state) => state);
 
-  const status = useAppSelector(selectStatus);
-  const fontSize = useAppSelector(selectFontSize);
-  const margin = useAppSelector(selectMargin);
-  const opacity = useAppSelector(selectOpacity);
-  const horizontallyFlipped = useAppSelector(selectHorizontallyFlipped);
-  const verticallyFlipped = useAppSelector(selectVerticallyFlipped);
+  const { setContent, setTextElements, resetTranscriptionIndices } = useContentStore(
+    useShallow((state) => ({
+      setContent: state.setContent,
+      setTextElements: state.setTextElements,
+      resetTranscriptionIndices: state.resetTranscriptionIndices,
+    }))
+  );
+
   const fullscreen = useFullScreen();
 
   return (
@@ -53,8 +55,10 @@ export const NavBar = () => {
       <div
         style={{
           display: "flex",
-          gap: "1rem",
+          rowGap: "0.25rem",
+          columnGap: "0.5rem",
           justifyContent: "space-between",
+          flexWrap: "wrap",
           alignItems: "center",
           width: "100%",
           paddingLeft: "0.5rem",
@@ -65,71 +69,53 @@ export const NavBar = () => {
           <button
             className="button"
             disabled={status === "editing"}
-            onClick={() =>
-              dispatch(status === "stopped" ? startTeleprompter() : stopTeleprompter())
-            }
+            onClick={() => (status === "stopped" ? startTeleprompter() : stopTeleprompter())}
             title={status === "stopped" || status === "editing" ? "Start" : "Stop"}
           >
-            <span className="icon is-small">
+            <span className="icon">
               {status === "stopped" || status === "editing" ? (
-                <Play style={{ color: "#0ea44d", fill: "#0ea44d" }} />
+                <Play style={{ color: "#0ea44d", fill: "#0ea44d" }} className="icon" />
               ) : (
-                <Pause style={{ color: "#d03739", fill: "#d03739" }} />
+                <Pause style={{ color: "#d03739", fill: "#d03739" }} className="icon" />
               )}
             </span>
           </button>
           {status !== "started" ? (
             <>
               <button
-                className={`button ${status === "editing" ? "editing" : ""}`}
-                onClick={() => dispatch(toggleEdit())}
+                className="button"
+                onClick={() => (toggleEdit(), setTextElements())}
                 title="Edit"
               >
-                <span className="icon is-small">
-                  {status === "editing" ? <Pencil style={{ color: "yellow" }} /> : <Pencil />}
-                </span>
+                <Pencil className={`icon ${status === "editing" ? "yellow" : ""}`} />
               </button>
               <button
-                className={`button`}
+                className="button"
                 onClick={() => {
                   if (confirm("Are you sure you want to clear your script?")) {
-                    dispatch(setContent(""));
-                    dispatch(setTextContent());
+                    setContent("");
+                    setTextElements();
                   }
                 }}
                 title="Clear"
               >
-                <span className="icon is-small">
-                  <Trash2 />
-                </span>
+                <Trash2 className="icon" />
               </button>
               <button
-                className={`button ${horizontallyFlipped ? "horizontally-flipped" : ""}`}
+                className="button"
                 disabled={status !== "stopped"}
-                onClick={() => dispatch(flipHorizontally())}
+                onClick={() => flipHorizontally()}
                 title="Flip Text Horizontally"
               >
-                <span className="icon is-small">
-                  {horizontallyFlipped ? (
-                    <MoveHorizontal style={{ color: "yellow" }} />
-                  ) : (
-                    <MoveHorizontal />
-                  )}
-                </span>
+                <MoveHorizontal className={`icon ${horizontallyFlipped ? "yellow" : ""}`} />
               </button>
               <button
-                className={`button ${verticallyFlipped ? "vertically-flipped" : ""}`}
+                className="button"
                 disabled={status !== "stopped"}
-                onClick={() => dispatch(flipVertically())}
+                onClick={() => flipVertically()}
                 title="Flip Text Vertically"
               >
-                <span className="icon is-small">
-                  {verticallyFlipped ? (
-                    <MoveVertical style={{ color: "yellow" }} />
-                  ) : (
-                    <MoveVertical />
-                  )}
-                </span>
+                <MoveVertical className={`icon ${verticallyFlipped ? "yellow" : ""}`} />
               </button>
               <button
                 className="button"
@@ -137,19 +123,15 @@ export const NavBar = () => {
                 onClick={() => (fullscreen.active ? fullscreen.exit() : fullscreen.enter())}
                 title={fullscreen.active ? "Exit Fullscreen" : "Fullscreen"}
               >
-                <span className="icon is-small">
-                  {fullscreen.active ? <Expand style={{ color: "yellow" }} /> : <Expand />}
-                </span>
+                <Expand className={`icon ${fullscreen.active ? "yellow" : ""}`} />
               </button>
               <button
                 className="button"
                 disabled={status !== "stopped"}
-                onClick={() => dispatch(resetTranscriptionIndices())}
+                onClick={() => resetTranscriptionIndices()}
                 title="Restart from the beginning"
               >
-                <span className="icon is-small">
-                  <RefreshCw />
-                </span>
+                <RefreshCw className="icon" />
               </button>
             </>
           ) : null}
@@ -164,7 +146,7 @@ export const NavBar = () => {
               color: "#ccc",
             }}
           >
-            <div style={{ display: "flex", gap: "0.5rem" }}>
+            <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
               <span>Size</span>
               <input
                 type="range"
@@ -172,7 +154,7 @@ export const NavBar = () => {
                 min="10"
                 max="200"
                 value={fontSize}
-                onChange={(e) => dispatch(setFontSize(parseInt(e.currentTarget.value, 10)))}
+                onChange={(e) => setFontSize(parseInt(e.currentTarget.value, 10))}
               />
             </div>
             <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
@@ -183,18 +165,18 @@ export const NavBar = () => {
                 min="0"
                 max="30"
                 value={margin}
-                onChange={(e) => dispatch(setMargin(parseInt(e.currentTarget.value, 10)))}
+                onChange={(e) => setMargin(parseInt(e.currentTarget.value, 10))}
               />
             </div>
             <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
-              <span>Opacity</span>
+              <span>Brightness</span>
               <input
                 type="range"
                 step="10"
                 min="0"
                 max="100"
                 value={opacity}
-                onChange={(e) => dispatch(setOpacity(parseInt(e.currentTarget.value, 10)))}
+                onChange={(e) => setOpacity(parseInt(e.currentTarget.value, 10))}
               />
             </div>
           </div>
@@ -204,4 +186,4 @@ export const NavBar = () => {
       </div>
     </nav>
   );
-};
+}
