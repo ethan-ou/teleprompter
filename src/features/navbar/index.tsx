@@ -229,8 +229,8 @@ export function Navbar() {
           <input
             type="range"
             step="5"
-            min="10"
-            max="200"
+            min="15"
+            max="150"
             value={fontSize}
             onChange={(e) => setFontSize(parseInt(e.currentTarget.value, 10))}
           />

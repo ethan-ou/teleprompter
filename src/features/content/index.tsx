@@ -3,8 +3,6 @@ import { escape } from "@/lib/html-escaper";
 import { useNavbarStore } from "../navbar/store";
 import { useContentStore } from "./store";
 import { useShallow } from "zustand/react/shallow";
-import { useHotkeys } from "react-hotkeys-hook";
-import { startTeleprompter, stopTeleprompter } from "@/app/recognizer";
 
 export function Content() {
   const { fontSize, margin, status, opacity, horizontallyFlipped, verticallyFlipped } =
@@ -29,7 +27,7 @@ export function Content() {
     setFinalTranscriptIndex,
   } = useContentStore((state) => state);
 
-  const style = {
+  const style: React.CSSProperties = {
     fontSize: `${fontSize}px`,
     paddingLeft: `${margin}vw`,
     paddingRight: `${margin * 0.66}vw`,

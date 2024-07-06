@@ -1,3 +1,5 @@
+import { mobileAndTabletCheck } from "./device";
+
 type SubscriberFunction = (final_transcript: string, interim_transcript: string) => void;
 type ErrorSubscriberFunction = (running: boolean, error: SpeechRecognitionErrorEvent) => void;
 
@@ -26,18 +28,18 @@ export default class SpeechRecognizer {
 
     this.recognizer.onresult = (e) => {
       this.restartCount = 0;
+      let isMobileOrTablet = mobileAndTabletCheck();
 
       let final_transcript = "";
       let interim_transcript = "";
 
       for (let i = e.resultIndex; i < e.results.length; ++i) {
         const result = e.results[i];
-        const transcript = result[0].transcript;
 
-        if (result.isFinal) {
-          final_transcript += transcript;
+        if (result.isFinal && result[0].confidence !== 0) {
+          final_transcript = (isMobileOrTablet ? "" : final_transcript) + result[0].transcript;
         } else {
-          interim_transcript += transcript;
+          interim_transcript = (isMobileOrTablet ? "" : interim_transcript) + result[0].transcript;
         }
       }
 

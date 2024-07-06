@@ -127,7 +127,8 @@ input[type="range"] {
   width: 100%;
   height: 100%;
   padding: 0;
-  line-height: 1.25;
+  /* https://kittygiraudel.com/2020/05/18/using-calc-to-figure-out-optimal-line-height/ */
+  line-height: calc(10px + 2ex);
   cursor: default;
   padding-top: 0.25rem;
   padding-bottom: 75vh;
