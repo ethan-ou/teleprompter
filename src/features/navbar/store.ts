@@ -30,7 +30,7 @@ export const useNavbarStore = create<NavbarState & NavbarActions>()(
       status: "stopped",
       horizontallyFlipped: false,
       verticallyFlipped: false,
-      fontSize: 30,
+      fontSize: 60,
       margin: 10,
       opacity: 80,
       timer: 0,

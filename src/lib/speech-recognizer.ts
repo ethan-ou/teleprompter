@@ -1,4 +1,5 @@
 type SubscriberFunction = (final_transcript: string, interim_transcript: string) => void;
+type ErrorSubscriberFunction = (running: boolean, error: SpeechRecognitionErrorEvent) => void;
 
 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
@@ -10,10 +11,11 @@ if (!SpeechRecognition)
 export default class SpeechRecognizer {
   private recognizer: SpeechRecognition;
   private subscribers: SubscriberFunction[] = [];
+  private errorSubscribers: ErrorSubscriberFunction[] = [];
 
-  private running: boolean;
-  private startedAt: number;
-  private restartCount: number;
+  private running: boolean = false;
+  private startedAt: number = new Date().getTime();
+  private restartCount: number = 0;
 
   constructor() {
     this.recognizer = new SpeechRecognition();
@@ -22,11 +24,9 @@ export default class SpeechRecognizer {
     this.recognizer.continuous = true;
     this.recognizer.interimResults = true;
 
-    this.running = false;
-    this.startedAt = new Date().getTime();
-    this.restartCount = 0;
-
     this.recognizer.onresult = (e) => {
+      this.restartCount = 0;
+
       let final_transcript = "";
       let interim_transcript = "";
 
@@ -47,24 +47,26 @@ export default class SpeechRecognizer {
     };
 
     this.recognizer.onerror = (e) => {
-      this.running = false;
-      if (e.error == "no-speech") {
-        try {
-          this.recognizer.stop();
-        } catch (e) {}
-        alert("No speech detected. Check your microphone or try again.");
+      switch (e.error) {
+        case "network":
+          alert(
+            "Speech recognition requires a network connection. Check your network connection and try again."
+          );
+          break;
+        case "audio-capture":
+          this.stop();
+          alert("No microphone found. Check your microphone settings and try again.");
+          break;
+        case "not-allowed":
+        case "service-not-allowed":
+          this.stop();
+          alert(
+            "Permission to use microphone has been denied. Check your microphone settings and try again."
+          );
       }
-      if (e.error == "audio-capture") {
-        try {
-          this.recognizer.stop();
-        } catch (e) {}
-        alert("No microphone found.");
-      }
-      if (e.error == "not-allowed") {
-        try {
-          this.recognizer.stop();
-        } catch (e) {}
-        alert("Permission denied for microphone access.");
+
+      for (let subscriber of this.errorSubscribers) {
+        subscriber(this.running, e);
       }
     };
 
@@ -79,7 +81,7 @@ export default class SpeechRecognizer {
         // If multiple speech recogntion tabs are being used,
         // the service may go into an infinite loop.
         // See: https://stackoverflow.com/a/30007684
-        if (this.restartCount > 10000) {
+        if (this.restartCount > 50) {
           alert(
             "Speech recognition is repeatedly stopping. Close any other browser tabs and reload the page."
           );
@@ -112,5 +114,9 @@ export default class SpeechRecognizer {
 
   onresult(subscriber: SubscriberFunction): void {
     this.subscribers.push(subscriber);
+  }
+
+  onerror(subscriber: ErrorSubscriberFunction): void {
+    this.errorSubscribers.push(subscriber);
   }
 }

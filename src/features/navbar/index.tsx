@@ -128,8 +128,16 @@ export function Navbar() {
           <RefreshCw className="icon" />
         </button>
       </div>
-      <div style={{ display: "flex", justifyContent: "center" }}>
-        <span style={{ fontSize: "2rem", userSelect: "none" }}>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          color: "#ccc",
+          fontSize: "2rem",
+          userSelect: "none",
+        }}
+      >
+        <span>
           {Math.floor(timer / (60 * 60))
             .toString()
             .padStart(2, "0")}
@@ -178,7 +186,7 @@ export function Navbar() {
           <input
             type="range"
             step="10"
-            min="0"
+            min="10"
             max="100"
             value={opacity}
             onChange={(e) => setOpacity(parseInt(e.currentTarget.value, 10))}

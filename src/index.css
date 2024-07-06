@@ -32,6 +32,7 @@ body {
 
 /* Navbar styles */
 .navbar {
+  background-color: var(--gray-950);
   display: grid;
   grid-template-columns: 3fr 1fr 3fr;
   grid-template-rows: 1fr;
@@ -60,7 +61,7 @@ body {
 
 .button,
 .button:focus {
-  color: var(--gray-600);
+  color: var(--gray-500);
   padding: 0.25rem;
 }
 
@@ -70,7 +71,7 @@ body {
 }
 
 .button:hover {
-  color: var(--gray-500);
+  color: var(--gray-400);
 }
 
 .icon {
