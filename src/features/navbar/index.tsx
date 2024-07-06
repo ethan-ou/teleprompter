@@ -63,7 +63,7 @@ export function Navbar() {
   useActionHotkeys(startAction);
 
   const editAction = {
-    action: () => (toggleEdit(), setTextElements(), resetTimer()),
+    action: () => (toggleEdit(), setTextElements()),
     disabled: status === "started",
     keys: ["e", "2"],
   };
