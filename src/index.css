@@ -7,6 +7,8 @@
   --gray-500: #737373;
   --gray-400: #a3a3a3;
   --yellow: #c1ac15;
+  --green: #0ea44d;
+  --red: #d03739;
 }
 
 html,
@@ -28,6 +30,16 @@ body {
 
 .yellow {
   color: var(--yellow);
+}
+
+.green-fill {
+  color: var(--green);
+  fill: var(--green);
+}
+
+.red-fill {
+  color: var(--red);
+  fill: var(--red);
 }
 
 /* Navbar styles */

@@ -15,6 +15,8 @@ import {
   Trash2,
 } from "lucide-react";
 import { useShallow } from "zustand/react/shallow";
+import { useHotkeys } from "react-hotkeys-hook";
+import { useState } from "react";
 
 export function Navbar() {
   const {
@@ -46,6 +48,67 @@ export function Navbar() {
   const fullscreen = useFullScreen();
   useInterval(() => incrementTimer(), status === "started" ? 1000 : null);
 
+  const [focused, setFocused] = useState(false);
+
+  const startAction = {
+    action: () => (status === "stopped" ? startTeleprompter() : stopTeleprompter()),
+    disabled: status === "editing",
+    keys: ["1"],
+  };
+
+  useHotkeys("space", startAction.action, { enabled: !startAction.disabled && !focused }, [
+    startAction.action,
+    focused,
+  ]);
+  useActionHotkeys(startAction);
+
+  const editAction = {
+    action: () => (toggleEdit(), setTextElements(), resetTimer()),
+    disabled: status === "started",
+    keys: ["e", "2"],
+  };
+  useActionHotkeys(editAction);
+
+  const clearAction = {
+    action: () => {
+      if (confirm("Are you sure you want to clear your script?")) {
+        setContent("");
+        setTextElements();
+      }
+    },
+    disabled: status === "started",
+    keys: ["delete", "3"],
+  };
+  useActionHotkeys(clearAction);
+
+  const horizontallyFlippedAction = {
+    action: () => flipHorizontally(),
+    disabled: status === "editing",
+    keys: ["h", "4"],
+  };
+  useActionHotkeys(horizontallyFlippedAction);
+
+  const verticallyFlippedAction = {
+    action: () => flipVertically(),
+    disabled: status === "editing",
+    keys: ["v", "5"],
+  };
+  useActionHotkeys(verticallyFlippedAction);
+
+  const fullscreenAction = {
+    action: () => (fullscreen.active ? fullscreen.exit() : fullscreen.enter()),
+    disabled: false,
+    keys: ["f", "6"],
+  };
+  useActionHotkeys(fullscreenAction);
+
+  const restartAction = {
+    action: () => (resetTranscriptionIndices(), resetTimer()),
+    disabled: status === "started",
+    keys: ["r", "7"],
+  };
+  useActionHotkeys(restartAction);
+
   return (
     <nav
       role="navigation"
@@ -60,70 +123,70 @@ export function Navbar() {
         alignItems: "center",
       }}
     >
-      <div style={{ alignItems: "center", display: "flex", columnGap: "0.25rem" }}>
+      <div
+        style={{ alignItems: "center", display: "flex", columnGap: "0.25rem" }}
+        onFocus={() => setFocused(() => true)}
+        onBlur={() => setFocused(() => false)}
+      >
         <button
           className="button"
-          disabled={status === "editing"}
-          onClick={() => (status === "stopped" ? startTeleprompter() : stopTeleprompter())}
-          title={status === "stopped" || status === "editing" ? "Start" : "Stop"}
+          disabled={startAction.disabled}
+          onClick={startAction.action}
+          title={status === "stopped" || status === "editing" ? "Start (space)" : "Stop (space)"}
         >
           <span className="icon">
             {status === "stopped" || status === "editing" ? (
-              <Play style={{ color: "#0ea44d", fill: "#0ea44d" }} className="icon" />
+              <Play className={`icon ${status !== "editing" && "green-fill"}`} />
             ) : (
-              <Pause style={{ color: "#d03739", fill: "#d03739" }} className="icon" />
+              <Pause className="icon red-fill" />
             )}
           </span>
         </button>
         <button
           className="button"
-          onClick={() => (toggleEdit(), setTextElements(), resetTimer())}
-          disabled={status === "started"}
-          title="Edit"
+          onClick={editAction.action}
+          disabled={editAction.disabled}
+          title="Edit (e)"
         >
           <Pencil className={`icon ${status === "editing" ? "yellow" : ""}`} />
         </button>
         <button
           className="button"
-          onClick={() => {
-            if (confirm("Are you sure you want to clear your script?")) {
-              setContent("");
-              setTextElements();
-            }
-          }}
-          disabled={status === "started"}
-          title="Clear"
+          onClick={clearAction.action}
+          disabled={clearAction.disabled}
+          title="Clear (del)"
         >
           <Trash2 className="icon" />
         </button>
         <button
           className="button"
-          disabled={status === "editing"}
-          onClick={() => flipHorizontally()}
-          title="Flip Text Horizontally"
+          onClick={horizontallyFlippedAction.action}
+          disabled={horizontallyFlippedAction.disabled}
+          title="Flip Text Horizontally (h)"
         >
           <MoveHorizontal className={`icon ${horizontallyFlipped ? "yellow" : ""}`} />
         </button>
         <button
           className="button"
-          disabled={status === "editing"}
-          onClick={() => flipVertically()}
-          title="Flip Text Vertically"
+          onClick={verticallyFlippedAction.action}
+          disabled={verticallyFlippedAction.disabled}
+          title="Flip Text Vertically (v)"
         >
           <MoveVertical className={`icon ${verticallyFlipped ? "yellow" : ""}`} />
         </button>
         <button
           className="button"
-          onClick={() => (fullscreen.active ? fullscreen.exit() : fullscreen.enter())}
-          title={fullscreen.active ? "Exit Fullscreen" : "Fullscreen"}
+          onClick={fullscreenAction.action}
+          disabled={fullscreenAction.disabled}
+          title={fullscreen.active ? "Exit Fullscreen (f)" : "Fullscreen (f)"}
         >
           <Expand className={`icon ${fullscreen.active ? "yellow" : ""}`} />
         </button>
         <button
           className="button"
-          disabled={status !== "stopped"}
-          onClick={() => (resetTranscriptionIndices(), resetTimer())}
-          title="Restart from the beginning"
+          onClick={restartAction.action}
+          disabled={restartAction.disabled}
+          title="Restart from the beginning (r)"
         >
           <RefreshCw className="icon" />
         </button>
@@ -158,6 +221,8 @@ export function Navbar() {
           color: "#ccc",
           userSelect: "none",
         }}
+        onFocus={() => setFocused(() => true)}
+        onBlur={() => setFocused(() => false)}
       >
         <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
           <span>Size</span>
@@ -195,4 +260,11 @@ export function Navbar() {
       </div>
     </nav>
   );
+}
+
+function useActionHotkeys(action: { action: () => void; disabled: boolean; keys: string[] }) {
+  return useHotkeys(action.keys, action.action, { enabled: !action.disabled }, [
+    action.action,
+    action.disabled,
+  ]);
 }

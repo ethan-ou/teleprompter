@@ -3,6 +3,8 @@ import { escape } from "@/lib/html-escaper";
 import { useNavbarStore } from "../navbar/store";
 import { useContentStore } from "./store";
 import { useShallow } from "zustand/react/shallow";
+import { useHotkeys } from "react-hotkeys-hook";
+import { startTeleprompter, stopTeleprompter } from "@/app/recognizer";
 
 export function Content() {
   const { fontSize, margin, status, opacity, horizontallyFlipped, verticallyFlipped } =
@@ -76,6 +78,7 @@ export function Content() {
             opacity: opacity / 100,
             transform: `scale(${horizontallyFlipped ? "-1" : "1"}, ${verticallyFlipped ? "-1" : "1"})`,
           }}
+          tabIndex={-1}
         >
           {textElements.map((textElement, index, array) => {
             const itemProps =

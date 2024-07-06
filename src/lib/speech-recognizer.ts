@@ -49,9 +49,7 @@ export default class SpeechRecognizer {
     this.recognizer.onerror = (e) => {
       switch (e.error) {
         case "network":
-          alert(
-            "Speech recognition requires a network connection. Check your network connection and try again."
-          );
+          // Network dropouts are usually not an issue!
           break;
         case "audio-capture":
           this.stop();
