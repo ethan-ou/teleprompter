@@ -4,7 +4,7 @@ import { resolve } from "path";
 
 export default defineConfig(({ command }) => ({
   plugins: [preact()],
-  base: command === "build" ? "/<REPO>/" : "/",
+  base: command === "build" ? "/voice-activated-teleprompter/" : "/",
   resolve: {
     alias: {
       "@": resolve(__dirname, "./src"),
