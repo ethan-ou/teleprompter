@@ -1,0 +1,75 @@
+:root {
+  --fgColor: white;
+  --input-slider-color-focus: rgb(0, 130, 255);
+  --input-slider-knob-size: 16px;
+  --input-slider-track-size: 6px;
+  --input-slider-track-hit-size: 6px;
+  --fgColorDimmed: rgba(255, 255, 255, 0.4);
+  --input-color-bg: #2c2c2c;
+  --input-slider-color-bg: rgba(255, 255, 255, 0.3);
+  --input-slider-color-fg: var(--fgColor);
+  --focus-color: #18a0fb;
+  --surface1-color-bg: #1b1b1b;
+  --surface1-color-fg: #aaa;
+}
+
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  background: transparent;
+  cursor: default;
+  margin-left: calc(calc(var(--input-slider-track-hit-size) - var(--input-slider-track-size)) / -2);
+}
+input[type="range"]:focus {
+  outline: none;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  border: 0;
+  height: var(--input-slider-knob-size);
+  width: var(--input-slider-knob-size);
+  border-radius: var(--input-slider-knob-size);
+  background: var(--input-slider-color-fg);
+  box-shadow: 0 0 0 2px var(--surface1-color-bg);
+  margin-top: calc(calc(var(--input-slider-knob-size) - var(--input-slider-track-size)) / -2);
+}
+input[type="range"]::-moz-range-thumb {
+  border: 0;
+  height: var(--input-slider-knob-size);
+  width: var(--input-slider-knob-size);
+  border-radius: var(--input-slider-knob-size);
+  background: var(--input-slider-color-fg);
+  box-shadow: 0 0 0 2px var(--surface1-color-bg);
+  margin-top: calc(calc(var(--input-slider-knob-size) - var(--input-slider-track-size)) / -2);
+}
+
+input[type="range"]::-webkit-slider-runnable-track {
+  /* Note: hit testing is done on this element so we make it large enough
+     to easily hit with --input-slider-track-hit-size and a border that matches the
+     background color. This is not portable, unfortunately. */
+  box-sizing: border-box;
+  width: 100%;
+  height: var(--input-slider-track-hit-size);
+  background: var(--input-slider-color-bg);
+  border-radius: var(--input-slider-track-hit-size);
+  --border-w: calc(calc(var(--input-slider-track-hit-size) - var(--input-slider-track-size)) / 2);
+  border: var(--border-w) solid var(--surface1-color-bg);
+}
+input[type="range"]::-moz-range-track {
+  box-sizing: border-box;
+  width: 100%;
+  height: var(--input-slider-track-hit-size);
+  background: var(--input-slider-color-bg);
+  border-radius: var(--input-slider-track-size);
+  --border-w: calc(calc(var(--input-slider-track-hit-size) - var(--input-slider-track-size)) / 2);
+  border: var(--border-w) solid var(--surface1-color-bg);
+}
+
+input[type="range"]:focus::-webkit-slider-runnable-track {
+  box-shadow: 0 0 0 2px var(--focus-color);
+}
+input[type="range"]:focus::-moz-range-track {
+  box-shadow: 0 0 0 2px var(--focus-color);
+}
