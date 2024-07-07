@@ -115,8 +115,8 @@ export function Navbar() {
     max: 150,
     value: fontSize,
     action: setFontSize,
-    incrementKeys: ["s+Equal", "ctrl+shift+period"],
-    decrementKeys: ["s+Minus", "ctrl+shift+comma"],
+    incrementKeys: ["s+Equal", "shift+Equal", "ctrl+shift+period"],
+    decrementKeys: ["s+Minus", "shift+Minus", "ctrl+shift+comma"],
   };
   useSliderHotkeys(sizeSlider);
 
@@ -126,8 +126,8 @@ export function Navbar() {
     max: 36,
     value: margin,
     action: setMargin,
-    incrementKeys: ["m+Equal"],
-    decrementKeys: ["m+Minus"],
+    incrementKeys: ["m+Equal", "shift+BracketRight"],
+    decrementKeys: ["m+Minus", "shift+BracketLeft"],
   };
   useSliderHotkeys(marginSlider);
 
@@ -137,8 +137,8 @@ export function Navbar() {
     max: 100,
     value: opacity,
     action: setOpacity,
-    incrementKeys: ["c+Equal"],
-    decrementKeys: ["c+Minus"],
+    incrementKeys: ["c+Equal", "shift+Quote"],
+    decrementKeys: ["c+Minus", "shift+Semicolon"],
   };
   useSliderHotkeys(contrastSlider);
 
