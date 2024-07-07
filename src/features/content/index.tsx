@@ -63,7 +63,7 @@ export function Content() {
       {status === "editing" ? (
         <textarea
           className="content"
-          style={style}
+          style={{ ...style, cursor: "text" }}
           value={rawText}
           onChange={(e) => setContent(e.target.value || "")}
           placeholder="Enter your content here..."
