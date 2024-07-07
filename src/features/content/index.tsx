@@ -76,7 +76,6 @@ export function Content() {
             ...style,
             transform: `scale(${horizontallyFlipped ? "-1" : "1"}, ${verticallyFlipped ? "-1" : "1"})`,
           }}
-          tabIndex={-1}
         >
           {textElements.map((textElement, index, array) => {
             const itemProps =
