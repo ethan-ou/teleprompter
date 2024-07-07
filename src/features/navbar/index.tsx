@@ -109,6 +109,39 @@ export function Navbar() {
   };
   useActionHotkeys(restartAction);
 
+  const sizeSlider = {
+    step: 5,
+    min: 15,
+    max: 150,
+    value: fontSize,
+    action: setFontSize,
+    incrementKeys: ["s+Equal", "ctrl+shift+period"],
+    decrementKeys: ["s+Minus", "ctrl+shift+comma"],
+  };
+  useSliderHotkeys(sizeSlider);
+
+  const marginSlider = {
+    step: 2,
+    min: 0,
+    max: 36,
+    value: margin,
+    action: setMargin,
+    incrementKeys: ["m+Equal"],
+    decrementKeys: ["m+Minus"],
+  };
+  useSliderHotkeys(marginSlider);
+
+  const contrastSlider = {
+    step: 10,
+    min: 10,
+    max: 100,
+    value: opacity,
+    action: setOpacity,
+    incrementKeys: ["c+Equal"],
+    decrementKeys: ["c+Minus"],
+  };
+  useSliderHotkeys(contrastSlider);
+
   return (
     <nav
       role="navigation"
@@ -239,9 +272,9 @@ export function Navbar() {
           <span>Margin</span>
           <input
             type="range"
-            step="1"
+            step="2"
             min="0"
-            max="35"
+            max="36"
             value={margin}
             onChange={(e) => setMargin(parseInt(e.currentTarget.value, 10))}
           />
@@ -262,9 +295,47 @@ export function Navbar() {
   );
 }
 
-function useActionHotkeys(action: { action: () => void; disabled: boolean; keys: string[] }) {
-  return useHotkeys(action.keys, action.action, { enabled: !action.disabled }, [
-    action.action,
-    action.disabled,
+function useActionHotkeys({
+  action,
+  disabled,
+  keys,
+}: {
+  action: () => void;
+  disabled: boolean;
+  keys: string[];
+}) {
+  useHotkeys(keys, action, { enabled: !disabled }, [action, disabled]);
+}
+
+function useSliderHotkeys({
+  step,
+  min,
+  max,
+  value,
+  action,
+  incrementKeys,
+  decrementKeys,
+}: {
+  step: number;
+  min: number;
+  max: number;
+  value: number;
+  action: (value: number) => void;
+  incrementKeys: string[];
+  decrementKeys: string[];
+}) {
+  useHotkeys(incrementKeys, () => action(value + step <= max ? value + step : value), [
+    incrementKeys,
+    action,
+    value,
+    step,
+    max,
+  ]);
+  useHotkeys(decrementKeys, () => action(value - step >= min ? value - step : value), [
+    decrementKeys,
+    action,
+    value,
+    step,
+    max,
   ]);
 }
