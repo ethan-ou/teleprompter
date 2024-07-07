@@ -1,4 +1,4 @@
-import { mobileAndTabletCheck } from "./device";
+import { isMobileOrTablet } from "./device";
 
 type SubscriberFunction = (final_transcript: string, interim_transcript: string) => void;
 type ErrorSubscriberFunction = (running: boolean, error: SpeechRecognitionErrorEvent) => void;
@@ -28,7 +28,7 @@ export default class SpeechRecognizer {
 
     this.recognizer.onresult = (e) => {
       this.restartCount = 0;
-      let isMobileOrTablet = mobileAndTabletCheck();
+      let mobileOrTablet = isMobileOrTablet();
 
       let final_transcript = "";
       let interim_transcript = "";
@@ -36,10 +36,12 @@ export default class SpeechRecognizer {
       for (let i = e.resultIndex; i < e.results.length; ++i) {
         const result = e.results[i];
 
+        // Speech Recognition requires a different setup on mobile
+        // https://stackoverflow.com/questions/75272972/speech-recognition-result-double-in-mobile/77046406#77046406
         if (result.isFinal && result[0].confidence !== 0) {
-          final_transcript = (isMobileOrTablet ? "" : final_transcript) + result[0].transcript;
+          final_transcript = (mobileOrTablet ? "" : final_transcript) + result[0].transcript;
         } else {
-          interim_transcript = (isMobileOrTablet ? "" : interim_transcript) + result[0].transcript;
+          interim_transcript = (mobileOrTablet ? "" : interim_transcript) + result[0].transcript;
         }
       }
 
