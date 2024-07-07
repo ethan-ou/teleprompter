@@ -31,6 +31,7 @@ export function Content() {
     fontSize: `${fontSize}px`,
     paddingLeft: `${margin}vw`,
     paddingRight: `${margin * 0.66}vw`,
+    opacity: opacity / 100,
   };
 
   const containerRef = useRef<null | HTMLDivElement>(null);
@@ -73,7 +74,6 @@ export function Content() {
           ref={containerRef}
           style={{
             ...style,
-            opacity: opacity / 100,
             transform: `scale(${horizontallyFlipped ? "-1" : "1"}, ${verticallyFlipped ? "-1" : "1"})`,
           }}
           tabIndex={-1}

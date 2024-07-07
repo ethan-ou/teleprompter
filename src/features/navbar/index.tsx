@@ -133,7 +133,7 @@ export function Navbar() {
 
   const contrastSlider = {
     step: 10,
-    min: 10,
+    min: 20,
     max: 100,
     value: opacity,
     action: setOpacity,
@@ -261,9 +261,9 @@ export function Navbar() {
           <span>Size</span>
           <input
             type="range"
-            step="5"
-            min="15"
-            max="150"
+            step={sizeSlider.step}
+            min={sizeSlider.min}
+            max={sizeSlider.max}
             value={fontSize}
             onChange={(e) => setFontSize(parseInt(e.currentTarget.value, 10))}
           />
@@ -272,9 +272,9 @@ export function Navbar() {
           <span>Margin</span>
           <input
             type="range"
-            step="2"
-            min="0"
-            max="36"
+            step={marginSlider.step}
+            min={marginSlider.min}
+            max={marginSlider.max}
             value={margin}
             onChange={(e) => setMargin(parseInt(e.currentTarget.value, 10))}
           />
@@ -283,9 +283,9 @@ export function Navbar() {
           <span>Contrast</span>
           <input
             type="range"
-            step="10"
-            min="10"
-            max="100"
+            step={contrastSlider.step}
+            min={contrastSlider.min}
+            max={contrastSlider.max}
             value={opacity}
             onChange={(e) => setOpacity(parseInt(e.currentTarget.value, 10))}
           />
