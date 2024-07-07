@@ -15,5 +15,5 @@ function isTabletUserAgent() {
 }
 
 function hasTouchPoints() {
-  return navigator.maxTouchPoints || "ontouchstart" in document.documentElement;
+  return !!navigator.maxTouchPoints || "ontouchstart" in document.documentElement;
 }
