@@ -24,7 +24,6 @@ import { useShallow } from "zustand/react/shallow";
 import { useHotkeys } from "react-hotkeys-hook";
 import { useState } from "react";
 import { DragInput } from "@/components/DragLabel";
-import { capitalise } from "@/lib/text";
 
 export function Navbar() {
   const {
@@ -304,15 +303,19 @@ export function Navbar() {
             <select
               className="border-0 focus-visible:outline-0"
               onChange={(e) => {
-                const lowercase = e.target.value.toLowerCase();
-                if (lowercase === "top" || lowercase === "center") {
-                  setAlign(lowercase);
+                const value = e.target.value;
+                if (value === "top" || value === "center") {
+                  setAlign(value);
                 }
               }}
-              value={capitalise(align)}
+              value={align}
             >
-              <option className="bg-black">Top</option>
-              <option className="bg-black">Center</option>
+              <option className="bg-black" value="top">
+                Top
+              </option>
+              <option className="bg-black" value="center">
+                Center
+              </option>
             </select>
           </label>
         </div>
