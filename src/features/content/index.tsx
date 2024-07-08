@@ -5,17 +5,23 @@ import { useContentStore } from "./store";
 import { useShallow } from "zustand/react/shallow";
 
 export function Content() {
-  const { fontSize, margin, status, opacity, horizontallyFlipped, verticallyFlipped } =
-    useNavbarStore(
-      useShallow((state) => ({
-        fontSize: state.fontSize,
-        margin: state.margin,
-        status: state.status,
-        opacity: state.opacity,
-        horizontallyFlipped: state.horizontallyFlipped,
-        verticallyFlipped: state.verticallyFlipped,
-      }))
-    );
+  const {
+    fontSize,
+    margin,
+    status,
+    opacity,
+    horizontallyFlipped,
+    verticallyFlipped,
+  } = useNavbarStore(
+    useShallow((state) => ({
+      fontSize: state.fontSize,
+      margin: state.margin,
+      status: state.status,
+      opacity: state.opacity,
+      horizontallyFlipped: state.horizontallyFlipped,
+      verticallyFlipped: state.verticallyFlipped,
+    }))
+  );
 
   const {
     rawText,
@@ -41,7 +47,10 @@ export function Content() {
     if (containerRef.current) {
       if (lastRef.current && interimTranscriptIndex > 0) {
         containerRef.current.scrollTo({
-          top: lastRef.current.offsetTop - 100,
+          top:
+            lastRef.current.offsetTop -
+            containerRef.current.clientHeight / 2 +
+            fontSize,
           behavior: "smooth",
         });
       } else {
@@ -91,9 +100,11 @@ export function Content() {
                   setInterimTranscriptIndex(index - 1);
                 }}
                 className={
-                  finalTranscriptIndex > 0 && textElement.index <= finalTranscriptIndex + 1
+                  finalTranscriptIndex > 0 &&
+                  textElement.index <= finalTranscriptIndex + 1
                     ? "final-transcript"
-                    : interimTranscriptIndex > 0 && textElement.index <= interimTranscriptIndex + 1
+                    : interimTranscriptIndex > 0 &&
+                        textElement.index <= interimTranscriptIndex + 1
                       ? "interim-transcript"
                       : "has-text-white"
                 }
