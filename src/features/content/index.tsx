@@ -3,6 +3,7 @@ import { escape } from "@/lib/html-escaper";
 import { useNavbarStore } from "../navbar/store";
 import { useContentStore } from "./store";
 import { useShallow } from "zustand/react/shallow";
+import { useLayoutEffect } from "preact/hooks";
 
 export function Content() {
   const {
@@ -12,6 +13,7 @@ export function Content() {
     opacity,
     horizontallyFlipped,
     verticallyFlipped,
+    align,
   } = useNavbarStore(
     useShallow((state) => ({
       fontSize: state.fontSize,
@@ -20,7 +22,8 @@ export function Content() {
       opacity: state.opacity,
       horizontallyFlipped: state.horizontallyFlipped,
       verticallyFlipped: state.verticallyFlipped,
-    }))
+      align: state.align,
+    })),
   );
 
   const {
@@ -33,24 +36,33 @@ export function Content() {
     setFinalTranscriptIndex,
   } = useContentStore((state) => state);
 
+  const mainRef = useRef<HTMLElement>(null);
+  const scrollPosition = useRef(0);
+
   const style: React.CSSProperties = {
     fontSize: `${fontSize}px`,
     paddingLeft: `${margin}vw`,
     paddingRight: `${margin * 0.66}vw`,
     opacity: opacity / 100,
+    paddingTop:
+      align === "center" ? `calc(50vh - ${fontSize * 2}px)` : "0.5rem",
   };
 
   const containerRef = useRef<null | HTMLDivElement>(null);
+  const textAreaRef = useRef<null | HTMLTextAreaElement>(null);
   const lastRef = useRef<null | HTMLDivElement>(null);
 
   useEffect(() => {
     if (containerRef.current) {
       if (lastRef.current && interimTranscriptIndex > 0) {
+        const alignTop = lastRef.current.offsetTop - fontSize;
+        const alignCenter =
+          lastRef.current.offsetTop -
+          containerRef.current.clientHeight / 2 +
+          fontSize * 2;
+
         containerRef.current.scrollTo({
-          top:
-            lastRef.current.offsetTop -
-            containerRef.current.clientHeight / 2 +
-            fontSize,
+          top: align === "center" ? alignCenter : alignTop,
           behavior: "smooth",
         });
       } else {
@@ -62,20 +74,39 @@ export function Content() {
     }
   });
 
+  useLayoutEffect(() => {
+    if (textAreaRef.current) {
+      textAreaRef.current.scrollTo({
+        top: scrollPosition.current,
+      });
+    }
+    if (containerRef.current) {
+      containerRef.current.scrollTo({
+        top: scrollPosition.current,
+      });
+    }
+  }, [status]);
+
   return (
     <main
+      ref={mainRef}
+      className={`grow`}
       style={{
         height: status === "editing" ? "100%" : "inherit",
-        overflowY: status === "editing" ? "inherit" : "auto",
+        overflowY: status === "editing" ? "initial" : "inherit",
       }}
     >
       {status === "editing" ? (
         <textarea
+          ref={textAreaRef}
           className="content"
           style={{ ...style, cursor: "text" }}
           value={rawText}
           onChange={(e) => setContent(e.target.value || "")}
           placeholder="Enter your content here..."
+          onScroll={(e) => {
+            scrollPosition.current = e.currentTarget.scrollTop;
+          }}
         />
       ) : (
         <div
@@ -84,6 +115,9 @@ export function Content() {
           style={{
             ...style,
             transform: `scale(${horizontallyFlipped ? "-1" : "1"}, ${verticallyFlipped ? "-1" : "1"})`,
+          }}
+          onScroll={(e) => {
+            scrollPosition.current = e.currentTarget.scrollTop;
           }}
         >
           {textElements.map((textElement, index, array) => {

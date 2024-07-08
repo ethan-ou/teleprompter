@@ -13,10 +13,18 @@ import {
   Pause,
   Expand,
   Trash2,
+  AArrowUp,
+  Minimize2,
+  Sun,
+  AlignCenter,
+  SunDim,
+  SunMedium,
 } from "lucide-react";
 import { useShallow } from "zustand/react/shallow";
 import { useHotkeys } from "react-hotkeys-hook";
 import { useState } from "react";
+import { DragInput } from "@/components/DragLabel";
+import { capitalise } from "@/lib/text";
 
 export function Navbar() {
   const {
@@ -32,18 +40,21 @@ export function Navbar() {
     setMargin,
     opacity,
     setOpacity,
+    align,
+    setAlign,
     timer,
     incrementTimer,
     resetTimer,
   } = useNavbarStore((state) => state);
 
-  const { setContent, setTextElements, resetTranscriptionIndices } = useContentStore(
-    useShallow((state) => ({
-      setContent: state.setContent,
-      setTextElements: state.setTextElements,
-      resetTranscriptionIndices: state.resetTranscriptionIndices,
-    }))
-  );
+  const { setContent, setTextElements, resetTranscriptionIndices } =
+    useContentStore(
+      useShallow((state) => ({
+        setContent: state.setContent,
+        setTextElements: state.setTextElements,
+        resetTranscriptionIndices: state.resetTranscriptionIndices,
+      })),
+    );
 
   const fullscreen = useFullScreen();
   useInterval(() => incrementTimer(), status === "started" ? 1000 : null);
@@ -51,15 +62,18 @@ export function Navbar() {
   const [focused, setFocused] = useState(false);
 
   const startAction = {
-    action: () => (status === "stopped" ? startTeleprompter() : stopTeleprompter()),
+    action: () =>
+      status === "stopped" ? startTeleprompter() : stopTeleprompter(),
     disabled: status === "editing",
     keys: ["1"],
   };
 
-  useHotkeys("space", startAction.action, { enabled: !startAction.disabled && !focused }, [
+  useHotkeys(
+    "space",
     startAction.action,
-    focused,
-  ]);
+    { enabled: !startAction.disabled && !focused },
+    [startAction.action, focused],
+  );
   useActionHotkeys(startAction);
 
   const editAction = {
@@ -146,15 +160,7 @@ export function Navbar() {
     <nav
       role="navigation"
       aria-label="main navigation"
-      className="navbar"
-      style={{
-        color: "white",
-        borderBottom: "solid 1px #222",
-        padding: "0.25rem 0.5rem",
-        columnGap: "1rem",
-        width: "100%",
-        alignItems: "center",
-      }}
+      className="sticky top-0 z-10 flex w-full flex-wrap items-center justify-evenly gap-x-4 border-b border-neutral-800 bg-neutral-950/80 py-1 px-2 text-white backdrop-blur-sm lg:justify-between xl:grid xl:grid-cols-[3fr_1fr_3fr]"
     >
       <div
         style={{ alignItems: "center", display: "flex", columnGap: "0.25rem" }}
@@ -165,15 +171,17 @@ export function Navbar() {
           className="button"
           disabled={startAction.disabled}
           onClick={startAction.action}
-          title={status === "stopped" || status === "editing" ? "Start (space)" : "Stop (space)"}
+          title={
+            status === "stopped" || status === "editing"
+              ? "Start (space)"
+              : "Stop (space)"
+          }
         >
-          <span className="icon">
-            {status === "stopped" || status === "editing" ? (
-              <Play className={`icon ${status !== "editing" && "green-fill"}`} />
-            ) : (
-              <Pause className="icon red-fill" />
-            )}
-          </span>
+          {status === "stopped" || status === "editing" ? (
+            <Play className={`icon ${status !== "editing" && "green-fill"}`} />
+          ) : (
+            <Pause className="icon red-fill" />
+          )}
         </button>
         <button
           className="button"
@@ -197,7 +205,9 @@ export function Navbar() {
           disabled={horizontallyFlippedAction.disabled}
           title="Flip Text Horizontally (h)"
         >
-          <MoveHorizontal className={`icon ${horizontallyFlipped ? "yellow" : ""}`} />
+          <MoveHorizontal
+            className={`icon ${horizontallyFlipped ? "yellow" : ""}`}
+          />
         </button>
         <button
           className="button"
@@ -205,7 +215,9 @@ export function Navbar() {
           disabled={verticallyFlippedAction.disabled}
           title="Flip Text Vertically (v)"
         >
-          <MoveVertical className={`icon ${verticallyFlipped ? "yellow" : ""}`} />
+          <MoveVertical
+            className={`icon ${verticallyFlipped ? "yellow" : ""}`}
+          />
         </button>
         <button
           className="button"
@@ -224,15 +236,7 @@ export function Navbar() {
           <RefreshCw className="icon" />
         </button>
       </div>
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "center",
-          color: "#ccc",
-          fontSize: "2rem",
-          userSelect: "none",
-        }}
-      >
+      <div className="flex justify-center text-3xl text-neutral-300 select-none">
         <span>
           {Math.floor(timer / (60 * 60))
             .toString()
@@ -245,50 +249,72 @@ export function Navbar() {
         </span>
       </div>
       <div
-        className="navbar-end"
-        style={{
-          display: "flex",
-          columnGap: "1rem",
-          rowGap: "0.1rem",
-          flexWrap: "wrap",
-          color: "#ccc",
-          userSelect: "none",
-        }}
+        className="flex flex-wrap items-center justify-center gap-x-4 gap-y-0.5 text-neutral-300 select-none lg:justify-end"
         onFocus={() => setFocused(() => true)}
         onBlur={() => setFocused(() => false)}
       >
-        <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
-          <span>Size</span>
-          <input
-            type="range"
+        <div className="w-20">
+          <DragInput
+            value={sizeSlider.value}
+            onValueChange={sizeSlider.action}
             step={sizeSlider.step}
             min={sizeSlider.min}
             max={sizeSlider.max}
-            value={fontSize}
-            onChange={(e) => setFontSize(parseInt(e.currentTarget.value, 10))}
-          />
+            title="Font Size"
+          >
+            <AArrowUp />
+          </DragInput>
         </div>
-        <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
-          <span>Margin</span>
-          <input
-            type="range"
+        <div className="w-20">
+          <DragInput
+            value={marginSlider.value}
+            onValueChange={marginSlider.action}
             step={marginSlider.step}
             min={marginSlider.min}
             max={marginSlider.max}
-            value={margin}
-            onChange={(e) => setMargin(parseInt(e.currentTarget.value, 10))}
-          />
+            title="Margin"
+          >
+            <Minimize2 className="rotate-45" />
+          </DragInput>
         </div>
-        <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
-          <span>Contrast</span>
-          <input
-            type="range"
+        <div className="w-20">
+          <DragInput
+            value={contrastSlider.value}
+            onValueChange={contrastSlider.action}
             step={contrastSlider.step}
             min={contrastSlider.min}
             max={contrastSlider.max}
-            value={opacity}
-            onChange={(e) => setOpacity(parseInt(e.currentTarget.value, 10))}
-          />
+            title="Contrast"
+          >
+            {contrastSlider.value > 80 ? (
+              <Sun />
+            ) : contrastSlider.value > 50 ? (
+              <SunMedium />
+            ) : (
+              <SunDim />
+            )}
+          </DragInput>
+        </div>
+        <div>
+          <label
+            className="flex gap-1 py-0.5 px-1 focus-within:outline-2 focus-within:outline-blue-500"
+            title="Align"
+          >
+            <AlignCenter />
+            <select
+              className="border-0 focus-visible:outline-0"
+              onChange={(e) => {
+                const lowercase = e.target.value.toLowerCase();
+                if (lowercase === "top" || lowercase === "center") {
+                  setAlign(lowercase);
+                }
+              }}
+              value={capitalise(align)}
+            >
+              <option className="bg-black">Top</option>
+              <option className="bg-black">Center</option>
+            </select>
+          </label>
         </div>
       </div>
     </nav>
@@ -324,18 +350,14 @@ function useSliderHotkeys({
   incrementKeys: string[];
   decrementKeys: string[];
 }) {
-  useHotkeys(incrementKeys, () => action(value + step <= max ? value + step : value), [
+  useHotkeys(
     incrementKeys,
-    action,
-    value,
-    step,
-    max,
-  ]);
-  useHotkeys(decrementKeys, () => action(value - step >= min ? value - step : value), [
+    () => action(value + step <= max ? value + step : value),
+    [incrementKeys, action, value, step, max],
+  );
+  useHotkeys(
     decrementKeys,
-    action,
-    value,
-    step,
-    max,
-  ]);
+    () => action(value - step >= min ? value - step : value),
+    [decrementKeys, action, value, step, max],
+  );
 }

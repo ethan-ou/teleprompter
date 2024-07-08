@@ -1,3 +1,5 @@
+@import "tailwindcss";
+
 :root {
   --gray-950: #0a0a0a;
   --gray-900: #171717;
@@ -67,35 +69,6 @@ body {
   fill: var(--red);
 }
 
-/* Navbar styles */
-.navbar {
-  background-color: var(--gray-950);
-  display: grid;
-  grid-template-columns: 3fr 1fr 3fr;
-  grid-template-rows: 1fr;
-}
-
-.navbar-end {
-  justify-content: end;
-}
-
-@media (max-width: 1200px) {
-  .navbar {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-between;
-  }
-}
-
-@media (max-width: 1000px) {
-  .navbar {
-    justify-content: space-evenly;
-  }
-  .navbar-end {
-    justify-content: center;
-  }
-}
-
 .button,
 .button:focus {
   color: var(--gray-500);
@@ -112,8 +85,8 @@ body {
 }
 
 .icon {
-  width: 2rem;
-  height: 2rem;
+  width: 1.75rem;
+  height: 1.75rem;
 }
 
 input[type="range"] {
@@ -132,7 +105,6 @@ input[type="range"] {
   /* https://kittygiraudel.com/2020/05/18/using-calc-to-figure-out-optimal-line-height/ */
   line-height: calc(10px + 2ex);
   cursor: default;
-  padding-top: 0.25rem;
   padding-bottom: 75vh;
 }
 

@@ -9,6 +9,7 @@ export interface NavbarState {
   margin: number;
   opacity: number;
   timer: number;
+  align: "top" | "center";
 }
 
 export interface NavbarActions {
@@ -22,6 +23,7 @@ export interface NavbarActions {
   setOpacity: (value: number) => void;
   incrementTimer: () => void;
   resetTimer: () => void;
+  setAlign: (value: "top" | "center") => void;
 }
 
 export const useNavbarStore = create<NavbarState & NavbarActions>()(
@@ -34,17 +36,23 @@ export const useNavbarStore = create<NavbarState & NavbarActions>()(
       margin: 10,
       opacity: 80,
       timer: 0,
+      align: "top",
       toggleEdit: () =>
-        set((state) => ({ status: state.status === "editing" ? "stopped" : "editing" })),
+        set((state) => ({
+          status: state.status === "editing" ? "stopped" : "editing",
+        })),
       start: () => set(() => ({ status: "started" })),
       stop: () => set(() => ({ status: "stopped" })),
-      flipHorizontally: () => set((state) => ({ horizontallyFlipped: !state.horizontallyFlipped })),
-      flipVertically: () => set((state) => ({ verticallyFlipped: !state.verticallyFlipped })),
+      flipHorizontally: () =>
+        set((state) => ({ horizontallyFlipped: !state.horizontallyFlipped })),
+      flipVertically: () =>
+        set((state) => ({ verticallyFlipped: !state.verticallyFlipped })),
       setFontSize: (value: number) => set(() => ({ fontSize: value })),
       setMargin: (value: number) => set(() => ({ margin: value })),
       setOpacity: (value: number) => set(() => ({ opacity: value })),
       incrementTimer: () => set((state) => ({ timer: state.timer + 1 })),
       resetTimer: () => set(() => ({ timer: 0 })),
+      setAlign: (value: "top" | "center") => set(() => ({ align: value })),
     }),
     {
       name: "navbar",
@@ -54,7 +62,8 @@ export const useNavbarStore = create<NavbarState & NavbarActions>()(
         fontSize: state.fontSize,
         margin: state.margin,
         opacity: state.opacity,
+        align: state.align,
       }),
-    }
-  )
+    },
+  ),
 );

@@ -2,8 +2,7 @@ import React from "react";
 import { render } from "preact";
 import App from "./App";
 
-import "./reset.css";
-import "./slider.css";
+// import "./slider.css";
 import "./index.css";
 const container = document.getElementById("root");
 
