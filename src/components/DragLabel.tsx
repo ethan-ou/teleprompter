@@ -9,6 +9,13 @@ const stepValue = (value: number, step: number | string | undefined) =>
     ? Math.round(value / +Number(step)) * +Number(step)
     : value;
 
+const handleConstraints = (
+  value: number,
+  min: number | string | undefined,
+  max: number | string | undefined,
+  step: number | string | undefined,
+) => maxValue(minValue(stepValue(value, step), min), max);
+
 export function DragInput({
   value,
   onValueChange,
@@ -34,13 +41,15 @@ export function DragInput({
 
   // This captures the starting position of the drag and is used to
   // calculate the diff in positions of the cursor.
-  const [startVal, setStartVal] = useState(0);
+  const [startValue, setStartValue] = useState(0);
 
   // Start the drag to change operation when the mouse button is down.
   const onStart = useCallback(
     (event: React.MouseEvent<HTMLSpanElement, MouseEvent>) => {
-      setStartVal(() => event.clientX);
+      setStartValue(() => event.clientX);
       setSnapshot(() => value);
+      document.documentElement.style.cursor = "ew-resize";
+      document.body.style.pointerEvents = "none";
     },
     [value],
   );
@@ -51,11 +60,13 @@ export function DragInput({
   useEffect(() => {
     // Only change the value if the drag was actually started.
     const onUpdate = (event: MouseEvent) => {
-      if (startVal) {
+      if (startValue) {
         onValueChange(
-          maxValue(
-            minValue(stepValue(snapshot + event.clientX - startVal, step), min),
+          handleConstraints(
+            snapshot + event.clientX - startValue,
+            min,
             max,
+            step,
           ),
         );
       }
@@ -63,30 +74,26 @@ export function DragInput({
 
     // Stop the drag operation now.
     const onEnd = () => {
-      setStartVal(() => 0);
+      setStartValue(() => 0);
+      document.documentElement.style.cursor = "";
+      document.body.style.pointerEvents = "";
     };
 
-    document.addEventListener("mousemove", onUpdate);
-    document.addEventListener("mouseup", onEnd);
     document.addEventListener("pointermove", onUpdate);
     document.addEventListener("pointerup", onEnd);
     return () => {
-      document.removeEventListener("mousemove", onUpdate);
-      document.removeEventListener("mouseup", onEnd);
       document.removeEventListener("pointermove", onUpdate);
       document.removeEventListener("pointerup", onEnd);
     };
-  }, [startVal, onValueChange, snapshot]);
+  }, [startValue, onValueChange, snapshot]);
 
   return (
     <label
-      className="flex cursor-ew-resize items-center gap-2 py-0.5 px-1 align-middle focus-within:outline-2 focus-within:outline-blue-500"
+      className="flex cursor-ew-resize touch-none items-center gap-2 py-0.5 px-1 align-middle focus-within:outline-2 focus-within:outline-blue-500"
       onClick={(e) => e.preventDefault()}
       title={title}
     >
-      <span onMouseDown={onStart} onPointerDown={onStart}>
-        {children}
-      </span>
+      <span onPointerDown={onStart}>{children}</span>
       <input
         ref={inputRef}
         value={value}

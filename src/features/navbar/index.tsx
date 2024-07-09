@@ -155,6 +155,9 @@ export function Navbar() {
   };
   useSliderHotkeys(contrastSlider);
 
+  useHotkeys("t", () => setAlign("top"));
+  useHotkeys("c", () => setAlign("center"));
+
   return (
     <nav
       role="navigation"
@@ -230,7 +233,7 @@ export function Navbar() {
           className="button"
           onClick={restartAction.action}
           disabled={restartAction.disabled}
-          title="Restart from the beginning (r)"
+          title="Restart From Beginning (r)"
         >
           <RefreshCw className="icon" />
         </button>
@@ -259,7 +262,7 @@ export function Navbar() {
             step={sizeSlider.step}
             min={sizeSlider.min}
             max={sizeSlider.max}
-            title="Font Size"
+            title="Font Size (shift+= shift+-)"
           >
             <AArrowUp />
           </DragInput>
@@ -271,7 +274,7 @@ export function Navbar() {
             step={marginSlider.step}
             min={marginSlider.min}
             max={marginSlider.max}
-            title="Margin"
+            title="Margin (shift+] shift+[)"
           >
             <Minimize2 className="rotate-45" />
           </DragInput>
@@ -283,7 +286,7 @@ export function Navbar() {
             step={contrastSlider.step}
             min={contrastSlider.min}
             max={contrastSlider.max}
-            title="Contrast"
+            title="Brightness (shift+' shift+;)"
           >
             {contrastSlider.value > 80 ? (
               <Sun />
@@ -297,7 +300,7 @@ export function Navbar() {
         <div>
           <label
             className="flex gap-1 py-0.5 px-1 focus-within:outline-2 focus-within:outline-blue-500"
-            title="Align"
+            title="Align (t/c)"
           >
             <AlignCenter />
             <select
