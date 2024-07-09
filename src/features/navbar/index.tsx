@@ -116,7 +116,11 @@ export function Navbar() {
   useActionHotkeys(fullscreenAction);
 
   const restartAction = {
-    action: () => (resetTranscriptionIndices(), resetTimer()),
+    action: () => (
+      resetTranscriptionIndices(),
+      resetTimer(),
+      window.scrollTo({ top: 0, behavior: "smooth" })
+    ),
     disabled: status === "started",
     keys: ["r", "7"],
   };
