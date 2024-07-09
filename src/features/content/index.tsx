@@ -48,7 +48,7 @@ export function Content() {
   };
 
   const containerRef = useRef<null | HTMLDivElement>(null);
-  const textAreaRef = useRef<null | HTMLTextAreaElement>(null);
+  const textAreaRef = useRef<null | HTMLDivElement>(null);
   const lastRef = useRef<null | HTMLDivElement>(null);
 
   useEffect(() => {
@@ -89,17 +89,26 @@ export function Content() {
   return (
     <>
       {status === "editing" ? (
-        <textarea
-          ref={textAreaRef}
-          className="content"
-          style={{ ...style, cursor: "text" }}
-          value={rawText}
-          onChange={(e) => setContent(e.target.value || "")}
-          placeholder="Enter your content here..."
-          onScroll={(e) => {
-            scrollPosition.current = e.currentTarget.scrollTop;
-          }}
-        />
+        <div ref={textAreaRef} className="grid">
+          {/* Use an invisible div to force an increase in textarea sizing.
+              This should have exactly the same size and properties as the textarea. */}
+          <div
+            className="content invisible col-start-1 row-start-1"
+            style={style}
+          >
+            {rawText}
+          </div>
+          <textarea
+            className="content col-start-1 row-start-1"
+            style={{ ...style, cursor: "text", overflow: "hidden" }}
+            value={rawText}
+            onChange={(e) => setContent(e.target.value || "")}
+            placeholder="Enter your content here..."
+            onScroll={(e) => {
+              scrollPosition.current = e.currentTarget.scrollTop;
+            }}
+          />
+        </div>
       ) : (
         <div
           className="content"

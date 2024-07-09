@@ -39,20 +39,9 @@
 
 html,
 body {
-  height: 100vh;
-  height: 100dvh;
-  overflow: hidden;
   background-color: var(--gray-950);
   color: white;
   color-scheme: dark;
-}
-
-.app {
-  height: 100vh;
-  height: 100dvh;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
 }
 
 .yellow {
@@ -99,7 +88,7 @@ body {
   border: none;
   outline: none;
   overflow-wrap: break-word;
-  white-space: unset;
+  white-space: pre-wrap;
   width: 100%;
   height: 100%;
   /* https://kittygiraudel.com/2020/05/18/using-calc-to-figure-out-optimal-line-height/ */

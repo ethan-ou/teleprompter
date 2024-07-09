@@ -162,7 +162,7 @@ export function Navbar() {
     <nav
       role="navigation"
       aria-label="main navigation"
-      className="sticky top-0 z-10 flex w-full flex-wrap items-center justify-evenly gap-x-4 border-b border-neutral-800 bg-neutral-950/80 py-1 px-2 text-white backdrop-blur-sm lg:justify-between xl:grid xl:grid-cols-[3fr_1fr_3fr]"
+      className="sticky top-0 z-10 flex w-full flex-wrap items-center justify-evenly gap-x-4 border-b border-neutral-800 bg-neutral-950/90 py-1 px-2 text-white backdrop-blur lg:justify-between xl:grid xl:grid-cols-[3fr_1fr_3fr]"
     >
       <div
         style={{ alignItems: "center", display: "flex", columnGap: "0.25rem" }}
