@@ -1,19 +1,28 @@
 import { isMobileOrTablet } from "./device";
 
-type SubscriberFunction = (final_transcript: string, interim_transcript: string) => void;
-type ErrorSubscriberFunction = (running: boolean, error: SpeechRecognitionErrorEvent) => void;
+type SubscriberFunction = (
+  final_transcript: string,
+  interim_transcript: string,
+) => void;
+type ErrorSubscriberFunction = (
+  running: boolean,
+  error: SpeechRecognitionErrorEvent,
+) => void;
+type EndSubscriberFunction = () => void;
 
-const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+const SpeechRecognition =
+  window.SpeechRecognition || window.webkitSpeechRecognition;
 
 if (!SpeechRecognition)
   alert(
-    `This browser doesn't support speech recognition. Try using Google Chrome to run this app.`
+    `This browser doesn't support speech recognition. Try using Google Chrome to run this app.`,
   );
 
 export default class SpeechRecognizer {
   private recognizer: SpeechRecognition;
   private subscribers: SubscriberFunction[] = [];
   private errorSubscribers: ErrorSubscriberFunction[] = [];
+  private endSubscribers: EndSubscriberFunction[] = [];
 
   private running: boolean = false;
   private startedAt: number = new Date().getTime();
@@ -40,10 +49,13 @@ export default class SpeechRecognizer {
         // Speech Recognition requires a different setup on mobile
         // https://stackoverflow.com/questions/75272972/speech-recognition-result-double-in-mobile/77046406#77046406
         if (result.isFinal && result[0].confidence !== 0) {
-          final_transcript = (this.mobileOrTablet ? "" : final_transcript) + result[0].transcript;
+          final_transcript =
+            (this.mobileOrTablet ? "" : final_transcript) +
+            result[0].transcript;
         } else {
           interim_transcript =
-            (this.mobileOrTablet ? "" : interim_transcript) + result[0].transcript;
+            (this.mobileOrTablet ? "" : interim_transcript) +
+            result[0].transcript;
         }
       }
 
@@ -59,13 +71,15 @@ export default class SpeechRecognizer {
           break;
         case "audio-capture":
           this.stop();
-          alert("No microphone found. Check your microphone settings and try again.");
+          alert(
+            "No microphone found. Check your microphone settings and try again.",
+          );
           break;
         case "not-allowed":
         case "service-not-allowed":
           this.stop();
           alert(
-            "Permission to use microphone has been denied. Check your microphone settings and try again."
+            "Permission to use microphone has been denied. Check your microphone settings and try again.",
           );
       }
 
@@ -87,8 +101,11 @@ export default class SpeechRecognizer {
         // See: https://stackoverflow.com/a/30007684
         if (this.restartCount > 50) {
           alert(
-            "Speech recognition is repeatedly stopping. Close any other browser tabs and reload the page."
+            "Speech recognition is repeatedly stopping. Close any other browser tabs and reload the page.",
           );
+          for (let subscriber of this.endSubscribers) {
+            subscriber();
+          }
         } else {
           if (timeSinceStart < 1000) {
             setTimeout(() => {
@@ -97,6 +114,10 @@ export default class SpeechRecognizer {
           } else {
             this.recognizer.start();
           }
+        }
+      } else {
+        for (let subscriber of this.endSubscribers) {
+          subscriber();
         }
       }
     };
@@ -122,5 +143,9 @@ export default class SpeechRecognizer {
 
   onerror(subscriber: ErrorSubscriberFunction): void {
     this.errorSubscribers.push(subscriber);
+  }
+
+  onend(subscriber: EndSubscriberFunction): void {
+    this.endSubscribers.push(subscriber);
   }
 }
