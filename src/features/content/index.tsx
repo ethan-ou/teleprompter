@@ -44,8 +44,6 @@ export function Content() {
       align === "center" ? `calc(50vh - ${fontSize * 2}px)` : "0.5rem",
   };
 
-  const containerRef = useRef<null | HTMLDivElement>(null);
-  const textAreaRef = useRef<null | HTMLDivElement>(null);
   const lastRef = useRef<null | HTMLDivElement>(null);
 
   useEffect(() => {
@@ -71,9 +69,9 @@ export function Content() {
   });
 
   return (
-    <>
+    <main>
       {status === "editing" ? (
-        <div ref={textAreaRef} className="grid">
+        <div className="grid">
           {/* Use an invisible div to force an increase in textarea sizing.
               This should have exactly the same size and properties as the textarea. */}
           <div
@@ -93,7 +91,6 @@ export function Content() {
       ) : (
         <div
           className="content"
-          ref={containerRef}
           style={{
             ...style,
             transform: `scale(${horizontallyFlipped ? "-1" : "1"}, ${verticallyFlipped ? "-1" : "1"})`,
@@ -119,7 +116,7 @@ export function Content() {
                     : interimTranscriptIndex > 0 &&
                         textElement.index <= interimTranscriptIndex + 1
                       ? "interim-transcript"
-                      : "has-text-white"
+                      : ""
                 }
                 {...itemProps}
                 dangerouslySetInnerHTML={{
@@ -130,6 +127,6 @@ export function Content() {
           })}
         </div>
       )}
-    </>
+    </main>
   );
 }

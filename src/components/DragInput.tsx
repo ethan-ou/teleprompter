@@ -86,11 +86,13 @@ export function DragInput({
 
   return (
     <label
-      className="flex cursor-ew-resize touch-none items-center gap-2 py-0.5 px-1 align-middle focus-within:outline-2 focus-within:outline-blue-500"
+      className="flex touch-none items-center gap-2 py-0.5 px-1 align-middle focus-within:outline-2 focus-within:outline-blue-500"
       onClick={(e) => e.preventDefault()}
       title={title}
     >
-      <span onPointerDown={onStart}>{children}</span>
+      <span className="cursor-ew-resize" onPointerDown={onStart}>
+        {children}
+      </span>
       <input
         ref={inputRef}
         value={value}
@@ -113,7 +115,7 @@ export function DragInput({
         }}
         onClick={(e) => e.currentTarget.select()}
         {...props}
-        className="w-full border-0 focus-visible:outline-0"
+        className="w-full cursor-default border-0 focus-visible:outline-0"
       />
     </label>
   );

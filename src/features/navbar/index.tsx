@@ -23,7 +23,7 @@ import {
 import { useShallow } from "zustand/react/shallow";
 import { useHotkeys } from "react-hotkeys-hook";
 import { useState } from "react";
-import { DragInput } from "@/components/DragLabel";
+import { DragInput } from "@/components/DragInput";
 
 export function Navbar() {
   const {
@@ -166,7 +166,7 @@ export function Navbar() {
     <nav
       role="navigation"
       aria-label="main navigation"
-      className="sticky top-0 z-10 flex w-full flex-wrap items-center justify-evenly gap-x-4 border-b border-neutral-800 bg-neutral-950/90 py-1 px-2 text-white backdrop-blur lg:justify-between xl:grid xl:grid-cols-[3fr_1fr_3fr]"
+      className="sticky top-0 z-10 flex w-full flex-wrap items-center justify-evenly gap-x-4 border-b border-neutral-800 bg-neutral-950/90 py-1 px-2 text-white backdrop-blur select-none lg:justify-between xl:grid xl:grid-cols-[3fr_1fr_3fr]"
     >
       <div
         style={{ alignItems: "center", display: "flex", columnGap: "0.25rem" }}
@@ -242,7 +242,7 @@ export function Navbar() {
           <RefreshCw className="icon" />
         </button>
       </div>
-      <div className="flex justify-center text-3xl text-neutral-300 select-none">
+      <div className="flex justify-center text-3xl text-neutral-300">
         <span>
           {Math.floor(timer / (60 * 60))
             .toString()
@@ -255,7 +255,7 @@ export function Navbar() {
         </span>
       </div>
       <div
-        className="flex flex-wrap items-center justify-center gap-x-4 gap-y-0.5 text-neutral-300 select-none lg:justify-end"
+        className="flex flex-wrap items-center justify-center gap-x-4 gap-y-0.5 text-neutral-300 lg:justify-end"
         onFocus={() => setFocused(() => true)}
         onBlur={() => setFocused(() => false)}
       >
