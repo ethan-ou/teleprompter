@@ -9,12 +9,14 @@ const stepValue = (value: number, step: number | string | undefined) =>
     ? Math.round(value / +Number(step)) * +Number(step)
     : value;
 
-const handleConstraints = (
-  value: number,
-  min: number | string | undefined,
-  max: number | string | undefined,
-  step: number | string | undefined,
-) => maxValue(minValue(stepValue(value, step), min), max);
+const createConstraints =
+  (
+    min: number | string | undefined,
+    max: number | string | undefined,
+    step: number | string | undefined,
+  ) =>
+  (value: number) =>
+    maxValue(minValue(stepValue(value, step), min), max);
 
 export function DragInput({
   value,
@@ -32,6 +34,8 @@ export function DragInput({
   React.InputHTMLAttributes<HTMLInputElement>,
   HTMLInputElement
 >) {
+  const constrain = createConstraints(min, max, step);
+
   const inputRef = useRef<HTMLInputElement>(null);
 
   // We are creating a snapshot of the values when the drag starts
@@ -61,14 +65,7 @@ export function DragInput({
     // Only change the value if the drag was actually started.
     const onUpdate = (event: MouseEvent) => {
       if (startValue) {
-        onValueChange(
-          handleConstraints(
-            snapshot + event.clientX - startValue,
-            min,
-            max,
-            step,
-          ),
-        );
+        onValueChange(constrain(snapshot + event.clientX - startValue));
       }
     };
 
@@ -105,10 +102,12 @@ export function DragInput({
         max={max}
         autoComplete="false"
         spellCheck="false"
-        onBlur={(e) => onValueChange(parseInt(e.currentTarget.value, 10) || 0)}
+        onBlur={(e) =>
+          onValueChange(constrain(parseInt(e.currentTarget.value, 10) || 0))
+        }
         onKeyUp={(e) => {
           if (e.key === "Enter") {
-            onValueChange(parseInt(e.currentTarget.value, 10) || 0);
+            onValueChange(constrain(parseInt(e.currentTarget.value, 10) || 0));
             e.currentTarget.blur();
           }
         }}

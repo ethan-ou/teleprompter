@@ -70,7 +70,7 @@ export function Navbar() {
   useHotkeys(
     "space",
     startAction.action,
-    { enabled: !startAction.disabled && !focused },
+    { enabled: !startAction.disabled && !focused, preventDefault: true },
     [startAction.action, focused],
   );
   useActionHotkeys(startAction);

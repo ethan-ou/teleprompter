@@ -3,7 +3,6 @@ import { escape } from "@/lib/html-escaper";
 import { useNavbarStore } from "../navbar/store";
 import { useContentStore } from "./store";
 import { useShallow } from "zustand/react/shallow";
-import { useLayoutEffect } from "preact/hooks";
 
 export function Content() {
   const {
@@ -36,8 +35,6 @@ export function Content() {
     setFinalTranscriptIndex,
   } = useContentStore((state) => state);
 
-  const scrollPosition = useRef(0);
-
   const style: React.CSSProperties = {
     fontSize: `${fontSize}px`,
     paddingLeft: `${margin}vw`,
@@ -52,39 +49,26 @@ export function Content() {
   const lastRef = useRef<null | HTMLDivElement>(null);
 
   useEffect(() => {
-    if (containerRef.current) {
+    if (status === "started") {
       if (lastRef.current && interimTranscriptIndex > 0) {
         const alignTop = lastRef.current.offsetTop - fontSize;
         const alignCenter =
           lastRef.current.offsetTop -
-          containerRef.current.clientHeight / 2 +
+          document.documentElement.clientHeight / 2 +
           fontSize * 2;
 
-        containerRef.current.scrollTo({
+        window.scrollTo({
           top: align === "center" ? alignCenter : alignTop,
           behavior: "smooth",
         });
       } else {
-        containerRef.current.scrollTo({
+        window.scrollTo({
           top: 0,
           behavior: "smooth",
         });
       }
     }
   });
-
-  useLayoutEffect(() => {
-    if (textAreaRef.current) {
-      textAreaRef.current.scrollTo({
-        top: scrollPosition.current,
-      });
-    }
-    if (containerRef.current) {
-      containerRef.current.scrollTo({
-        top: scrollPosition.current,
-      });
-    }
-  }, [status]);
 
   return (
     <>
@@ -104,9 +88,6 @@ export function Content() {
             value={rawText}
             onChange={(e) => setContent(e.target.value || "")}
             placeholder="Enter your content here..."
-            onScroll={(e) => {
-              scrollPosition.current = e.currentTarget.scrollTop;
-            }}
           />
         </div>
       ) : (
@@ -116,9 +97,6 @@ export function Content() {
           style={{
             ...style,
             transform: `scale(${horizontallyFlipped ? "-1" : "1"}, ${verticallyFlipped ? "-1" : "1"})`,
-          }}
-          onScroll={(e) => {
-            scrollPosition.current = e.currentTarget.scrollTop;
           }}
         >
           {textElements.map((textElement, index, array) => {
