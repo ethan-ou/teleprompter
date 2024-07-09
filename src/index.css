@@ -89,23 +89,24 @@ body {
   height: 1.75rem;
 }
 
-input[type="range"] {
-  width: 6rem;
-}
-
 /* Content styles */
 .content {
-  overflow: auto;
+  display: block;
+  appearance: unset;
+  overflow-y: auto;
+  overflow-x: hidden;
   background-color: var(--gray-950);
   border: none;
   outline: none;
+  overflow-wrap: break-word;
+  white-space: unset;
   width: 100%;
   height: 100%;
-  padding: 0;
   /* https://kittygiraudel.com/2020/05/18/using-calc-to-figure-out-optimal-line-height/ */
   line-height: calc(10px + 2ex);
   cursor: default;
   padding-bottom: 75vh;
+  resize: none;
 }
 
 .content:focus {

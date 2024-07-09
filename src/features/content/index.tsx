@@ -36,7 +36,6 @@ export function Content() {
     setFinalTranscriptIndex,
   } = useContentStore((state) => state);
 
-  const mainRef = useRef<HTMLElement>(null);
   const scrollPosition = useRef(0);
 
   const style: React.CSSProperties = {
@@ -88,14 +87,7 @@ export function Content() {
   }, [status]);
 
   return (
-    <main
-      ref={mainRef}
-      className={`grow`}
-      style={{
-        height: status === "editing" ? "100%" : "inherit",
-        overflowY: status === "editing" ? "initial" : "inherit",
-      }}
-    >
+    <>
       {status === "editing" ? (
         <textarea
           ref={textAreaRef}
@@ -151,6 +143,6 @@ export function Content() {
           })}
         </div>
       )}
-    </main>
+    </>
   );
 }
