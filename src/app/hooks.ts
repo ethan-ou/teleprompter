@@ -2,7 +2,7 @@ import { useState, useRef, useEffect, useCallback, useMemo } from "react";
 
 export const useFullScreen = () => {
   const [active, setActive] = useState<boolean>(false);
-  const node = useRef<HTMLElement>(document.getElementById("root")!);
+  const node = useRef<HTMLElement>(document.documentElement);
 
   useEffect(() => {
     const handleChange = () => {
@@ -36,7 +36,7 @@ export const useFullScreen = () => {
       exit,
       node,
     }),
-    [active, enter, exit]
+    [active, enter, exit],
   );
 };
 
