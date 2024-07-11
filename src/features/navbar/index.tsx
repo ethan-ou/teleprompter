@@ -132,8 +132,8 @@ export function Navbar() {
     max: 150,
     value: fontSize,
     action: setFontSize,
-    incrementKeys: ["s+Equal", "shift+Equal", "ctrl+shift+period"],
-    decrementKeys: ["s+Minus", "shift+Minus", "ctrl+shift+comma"],
+    incrementKeys: ["shift+Equal", "ctrl+shift+period"],
+    decrementKeys: ["shift+Minus", "ctrl+shift+comma"],
   };
   useSliderHotkeys(sizeSlider);
 
@@ -143,8 +143,8 @@ export function Navbar() {
     max: 36,
     value: margin,
     action: setMargin,
-    incrementKeys: ["m+Equal", "shift+BracketRight"],
-    decrementKeys: ["m+Minus", "shift+BracketLeft"],
+    incrementKeys: ["shift+BracketRight"],
+    decrementKeys: ["shift+BracketLeft"],
   };
   useSliderHotkeys(marginSlider);
 
@@ -154,19 +154,31 @@ export function Navbar() {
     max: 100,
     value: opacity,
     action: setOpacity,
-    incrementKeys: ["c+Equal", "shift+Quote"],
-    decrementKeys: ["c+Minus", "shift+Semicolon"],
+    incrementKeys: ["shift+Quote"],
+    decrementKeys: ["shift+Semicolon"],
   };
   useSliderHotkeys(contrastSlider);
 
   useHotkeys("t", () => setAlign("top"));
   useHotkeys("c", () => setAlign("center"));
 
+  const [hideNavbar, setHideNavbar] = useState(false);
+  useHotkeys("shift+h", () => {
+    setHideNavbar((prev) => !prev);
+  });
+
   return (
     <nav
       role="navigation"
       aria-label="main navigation"
       className="sticky top-0 z-10 flex w-full flex-wrap items-center justify-evenly gap-x-4 border-b border-neutral-800 bg-neutral-950/90 py-1 px-2 text-white backdrop-blur select-none lg:justify-between xl:grid xl:grid-cols-[3fr_1fr_3fr]"
+      style={
+        hideNavbar
+          ? {
+              display: "none",
+            }
+          : {}
+      }
     >
       <div
         style={{ alignItems: "center", display: "flex", columnGap: "0.25rem" }}

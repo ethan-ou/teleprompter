@@ -12,7 +12,7 @@ import { getAveragedPositions, resetPositions } from "./average-position";
   to avoid rapid jumps in text position.
 */
 
-const MIN_WINDOW = 2;
+const MIN_WINDOW = 3;
 const MATCH_WINDOW = 5;
 const MAX_TEXT_DISTANCE = 0.75;
 const STOP_WORDS = [
