@@ -3,7 +3,6 @@ import { escape } from "@/lib/html-escaper";
 import { useNavbarStore } from "../navbar/store";
 import { useContentStore } from "./store";
 import { useShallow } from "zustand/react/shallow";
-import { useHotkeys } from "react-hotkeys-hook";
 
 export function Content() {
   const { fontSize, margin, status, opacity, horizontallyFlipped, verticallyFlipped, align } =
@@ -52,24 +51,8 @@ export function Content() {
     }
   });
 
-  // Overwrite ctrl+a to allow text selection without also selecting inputs.
-  const mainRef = useRef<HTMLElement | null>(null);
-  useHotkeys(
-    "ctrl+a",
-    () => {
-      const selection = window.getSelection();
-      if (mainRef.current && selection) {
-        const range = document.createRange();
-        range.selectNodeContents(mainRef.current);
-        selection.removeAllRanges();
-        selection.addRange(range);
-      }
-    },
-    { preventDefault: true },
-  );
-
   return (
-    <main ref={mainRef}>
+    <main>
       {status === "editing" ? (
         <div className="grid">
           {/* Use an invisible div to force an increase in textarea sizing.
