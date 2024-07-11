@@ -177,11 +177,10 @@ class Matcher {
     ) {
       this.throttlingIteration = 0;
       // Matched string exists
-      const matchResult: MatchResult = {
+      return {
         matchedText: firstMatch.words,
         matchedSpeech: hypothesisTokens,
       };
-      return matchResult;
     }
 
     // Match Fraction exceeded. Starting throttling to receive more accurate hypothesis
@@ -202,7 +201,7 @@ class Matcher {
     return;
   }
 
-  private createUniqueWordCountMap(words: SpeechToken[]): Map<string, number> {
+  private findUniqueWordCounts(words: SpeechToken[]): [string[], number[]] {
     const map = new Map<string, number>();
     words.forEach((word) => {
       if (word.word.trim() === "") return;
@@ -212,7 +211,8 @@ class Matcher {
         map.set(word.word, 1);
       }
     });
-    return map;
+
+    return [[...map.keys()], [...map.values()]];
   }
 
   private getDotProduct(array1: number[], array2: number[]): number {
@@ -346,14 +346,12 @@ class Matcher {
     candidateArtifact: WordToken[],
   ): Match[] {
     let wordTokens: WordToken[] = [];
-    const uniqueWordCountMap = this.createUniqueWordCountMap(speechTokens);
-    const uniqueWords = [...uniqueWordCountMap.keys()];
-    const uniqueWordCounts = [...uniqueWordCountMap.values()];
+    const [uniqueWords, uniqueWordCounts] =
+      this.findUniqueWordCounts(speechTokens);
 
     const matches: Match[] = [];
 
     if (speechTokens.length === 1) {
-      // Skipping use of cosine dot product
       const hypothesisToken = speechTokens[0];
       for (const wordToken of candidateArtifact) {
         if (hypothesisToken.word === wordToken.word) {
@@ -454,7 +452,7 @@ class MatchProcessor {
     isFinal: boolean,
     originalText: WordToken[],
   ) {
-    const initialRecentTokens = [...this.session.recentTokens];
+    const initialTokens = [...this.session.recentTokens];
 
     // Pad extra words from previous recognitions
     if (transcript.length < this.MIN_TOKENS) {
@@ -495,8 +493,8 @@ class MatchProcessor {
     if (
       this.session.recentTokens.every(
         (value, index) =>
-          value.word === initialRecentTokens[index].word &&
-          value.position === initialRecentTokens[index].position,
+          value.word === initialTokens[index].word &&
+          value.position === initialTokens[index].position,
       )
     ) {
       return;
