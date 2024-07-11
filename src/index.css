@@ -1,6 +1,13 @@
 @import "tailwindcss";
 
 :root {
+  --gray-950: #0a0a0a;
+  --gray-900: #171717;
+  --gray-800: #262626;
+  --gray-700: #404040;
+  --gray-600: #525252;
+  --gray-500: #737373;
+  --gray-400: #a3a3a3;
   --yellow: #c1ac15;
   --green: #0ea44d;
   --red: #d03739;
@@ -32,7 +39,8 @@
 
 html,
 body {
-  @apply bg-neutral-950 text-white;
+  background-color: var(--gray-950);
+  color: white;
   color-scheme: dark;
 }
 
@@ -50,23 +58,39 @@ body {
   fill: var(--red);
 }
 
-.button {
-  @apply cursor-pointer p-1 text-neutral-400 hover:text-neutral-300 disabled:cursor-auto disabled:text-neutral-900;
+.button,
+.button:focus {
+  color: var(--gray-500);
+  padding: 0.25rem;
+}
+
+.button:disabled,
+.button:disabled:hover {
+  color: var(--gray-900);
+}
+
+.button:hover {
+  color: var(--gray-400);
 }
 
 .icon {
-  @apply size-7;
+  width: 1.75rem;
+  height: 1.75rem;
 }
 
 /* Content styles */
 .content {
-  @apply size-full border-0 bg-neutral-950 outline-0 focus:outline-0;
   display: block;
   appearance: unset;
   overflow-y: auto;
   overflow-x: hidden;
+  background-color: var(--gray-950);
+  border: none;
+  outline: none;
   overflow-wrap: break-word;
   white-space: pre-wrap;
+  width: 100%;
+  height: 100%;
   /* https://kittygiraudel.com/2020/05/18/using-calc-to-figure-out-optimal-line-height/ */
   line-height: calc(10px + 2ex);
   cursor: default;
@@ -74,14 +98,18 @@ body {
   resize: none;
 }
 
+.content:focus {
+  outline: none;
+}
+
 .interim-transcript {
   color: hsl(48, 100%, 67%);
 }
 
 .final-transcript {
-  @apply text-neutral-700;
+  color: var(--gray-700);
 }
 
 .content > span:hover {
-  color: hsl(348, 86%, 61%);
+  color: hsl(348, 86%, 61%) !important;
 }
