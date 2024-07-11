@@ -39,5 +39,7 @@ function recentlyWeighedAverage(array: number[]) {
     count += weighting;
   }
 
-  return total / count;
+  // A hack to weigh averages closer to the last transcribed index.
+  const bias = (array.at(-1)! - array.at(0)!) * array.length;
+  return (total + bias) / count;
 }
