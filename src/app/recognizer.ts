@@ -1,5 +1,10 @@
 import SpeechRecognizer from "../lib/speech-recognizer";
-import { computeSpeechRecognitionTokenIndex } from "../lib/speech-matcher";
+import {
+  createTextSearchRegion,
+  createTranscriptTokens,
+  match,
+  reset,
+} from "../lib/speech-matcher";
 import { useNavbarStore } from "@/features/navbar/store";
 import { useContentStore } from "@/features/content/store";
 
@@ -15,29 +20,32 @@ export const startTeleprompter = () => {
 
     speechRecognizer.onresult(
       (final_transcript: string, interim_transcript: string) => {
-        const {
-          textElements,
-          finalTranscriptIndex: lastFinalTranscriptIndex,
-          setInterimTranscriptIndex,
-          setFinalTranscriptIndex,
-        } = useContentStore.getState();
+        const { textElements, start, end, setStart, setEnd } =
+          useContentStore.getState();
 
         if (final_transcript !== "") {
-          const finalTranscriptIndex = computeSpeechRecognitionTokenIndex(
-            final_transcript,
-            textElements,
-            lastFinalTranscriptIndex,
+          const foundMatch = match(
+            createTranscriptTokens(final_transcript),
+            true,
+            createTextSearchRegion(textElements, end),
           );
-          setFinalTranscriptIndex(finalTranscriptIndex);
+          if (foundMatch && foundMatch.textMatch.length > 0) {
+            setStart(foundMatch.textMatch[0].index);
+            setEnd(foundMatch.textMatch.at(-1)!.index);
+          }
         }
 
         if (interim_transcript !== "") {
-          const interimTranscriptIndex = computeSpeechRecognitionTokenIndex(
-            interim_transcript,
-            textElements,
-            lastFinalTranscriptIndex,
+          const foundMatch = match(
+            createTranscriptTokens(interim_transcript),
+            false,
+            createTextSearchRegion(textElements, start),
           );
-          setInterimTranscriptIndex(interimTranscriptIndex);
+
+          if (foundMatch && foundMatch.textMatch.length > 0) {
+            setStart(foundMatch.textMatch[0].index);
+            setEnd(foundMatch.textMatch.at(-1)!.index);
+          }
         }
       },
     );
@@ -46,12 +54,14 @@ export const startTeleprompter = () => {
       if (!running) {
         const { stop } = useNavbarStore.getState();
         stop();
+        reset();
       }
     });
 
     speechRecognizer.onend(() => {
       const { stop } = useNavbarStore.getState();
       stop();
+      reset();
     });
 
     const { start } = useNavbarStore.getState();

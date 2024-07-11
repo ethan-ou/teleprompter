@@ -25,15 +25,8 @@ export function Content() {
     })),
   );
 
-  const {
-    rawText,
-    setContent,
-    textElements,
-    interimTranscriptIndex,
-    setInterimTranscriptIndex,
-    finalTranscriptIndex,
-    setFinalTranscriptIndex,
-  } = useContentStore((state) => state);
+  const { rawText, setContent, textElements, start, setStart, end, setEnd } =
+    useContentStore((state) => state);
 
   const style: React.CSSProperties = {
     fontSize: `${fontSize}px`,
@@ -48,7 +41,7 @@ export function Content() {
 
   useEffect(() => {
     if (status === "started") {
-      if (lastRef.current && interimTranscriptIndex > 0) {
+      if (lastRef.current && start > 0) {
         const alignTop = lastRef.current.offsetTop - fontSize;
         const alignCenter =
           lastRef.current.offsetTop -
@@ -98,23 +91,20 @@ export function Content() {
         >
           {textElements.map((textElement, index, array) => {
             const itemProps =
-              interimTranscriptIndex > 0 &&
-              index === Math.min(interimTranscriptIndex + 2, array.length - 1)
+              start > 0 && index === Math.min(start + 2, array.length - 1)
                 ? { ref: lastRef }
                 : {};
             return (
               <span
                 key={textElement.index}
                 onClick={() => {
-                  setFinalTranscriptIndex(index - 1);
-                  setInterimTranscriptIndex(index - 1);
+                  setStart(index - 1);
+                  setEnd(index - 1);
                 }}
                 className={
-                  finalTranscriptIndex > 0 &&
-                  textElement.index <= finalTranscriptIndex + 1
+                  start > 0 && textElement.index <= start + 1
                     ? "final-transcript"
-                    : interimTranscriptIndex > 0 &&
-                        textElement.index <= interimTranscriptIndex + 1
+                    : end > 0 && textElement.index <= end + 1
                       ? "interim-transcript"
                       : ""
                 }
