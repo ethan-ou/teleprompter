@@ -33,7 +33,7 @@ export function Content() {
   const lastRef = useRef<null | HTMLDivElement>(null);
 
   useEffect(() => {
-    if (status === "started") {
+    if (status !== "editing") {
       if (lastRef.current && end > 0) {
         const alignTop = lastRef.current.offsetTop - fontSize;
         const alignCenter =

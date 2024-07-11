@@ -1,6 +1,6 @@
 import { type TextElement, tokenize } from "./word-tokenizer";
 import { levenshteinDistance } from "./levenshtein";
-import { getAveragedPositions, resetPositions } from "./average-position";
+import { getAveragedPositions, resetPositions as resetAveragedPositions } from "./average-position";
 
 /*
   Algorithm used to match transcript to the text is a simple
@@ -12,48 +12,43 @@ import { getAveragedPositions, resetPositions } from "./average-position";
   to avoid rapid jumps in text position.
 */
 
-const MIN_WINDOW = 3;
-const MATCH_WINDOW = 5;
-const MAX_TEXT_DISTANCE = 0.75;
+const MIN_WINDOW = 2;
+const MATCH_WINDOW = 6;
 
 export function getTokensFromText(text: string) {
   return tokenize(text).filter((element) => element.type === "TOKEN");
 }
 
-export function createTextRegion(tokens: TextElement[], index: number, next = 50, previous = 20) {
+/*
+  Avoid too much backtracking and too much forward prediction since it breaks the stability
+  of the matching in its general usage. 
+*/
+export function createTextRegion(tokens: TextElement[], index: number, next = 40, previous = 10) {
   return tokens
     .slice(index - previous > 0 ? index - previous : 0, index + next)
     .filter((element) => element.type === "TOKEN");
 }
 
 export function matchText(transcript: TextElement[], text: TextElement[], isFinal: boolean) {
-  const transcriptWindow = filterStopWords(transcript).slice(-MATCH_WINDOW);
+  const transcriptWindow = transcript.slice(-MATCH_WINDOW);
   if (transcriptWindow.length < MIN_WINDOW) {
     return;
   }
 
-  const textWindow = createTextWindow(
-    filterStopWords(text),
-    Math.min(transcriptWindow.length, MATCH_WINDOW),
-  );
+  const textWindow = createTextWindow(text, Math.min(transcriptWindow.length, MATCH_WINDOW));
+
+  let positions: [number, number] | undefined;
   const bestWindow = findBestTextWindow(transcriptWindow, textWindow);
   if (bestWindow) {
-    const averagePositions = getAveragedPositions(
-      bestWindow.at(0)!.index,
-      bestWindow.at(-1)!.index,
-    );
-
-    if (isFinal) {
-      resetPositions();
-    }
-
-    if (averagePositions) {
-      return averagePositions;
-    }
+    positions = getAveragedPositions(bestWindow.at(0)!.index, bestWindow.at(-1)!.index);
   }
 
   if (isFinal) {
-    resetPositions();
+    resetAveragedPositions();
+  }
+
+  if (positions) {
+    return positions;
   }
 }
 
@@ -76,64 +71,29 @@ function findBestTextWindow(transcript: TextElement[], textSlices: TextElement[]
   const transcriptText = transcript.map((text) => text.value).join("");
   const distances = textSlices.map((slice) => {
     const sliceText = slice.map((text) => text.value).join("");
-    return levenshteinDistance(transcriptText, sliceText);
+    return levenshteinDistance(transcriptText, sliceText) / transcriptText.length;
   });
 
-  const lowestDistanceIndex = distances.indexOf(Math.min.apply(Math, distances));
-
   /*
-    When talking off script or if the transcript is too different to
-    the text, avoid giving a match.
+    If there's an obvious high accuracy match, pick that. Otherwise go further
+    and further into lower confidence until you skip matching altogether.
 
-    Levenshtein Distance generally gets larger the longer the string,
-    so we normalise here to give a rough estimate.
+    Searching from the beginning of the text gives better stability than
+    trying to find a best match in the whole text section. But it does
+    rely on having not too much backtracking in the text.
   */
-  const normalisedDistance = distances[lowestDistanceIndex] / transcriptText.length;
-  if (normalisedDistance > MAX_TEXT_DISTANCE) {
-    return;
+  const lowDistanceIndex = distances.findIndex((distance) => distance < 0.1);
+  if (lowDistanceIndex > -1) {
+    return textSlices[lowDistanceIndex];
   }
 
-  if (lowestDistanceIndex > -1) {
-    return textSlices[lowestDistanceIndex];
+  const midDistanceIndex = distances.findIndex((distance) => distance < 0.3);
+  if (midDistanceIndex > -1) {
+    return textSlices[midDistanceIndex];
   }
-}
 
-const STOP_WORDS = [
-  "i",
-  "me",
-  "my",
-  "we",
-  "us",
-  "our",
-  "you",
-  "it",
-  "its",
-  "it's",
-  "am",
-  "is",
-  "be",
-  "do",
-  "a",
-  "an",
-  "are",
-  "the",
-  "and",
-  "but",
-  "if",
-  "or",
-  "as",
-  "of",
-  "at",
-  "by",
-  "for",
-  "to",
-  "so",
-  "you",
-  "your",
-  "in",
-  "on",
-];
-
-function filterStopWords(tokens: TextElement[]) {
-  return tokens.filter((token) => !STOP_WORDS.includes(token.value.toLowerCase()));
+  const highDistanceIndex = distances.findIndex((distance) => distance <= 0.5);
+  if (highDistanceIndex > -1) {
+    return textSlices[highDistanceIndex];
+  }
 }

@@ -1,5 +1,5 @@
-const MIN_AVERAGE = 3;
-const NUM_AVERAGE = 5;
+const MIN_AVERAGE = 2;
+const NUM_AVERAGE = 6;
 
 let positions: [number, number][] = [];
 
@@ -29,6 +29,8 @@ export function resetPositions() {
   positions = [];
 }
 
+/* Calculate average with more recent items being weighed
+   more heavily than previous items. */
 function recentlyWeighedAverage(array: number[]) {
   let total = 0;
   let count = 0;
