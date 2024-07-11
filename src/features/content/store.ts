@@ -36,8 +36,7 @@ export const useContentStore = create<ContentState & ContentActions>()(
           search: -1,
           end: -1,
         })),
-      setTextElements: () =>
-        set((state) => ({ textElements: tokenize(state.rawText) })),
+      setTextElements: () => set((state) => ({ textElements: tokenize(state.rawText) })),
       setStart: (index: number) => set(() => ({ start: index })),
       setSearch: (index: number) => set(() => ({ search: index })),
       setEnd: (index: number) => set(() => ({ end: index })),
@@ -46,8 +45,7 @@ export const useContentStore = create<ContentState & ContentActions>()(
     {
       name: "content",
       partialize: (state) => ({ rawText: state.rawText }),
-      onRehydrateStorage: () => (state, error) =>
-        !error && state && state.setTextElements(),
+      onRehydrateStorage: () => (state, error) => !error && state && state.setTextElements(),
     },
   ),
 );

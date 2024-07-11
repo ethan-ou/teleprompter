@@ -1,13 +1,7 @@
 // From https://github.com/gustf/js-levenshtein (MIT license)
 export const levenshteinDistance = (function () {
   function min(d0: number, d1: number, d2: number, bx: number, ay: number) {
-    return d0 < d1 || d2 < d1
-      ? d0 > d2
-        ? d2 + 1
-        : d0 + 1
-      : bx === ay
-        ? d1
-        : d1 + 1;
+    return d0 < d1 || d2 < d1 ? (d0 > d2 ? d2 + 1 : d0 + 1) : bx === ay ? d1 : d1 + 1;
   }
 
   return function (a: string, b: string) {

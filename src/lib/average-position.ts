@@ -1,11 +1,9 @@
-let positions: [number, number][] = [];
 const MIN_AVERAGE = 3;
 const NUM_AVERAGE = 5;
 
-export function getAveragedPositions(
-  start: number,
-  end: number,
-): [number, number] | undefined {
+let positions: [number, number][] = [];
+
+export function getAveragedPositions(start: number, end: number): [number, number] | undefined {
   positions.push([start, end]);
   positions = positions.slice(-NUM_AVERAGE);
 

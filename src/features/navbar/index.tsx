@@ -46,14 +46,13 @@ export function Navbar() {
     resetTimer,
   } = useNavbarStore((state) => state);
 
-  const { setContent, setTextElements, resetTranscriptionIndices } =
-    useContentStore(
-      useShallow((state) => ({
-        setContent: state.setContent,
-        setTextElements: state.setTextElements,
-        resetTranscriptionIndices: state.resetPosition,
-      })),
-    );
+  const { setContent, setTextElements, resetTranscriptionIndices } = useContentStore(
+    useShallow((state) => ({
+      setContent: state.setContent,
+      setTextElements: state.setTextElements,
+      resetTranscriptionIndices: state.resetPosition,
+    })),
+  );
 
   const fullscreen = useFullScreen();
   useInterval(() => incrementTimer(), status === "started" ? 1000 : null);
@@ -61,8 +60,7 @@ export function Navbar() {
   const [focused, setFocused] = useState(false);
 
   const startAction = {
-    action: () =>
-      status === "stopped" ? startTeleprompter() : stopTeleprompter(),
+    action: () => (status === "stopped" ? startTeleprompter() : stopTeleprompter()),
     disabled: status === "editing",
     keys: ["1"],
   };
@@ -117,9 +115,7 @@ export function Navbar() {
 
   const restartAction = {
     action: () => (
-      resetTranscriptionIndices(),
-      resetTimer(),
-      window.scrollTo({ top: 0, behavior: "smooth" })
+      resetTranscriptionIndices(), resetTimer(), window.scrollTo({ top: 0, behavior: "smooth" })
     ),
     disabled: status === "started",
     keys: ["r", "7"],
@@ -189,11 +185,7 @@ export function Navbar() {
           className="button"
           disabled={startAction.disabled}
           onClick={startAction.action}
-          title={
-            status === "stopped" || status === "editing"
-              ? "Start (space)"
-              : "Stop (space)"
-          }
+          title={status === "stopped" || status === "editing" ? "Start (space)" : "Stop (space)"}
         >
           {status === "stopped" || status === "editing" ? (
             <Play className={`icon ${status !== "editing" && "green-fill"}`} />
@@ -223,9 +215,7 @@ export function Navbar() {
           disabled={horizontallyFlippedAction.disabled}
           title="Flip Text Horizontally (h)"
         >
-          <MoveHorizontal
-            className={`icon ${horizontallyFlipped ? "yellow" : ""}`}
-          />
+          <MoveHorizontal className={`icon ${horizontallyFlipped ? "yellow" : ""}`} />
         </button>
         <button
           className="button"
@@ -233,9 +223,7 @@ export function Navbar() {
           disabled={verticallyFlippedAction.disabled}
           title="Flip Text Vertically (v)"
         >
-          <MoveVertical
-            className={`icon ${verticallyFlipped ? "yellow" : ""}`}
-          />
+          <MoveVertical className={`icon ${verticallyFlipped ? "yellow" : ""}`} />
         </button>
         <button
           className="button"
@@ -372,14 +360,18 @@ function useSliderHotkeys({
   incrementKeys: string[];
   decrementKeys: string[];
 }) {
-  useHotkeys(
+  useHotkeys(incrementKeys, () => action(value + step <= max ? value + step : value), [
     incrementKeys,
-    () => action(value + step <= max ? value + step : value),
-    [incrementKeys, action, value, step, max],
-  );
-  useHotkeys(
+    action,
+    value,
+    step,
+    max,
+  ]);
+  useHotkeys(decrementKeys, () => action(value - step >= min ? value - step : value), [
     decrementKeys,
-    () => action(value - step >= min ? value - step : value),
-    [decrementKeys, action, value, step, max],
-  );
+    action,
+    value,
+    step,
+    max,
+  ]);
 }

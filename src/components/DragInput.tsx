@@ -30,10 +30,7 @@ export function DragInput({
 }: {
   value: number;
   onValueChange: (value: number) => void;
-} & React.DetailedHTMLProps<
-  React.InputHTMLAttributes<HTMLInputElement>,
-  HTMLInputElement
->) {
+} & React.DetailedHTMLProps<React.InputHTMLAttributes<HTMLInputElement>, HTMLInputElement>) {
   const constrain = createConstraints(min, max, step);
 
   const inputRef = useRef<HTMLInputElement>(null);
@@ -104,9 +101,7 @@ export function DragInput({
         max={max}
         autoComplete="false"
         spellCheck="false"
-        onBlur={(e) =>
-          onValueChange(constrain(parseInt(e.currentTarget.value, 10) || 0))
-        }
+        onBlur={(e) => onValueChange(constrain(parseInt(e.currentTarget.value, 10) || 0))}
         onKeyUp={(e) => {
           if (e.key === "Enter") {
             onValueChange(constrain(parseInt(e.currentTarget.value, 10) || 0));

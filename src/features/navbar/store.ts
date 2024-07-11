@@ -43,10 +43,8 @@ export const useNavbarStore = create<NavbarState & NavbarActions>()(
         })),
       start: () => set(() => ({ status: "started" })),
       stop: () => set(() => ({ status: "stopped" })),
-      flipHorizontally: () =>
-        set((state) => ({ horizontallyFlipped: !state.horizontallyFlipped })),
-      flipVertically: () =>
-        set((state) => ({ verticallyFlipped: !state.verticallyFlipped })),
+      flipHorizontally: () => set((state) => ({ horizontallyFlipped: !state.horizontallyFlipped })),
+      flipVertically: () => set((state) => ({ verticallyFlipped: !state.verticallyFlipped })),
       setFontSize: (value: number) => set(() => ({ fontSize: value })),
       setMargin: (value: number) => set(() => ({ margin: value })),
       setOpacity: (value: number) => set(() => ({ opacity: value })),

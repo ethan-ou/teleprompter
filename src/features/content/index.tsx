@@ -5,44 +5,28 @@ import { useContentStore } from "./store";
 import { useShallow } from "zustand/react/shallow";
 
 export function Content() {
-  const {
-    fontSize,
-    margin,
-    status,
-    opacity,
-    horizontallyFlipped,
-    verticallyFlipped,
-    align,
-  } = useNavbarStore(
-    useShallow((state) => ({
-      fontSize: state.fontSize,
-      margin: state.margin,
-      status: state.status,
-      opacity: state.opacity,
-      horizontallyFlipped: state.horizontallyFlipped,
-      verticallyFlipped: state.verticallyFlipped,
-      align: state.align,
-    })),
-  );
+  const { fontSize, margin, status, opacity, horizontallyFlipped, verticallyFlipped, align } =
+    useNavbarStore(
+      useShallow((state) => ({
+        fontSize: state.fontSize,
+        margin: state.margin,
+        status: state.status,
+        opacity: state.opacity,
+        horizontallyFlipped: state.horizontallyFlipped,
+        verticallyFlipped: state.verticallyFlipped,
+        align: state.align,
+      })),
+    );
 
-  const {
-    rawText,
-    setContent,
-    textElements,
-    start,
-    setStart,
-    end,
-    setEnd,
-    setSearch,
-  } = useContentStore((state) => state);
+  const { rawText, setContent, textElements, start, setStart, end, setEnd, setSearch } =
+    useContentStore((state) => state);
 
   const style: React.CSSProperties = {
     fontSize: `${fontSize}px`,
     paddingLeft: `${margin}vw`,
     paddingRight: `${margin * 0.66}vw`,
     opacity: opacity / 100,
-    paddingTop:
-      align === "center" ? `calc(50vh - ${fontSize * 2}px)` : "0.5rem",
+    paddingTop: align === "center" ? `calc(50vh - ${fontSize * 2}px)` : "0.5rem",
   };
 
   const lastRef = useRef<null | HTMLDivElement>(null);
@@ -52,9 +36,7 @@ export function Content() {
       if (lastRef.current && end > 0) {
         const alignTop = lastRef.current.offsetTop - fontSize;
         const alignCenter =
-          lastRef.current.offsetTop -
-          document.documentElement.clientHeight / 2 +
-          fontSize * 2;
+          lastRef.current.offsetTop - document.documentElement.clientHeight / 2 + fontSize * 2;
 
         window.scrollTo({
           top: align === "center" ? alignCenter : alignTop,
@@ -75,10 +57,7 @@ export function Content() {
         <div className="grid">
           {/* Use an invisible div to force an increase in textarea sizing.
               This should have exactly the same size and properties as the textarea. */}
-          <div
-            className="content invisible col-start-1 row-start-1"
-            style={style}
-          >
+          <div className="content invisible col-start-1 row-start-1" style={style}>
             {rawText}
           </div>
           <textarea
@@ -99,9 +78,7 @@ export function Content() {
         >
           {textElements.map((textElement, index, array) => {
             const itemProps =
-              end > 0 && index === Math.min(end + 2, array.length - 1)
-                ? { ref: lastRef }
-                : {};
+              end > 0 && index === Math.min(end + 2, array.length - 1) ? { ref: lastRef } : {};
             return (
               <span
                 key={textElement.index}

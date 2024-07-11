@@ -1,17 +1,10 @@
 import { isMobileOrTablet } from "./device";
 
-type SubscriberFunction = (
-  final_transcript: string,
-  interim_transcript: string,
-) => void;
-type ErrorSubscriberFunction = (
-  running: boolean,
-  error: SpeechRecognitionErrorEvent,
-) => void;
+type SubscriberFunction = (final_transcript: string, interim_transcript: string) => void;
+type ErrorSubscriberFunction = (running: boolean, error: SpeechRecognitionErrorEvent) => void;
 type EndSubscriberFunction = () => void;
 
-const SpeechRecognition =
-  window.SpeechRecognition || window.webkitSpeechRecognition;
+const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
 if (!SpeechRecognition)
   alert(
@@ -49,13 +42,10 @@ export default class SpeechRecognizer {
         // Speech Recognition requires a different setup on mobile
         // https://stackoverflow.com/questions/75272972/speech-recognition-result-double-in-mobile/77046406#77046406
         if (result.isFinal && result[0].confidence !== 0) {
-          final_transcript =
-            (this.mobileOrTablet ? "" : final_transcript) +
-            result[0].transcript;
+          final_transcript = (this.mobileOrTablet ? "" : final_transcript) + result[0].transcript;
         } else {
           interim_transcript =
-            (this.mobileOrTablet ? "" : interim_transcript) +
-            result[0].transcript;
+            (this.mobileOrTablet ? "" : interim_transcript) + result[0].transcript;
         }
       }
 
@@ -71,9 +61,7 @@ export default class SpeechRecognizer {
           break;
         case "audio-capture":
           this.stop();
-          alert(
-            "No microphone found. Check your microphone settings and try again.",
-          );
+          alert("No microphone found. Check your microphone settings and try again.");
           break;
         case "not-allowed":
         case "service-not-allowed":
