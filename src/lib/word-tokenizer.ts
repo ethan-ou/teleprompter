@@ -2,6 +2,8 @@ export type TextElement = {
   type: "TOKEN" | "DELIMITER";
   value: string;
   index: number;
+  start: number;
+  end: number;
 };
 
 export const tokenize = (text: string | null) => {
@@ -33,29 +35,36 @@ export const tokenize = (text: string | null) => {
         type: inToken ? "TOKEN" : "DELIMITER",
         value: s,
         index: 0,
+        start: i,
+        end: i + 1,
       };
     } else if (
       (current.type === "TOKEN" && inToken) ||
       (current.type === "DELIMITER" && !inToken)
     ) {
       current.value += s;
+      current.end += s.length;
     } else if (
       (current.type === "TOKEN" && !inToken) ||
       (current.type === "DELIMITER" && inToken)
     ) {
-      let lastIndex: number = current.index;
       results.push(current);
+
+      const lastIndex: number = current.index;
+      const lastEnd: number = current.end;
       current = {
         type: inToken ? "TOKEN" : "DELIMITER",
         value: s,
         index: lastIndex + 1,
+        start: lastEnd,
+        end: lastEnd + 1,
       };
     }
 
     i += s.length;
   }
 
-  // Don't forget to add the last one, whatever it was...
+  // Don't forget to add the last item
   if (current !== null) {
     results.push(current);
   }

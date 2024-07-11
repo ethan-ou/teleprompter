@@ -1,7 +1,12 @@
 import SpeechRecognizer from "../lib/speech-recognizer";
-import { computeSpeechRecognitionTokenIndex } from "../lib/speech-matcher";
+import {
+  createTextRegion,
+  getTokensFromText,
+  matchText,
+} from "../lib/speech-matcher";
 import { useNavbarStore } from "@/features/navbar/store";
 import { useContentStore } from "@/features/content/store";
+import { resetPositions } from "@/lib/average-position";
 
 let speechRecognizer: SpeechRecognizer | null = null;
 
@@ -17,27 +22,49 @@ export const startTeleprompter = () => {
       (final_transcript: string, interim_transcript: string) => {
         const {
           textElements,
-          finalTranscriptIndex: lastFinalTranscriptIndex,
-          setInterimTranscriptIndex,
-          setFinalTranscriptIndex,
+          search,
+          start,
+          end,
+          setStart,
+          setSearch,
+          setEnd,
         } = useContentStore.getState();
 
         if (final_transcript !== "") {
-          const finalTranscriptIndex = computeSpeechRecognitionTokenIndex(
-            final_transcript,
-            textElements,
-            lastFinalTranscriptIndex,
+          const foundMatch = matchText(
+            getTokensFromText(final_transcript),
+            createTextRegion(textElements, search),
+            true,
           );
-          setFinalTranscriptIndex(finalTranscriptIndex);
+
+          if (foundMatch) {
+            const [matchStart, matchEnd] = foundMatch;
+            setStart(matchEnd);
+            setSearch(matchEnd);
+            setEnd(matchEnd);
+          } else {
+            setStart(end);
+            setSearch(end);
+            setEnd(end);
+          }
         }
 
         if (interim_transcript !== "") {
-          const interimTranscriptIndex = computeSpeechRecognitionTokenIndex(
-            interim_transcript,
-            textElements,
-            lastFinalTranscriptIndex,
+          const foundMatch = matchText(
+            getTokensFromText(interim_transcript),
+            createTextRegion(textElements, search),
+            false,
           );
-          setInterimTranscriptIndex(interimTranscriptIndex);
+
+          if (foundMatch) {
+            const [matchStart, matchEnd] = foundMatch;
+            if (matchStart < start) {
+              setStart(matchStart);
+            }
+
+            setSearch(matchStart);
+            setEnd(matchEnd);
+          }
         }
       },
     );
@@ -46,12 +73,14 @@ export const startTeleprompter = () => {
       if (!running) {
         const { stop } = useNavbarStore.getState();
         stop();
+        resetPositions();
       }
     });
 
     speechRecognizer.onend(() => {
       const { stop } = useNavbarStore.getState();
       stop();
+      resetPositions();
     });
 
     const { start } = useNavbarStore.getState();

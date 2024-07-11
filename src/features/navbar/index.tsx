@@ -51,7 +51,7 @@ export function Navbar() {
       useShallow((state) => ({
         setContent: state.setContent,
         setTextElements: state.setTextElements,
-        resetTranscriptionIndices: state.resetTranscriptionIndices,
+        resetTranscriptionIndices: state.resetPosition,
       })),
     );
 

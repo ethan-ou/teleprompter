@@ -1,67 +1,147 @@
 import { type TextElement, tokenize } from "./word-tokenizer";
 import { levenshteinDistance } from "./levenshtein";
+import { getAveragedPositions, resetPositions } from "./average-position";
 
-// This is the "secret sauce" of this whole project: a robust algorithm to match
-// the reference text and the speech recognized text using the levenshtein distance.
-export const computeSpeechRecognitionTokenIndex = (
-  recognized: string,
-  reference: TextElement[],
-  lastRecognizedTokenIndex: number,
-) => {
-  // Tokenize the recognized input:
-  const recognized_tokens = tokenize(recognized).filter(
-    (element) => element.type === "TOKEN",
+const MIN_WINDOW = 2;
+const MATCH_WINDOW = 5;
+const MAX_TEXT_DISTANCE = 0.75;
+const STOP_WORDS = [
+  "i",
+  "me",
+  "my",
+  "we",
+  "us",
+  "our",
+  "you",
+  "it",
+  "its",
+  "it's",
+  "am",
+  "is",
+  "be",
+  "do",
+  "a",
+  "an",
+  "are",
+  "the",
+  "and",
+  "but",
+  "if",
+  "or",
+  "as",
+  "of",
+  "at",
+  "by",
+  "for",
+  "to",
+  "so",
+  "you",
+  "your",
+  "in",
+  "on",
+];
+
+export function getTokensFromText(text: string) {
+  return tokenize(text).filter((element) => element.type === "TOKEN");
+}
+
+export function createTextRegion(
+  tokens: TextElement[],
+  index: number,
+  next = 50,
+  previous = 20,
+) {
+  return tokens
+    .slice(index - previous > 0 ? index - previous : 0, index + next)
+    .filter((element) => element.type === "TOKEN");
+}
+
+export function matchText(
+  transcript: TextElement[],
+  text: TextElement[],
+  isFinal: boolean,
+) {
+  const transcriptSection = filterStopWords(transcript).slice(-MATCH_WINDOW);
+  if (transcriptSection.length < MIN_WINDOW) {
+    return;
+  }
+
+  const slices = createTextWindow(
+    filterStopWords(text),
+    transcriptSection.length < MATCH_WINDOW
+      ? transcriptSection.length
+      : MATCH_WINDOW,
+  );
+  const bestWindow = findBestTextWindow(transcriptSection, slices);
+  if (bestWindow) {
+    const averagePositions = getAveragedPositions(
+      bestWindow.at(0)!.index,
+      bestWindow.at(-1)!.index,
+    );
+
+    if (isFinal) {
+      resetPositions();
+    }
+
+    if (averagePositions) {
+      return averagePositions;
+    }
+  }
+
+  if (isFinal) {
+    resetPositions();
+  }
+}
+
+function createTextWindow(tokens: TextElement[], length: number) {
+  if (tokens.length <= length) {
+    return [tokens];
+  }
+
+  const slices = [];
+  let i = 0;
+  while (i < tokens.length - length) {
+    slices.push(tokens.slice(i, i + length));
+    i++;
+  }
+
+  return slices;
+}
+
+function findBestTextWindow(
+  transcript: TextElement[],
+  textSlices: TextElement[][],
+) {
+  const transcriptText = transcript.map((text) => text.value).join("");
+  const distances = textSlices.map((slice) => {
+    const sliceText = slice.map((text) => text.value).join("");
+    return levenshteinDistance(transcriptText, sliceText);
+  });
+
+  const lowestDistanceIndex = distances.indexOf(
+    Math.min.apply(Math, distances),
   );
 
-  // Convert the tokens back to a string:
-  const comparison_string = recognized_tokens
-    .reduce(
-      (accumulator, currentToken) => accumulator + " " + currentToken.value,
-      "",
-    )
-    .replace(/\s+/, " ")
-    .trim();
+  /*
+    When talking off script or if the transcript is too different to
+    the text, avoid giving a match.
 
-  if (lastRecognizedTokenIndex < 0) {
-    lastRecognizedTokenIndex = 0;
+    Levenshtein Distance generally gets larger the longer the string,
+    so we normalise here to give a rough estimate.
+  */
+  const normalisedDistance =
+    distances[lowestDistanceIndex] / transcriptText.length;
+  if (normalisedDistance > MAX_TEXT_DISTANCE) {
+    return;
   }
 
-  // Now, let's pick the next few tokens from the reference text starting at the last recognized token index.
-  // To simplify, we'll pluck recognized_tokens.length * 2 + 10, and we'll filter out the delimiters:
-  const reference_tokens = reference
-    .slice(
-      lastRecognizedTokenIndex,
-      lastRecognizedTokenIndex + recognized_tokens.length * 2 + 10,
-    )
-    .filter((element) => element.type === "TOKEN");
-
-  // Now, compute the levenshtein distances between the comparison string
-  // and each possible substring created from the reference tokens:
-  const distances: number[] = [];
-
-  let i = 0;
-
-  while (++i <= reference_tokens.length) {
-    const reference_substring = reference_tokens
-      .slice(0, i)
-      .reduce(
-        (accumulator, currentToken) => accumulator + " " + currentToken.value,
-        "",
-      )
-      .replace(/\s+/, " ")
-      .trim();
-    distances.push(levenshteinDistance(comparison_string, reference_substring));
+  if (lowestDistanceIndex > -1) {
+    return textSlices[lowestDistanceIndex];
   }
+}
 
-  // Find the index of the minimum distance:
-  const index = distances.indexOf(Math.min(...distances));
-
-  // Trace that back to the token object:
-  const token = reference_tokens[index];
-
-  if (token) {
-    return token.index;
-  }
-
-  return lastRecognizedTokenIndex;
-};
+function filterStopWords(tokens: TextElement[]) {
+  return tokens.filter(
+    (token) => !STOP_WORDS.includes(token.value.toLowerCase()),
+  );
+}
