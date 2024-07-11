@@ -91,7 +91,7 @@ export function Content() {
         >
           {textElements.map((textElement, index, array) => {
             const itemProps =
-              start > 0 && index === Math.min(start + 2, array.length - 1)
+              end > 0 && index === Math.min(end + 2, array.length - 1)
                 ? { ref: lastRef }
                 : {};
             return (

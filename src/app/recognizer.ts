@@ -3,6 +3,7 @@ import {
   createTextSearchRegion,
   createTranscriptTokens,
   match,
+  match2,
   reset,
 } from "../lib/speech-matcher";
 import { useNavbarStore } from "@/features/navbar/store";
@@ -24,27 +25,33 @@ export const startTeleprompter = () => {
           useContentStore.getState();
 
         if (final_transcript !== "") {
-          const foundMatch = match(
+          console.log("final:", final_transcript);
+          const foundMatch = match2(
             createTranscriptTokens(final_transcript),
+            createTextSearchRegion(textElements, start),
             true,
-            createTextSearchRegion(textElements, end),
           );
-          if (foundMatch && foundMatch.textMatch.length > 0) {
-            setStart(foundMatch.textMatch[0].index);
-            setEnd(foundMatch.textMatch.at(-1)!.index);
+
+          if (foundMatch) {
+            const [start, end] = foundMatch;
+            setStart(start);
+            setEnd(end);
           }
         }
 
         if (interim_transcript !== "") {
-          const foundMatch = match(
+          console.log("interim:", interim_transcript);
+
+          const foundMatch = match2(
             createTranscriptTokens(interim_transcript),
-            false,
             createTextSearchRegion(textElements, start),
+            false,
           );
 
-          if (foundMatch && foundMatch.textMatch.length > 0) {
-            setStart(foundMatch.textMatch[0].index);
-            setEnd(foundMatch.textMatch.at(-1)!.index);
+          if (foundMatch) {
+            const [start, end] = foundMatch;
+            setStart(start);
+            setEnd(end);
           }
         }
       },
