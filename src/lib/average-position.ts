@@ -22,8 +22,8 @@ export function getAveragedPositions(
   }
 
   return [
-    Math.max(Math.round(recentlyWeighedAverage(startValues)), 0),
-    Math.max(Math.round(recentlyWeighedAverage(endValues)), 0),
+    Math.max(Math.ceil(recentlyWeighedAverage(startValues)), 0),
+    Math.max(Math.ceil(recentlyWeighedAverage(endValues)), 0),
   ];
 }
 
