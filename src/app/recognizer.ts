@@ -1,13 +1,12 @@
 import SpeechRecognizer from "../lib/speech-recognizer";
 import {
-  createTextSearchRegion,
-  createTranscriptTokens,
-  match,
-  match2,
-  reset,
+  createTextRegion,
+  getTokensFromText,
+  matchText,
 } from "../lib/speech-matcher";
 import { useNavbarStore } from "@/features/navbar/store";
 import { useContentStore } from "@/features/content/store";
+import { resetPositions } from "@/lib/average-position";
 
 let speechRecognizer: SpeechRecognizer | null = null;
 
@@ -21,37 +20,50 @@ export const startTeleprompter = () => {
 
     speechRecognizer.onresult(
       (final_transcript: string, interim_transcript: string) => {
-        const { textElements, start, end, setStart, setEnd } =
-          useContentStore.getState();
+        const {
+          textElements,
+          search,
+          start,
+          end,
+          setStart,
+          setSearch,
+          setEnd,
+        } = useContentStore.getState();
 
         if (final_transcript !== "") {
-          console.log("final:", final_transcript);
-          const foundMatch = match2(
-            createTranscriptTokens(final_transcript),
-            createTextSearchRegion(textElements, start),
+          const foundMatch = matchText(
+            getTokensFromText(final_transcript),
+            createTextRegion(textElements, search),
             true,
           );
 
           if (foundMatch) {
-            const [start, end] = foundMatch;
-            setStart(start);
+            const [matchStart, matchEnd] = foundMatch;
+            setStart(matchEnd);
+            setSearch(matchEnd);
+            setEnd(matchEnd);
+          } else {
+            setStart(end);
+            setSearch(end);
             setEnd(end);
           }
         }
 
         if (interim_transcript !== "") {
-          console.log("interim:", interim_transcript);
-
-          const foundMatch = match2(
-            createTranscriptTokens(interim_transcript),
-            createTextSearchRegion(textElements, start),
+          const foundMatch = matchText(
+            getTokensFromText(interim_transcript),
+            createTextRegion(textElements, search),
             false,
           );
 
           if (foundMatch) {
-            const [start, end] = foundMatch;
-            setStart(start);
-            setEnd(end);
+            const [matchStart, matchEnd] = foundMatch;
+            if (matchStart < start) {
+              setStart(matchStart);
+            }
+
+            setSearch(matchStart);
+            setEnd(matchEnd);
           }
         }
       },
@@ -61,14 +73,14 @@ export const startTeleprompter = () => {
       if (!running) {
         const { stop } = useNavbarStore.getState();
         stop();
-        reset();
+        resetPositions();
       }
     });
 
     speechRecognizer.onend(() => {
       const { stop } = useNavbarStore.getState();
       stop();
-      reset();
+      resetPositions();
     });
 
     const { start } = useNavbarStore.getState();

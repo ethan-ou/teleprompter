@@ -1,26 +1,99 @@
 import { type TextElement, tokenize } from "./word-tokenizer";
-import { matchText } from "./ngram-matcher";
 import { levenshteinDistance } from "./levenshtein";
+import { getAveragedPositions, resetPositions } from "./average-position";
 
-const MATCH_WINDOW = 7;
-const INDEX_AVERAGE = 2;
+const MIN_WINDOW = 2;
+const MATCH_WINDOW = 5;
+const MAX_TEXT_DISTANCE = 0.75;
+const STOP_WORDS = [
+  "i",
+  "me",
+  "my",
+  "we",
+  "us",
+  "our",
+  "you",
+  "it",
+  "its",
+  "it's",
+  "am",
+  "is",
+  "be",
+  "do",
+  "a",
+  "an",
+  "are",
+  "the",
+  "and",
+  "but",
+  "if",
+  "or",
+  "as",
+  "of",
+  "at",
+  "by",
+  "for",
+  "to",
+  "so",
+  "you",
+  "your",
+  "in",
+  "on",
+];
 
-export function createTranscriptTokens(text: string) {
+export function getTokensFromText(text: string) {
   return tokenize(text).filter((element) => element.type === "TOKEN");
 }
 
-export function createTextSearchRegion(
+export function createTextRegion(
   tokens: TextElement[],
   index: number,
-  quantity = 20,
-  backtrack = 5,
+  next = 50,
+  previous = 20,
 ) {
   return tokens
-    .slice(index - backtrack > 0 ? index - backtrack : 0, index + quantity)
+    .slice(index - previous > 0 ? index - previous : 0, index + next)
     .filter((element) => element.type === "TOKEN");
 }
 
-function createTextSlices(tokens: TextElement[], length: number) {
+export function matchText(
+  transcript: TextElement[],
+  text: TextElement[],
+  isFinal: boolean,
+) {
+  const transcriptSection = filterStopWords(transcript).slice(-MATCH_WINDOW);
+  if (transcriptSection.length < MIN_WINDOW) {
+    return;
+  }
+
+  const slices = createTextWindow(
+    filterStopWords(text),
+    transcriptSection.length < MATCH_WINDOW
+      ? transcriptSection.length
+      : MATCH_WINDOW,
+  );
+  const bestWindow = findBestTextWindow(transcriptSection, slices);
+  if (bestWindow) {
+    const averagePositions = getAveragedPositions(
+      bestWindow.at(0)!.index,
+      bestWindow.at(-1)!.index,
+    );
+
+    if (isFinal) {
+      resetPositions();
+    }
+
+    if (averagePositions) {
+      return averagePositions;
+    }
+  }
+
+  if (isFinal) {
+    resetPositions();
+  }
+}
+
+function createTextWindow(tokens: TextElement[], length: number) {
   if (tokens.length <= length) {
     return [tokens];
   }
@@ -35,13 +108,13 @@ function createTextSlices(tokens: TextElement[], length: number) {
   return slices;
 }
 
-function findBestTextSlice(
+function findBestTextWindow(
   transcript: TextElement[],
   textSlices: TextElement[][],
 ) {
-  const transcriptText = transcript.map((text) => text.value).join(" ");
+  const transcriptText = transcript.map((text) => text.value).join("");
   const distances = textSlices.map((slice) => {
-    const sliceText = slice.map((text) => text.value).join(" ");
+    const sliceText = slice.map((text) => text.value).join("");
     return levenshteinDistance(transcriptText, sliceText);
   });
 
@@ -49,167 +122,26 @@ function findBestTextSlice(
     Math.min.apply(Math, distances),
   );
 
+  /*
+    When talking off script or if the transcript is too different to
+    the text, avoid giving a match.
+
+    Levenshtein Distance generally gets larger the longer the string,
+    so we normalise here to give a rough estimate.
+  */
+  const normalisedDistance =
+    distances[lowestDistanceIndex] / transcriptText.length;
+  if (normalisedDistance > MAX_TEXT_DISTANCE) {
+    return;
+  }
+
   if (lowestDistanceIndex > -1) {
     return textSlices[lowestDistanceIndex];
   }
 }
 
-class TranscriptSession2 {
-  memory: TextElement[] = [];
-  positions: [number, number][] = [];
-
-  add(transcript: TextElement[], isFinal: boolean) {
-    if (isFinal) {
-      this.memory = this.memory.concat(transcript).slice(-MATCH_WINDOW);
-      return this.memory;
-    }
-
-    return this.memory.concat(transcript).slice(-MATCH_WINDOW);
-  }
-
-  averagePositions(start: number, end: number): [number, number] {
-    this.positions.push([start, end]);
-    this.positions = this.positions.slice(-INDEX_AVERAGE);
-
-    let x = start;
-    let y = end;
-    for (const position of this.positions) {
-      const [currentX, currentY] = position;
-      x = (x + currentX) / 2;
-      y = (y + currentY) / 2;
-    }
-
-    return [Math.max(Math.floor(x), 0), Math.max(Math.floor(y), 0)];
-  }
-}
-
-let session2 = new TranscriptSession2();
-
-export function match2(
-  transcript: TextElement[],
-  text: TextElement[],
-  isFinal: boolean,
-) {
-  const transcriptSection = session2.add(transcript, isFinal);
-  if (transcriptSection.length < MATCH_WINDOW / 2) {
-    return;
-  }
-
-  const slices = createTextSlices(text, MATCH_WINDOW);
-  const bestSection = findBestTextSlice(transcriptSection, slices);
-
-  if (bestSection) {
-    return session2.averagePositions(
-      bestSection[0].index,
-      bestSection.at(-1)!.index,
-    );
-  }
-}
-
-class TranscriptSession {
-  previousTokens: TextElement[] = [];
-  recentTokens: TextElement[] = [];
-  currentTokenQuantity = 0;
-  previousTokenQuantity = 0;
-  lastMatch: TextElement[] = [];
-
-  public getSection(): TextElement[] {
-    if (this.lastMatch.length === 0) {
-      const recentMatch = this.findRecentMatch(
-        this.lastMatch,
-        this.recentTokens,
-      );
-      if (recentMatch > -1 && this.recentTokens.length - recentMatch <= 5) {
-        return this.recentTokens.slice(
-          recentMatch + 1,
-          this.recentTokens.length,
-        );
-      }
-    }
-    return this.recentTokens.slice(-5);
-  }
-
-  private findRecentMatch(
-    lastMatch: TextElement[],
-    recentTokens: TextElement[],
-  ) {
-    if (lastMatch.length > 0) {
-      for (let i = lastMatch.length - 1; i >= 0; i--) {
-        const index = recentTokens.findIndex(
-          (token) =>
-            lastMatch[i].index === token.index &&
-            lastMatch[i].value === token.value,
-        );
-        if (index > -1) return index;
-      }
-    }
-
-    return -1;
-  }
-}
-
-const MIN_TOKENS = 15;
-let session = new TranscriptSession();
-
-export function match(
-  transcript: TextElement[],
-  isFinal: boolean,
-  text: TextElement[],
-) {
-  const initialTokens = [...session.recentTokens];
-
-  // Pad extra words from previous recognitions
-  if (transcript.length < MIN_TOKENS) {
-    const last = session.previousTokens.slice(transcript.length - MIN_TOKENS);
-    const tokens = transcript.map(
-      (token, index): TextElement => ({
-        ...token,
-        index: session.previousTokenQuantity + index,
-      }),
-    );
-    session.recentTokens = last.concat(tokens);
-  } else {
-    // Hypothesis is long enough to take all words
-    const tokens = transcript.slice(-MIN_TOKENS).map(
-      (token, index): TextElement => ({
-        ...token,
-        index:
-          session.previousTokenQuantity +
-          (transcript.length - MIN_TOKENS) +
-          index,
-      }),
-    );
-
-    session.recentTokens = tokens;
-  }
-
-  session.currentTokenQuantity = transcript.length;
-
-  if (isFinal) {
-    session.previousTokenQuantity =
-      session.previousTokenQuantity + session.currentTokenQuantity;
-    session.previousTokens = session.recentTokens;
-  }
-
-  const transcriptSection = session.getSection();
-  if (
-    session.recentTokens.length === initialTokens.length &&
-    session.recentTokens.every(
-      (value, index) =>
-        value.value === initialTokens[index].value &&
-        value.index === initialTokens[index].index,
-    )
-  ) {
-    return;
-  }
-
-  const match = matchText(transcriptSection, text);
-  if (match) {
-    session.lastMatch = match.transcriptMatch;
-    return match;
-  }
-}
-
-export function reset() {
-  session = new TranscriptSession();
+function filterStopWords(tokens: TextElement[]) {
+  return tokens.filter(
+    (token) => !STOP_WORDS.includes(token.value.toLowerCase()),
+  );
 }

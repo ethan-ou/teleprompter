@@ -25,8 +25,16 @@ export function Content() {
     })),
   );
 
-  const { rawText, setContent, textElements, start, setStart, end, setEnd } =
-    useContentStore((state) => state);
+  const {
+    rawText,
+    setContent,
+    textElements,
+    start,
+    setStart,
+    end,
+    setEnd,
+    setSearch,
+  } = useContentStore((state) => state);
 
   const style: React.CSSProperties = {
     fontSize: `${fontSize}px`,
@@ -41,7 +49,7 @@ export function Content() {
 
   useEffect(() => {
     if (status === "started") {
-      if (lastRef.current && start > 0) {
+      if (lastRef.current && end > 0) {
         const alignTop = lastRef.current.offsetTop - fontSize;
         const alignCenter =
           lastRef.current.offsetTop -
@@ -99,6 +107,7 @@ export function Content() {
                 key={textElement.index}
                 onClick={() => {
                   setStart(index - 1);
+                  setSearch(index - 1);
                   setEnd(index - 1);
                 }}
                 className={
