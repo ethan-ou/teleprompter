@@ -2,6 +2,16 @@ import { type TextElement, tokenize } from "./word-tokenizer";
 import { levenshteinDistance } from "./levenshtein";
 import { getAveragedPositions, resetPositions } from "./average-position";
 
+/*
+  Algorithm used to match transcript to the text is a simple
+  sliding window algorithm using Levenshtein Distance to measure
+  the difference in text.
+
+  The window with the lowest score is the one that's selected. The
+  selection is then smoothed by averaging with the previous selections
+  to avoid rapid jumps in text position.
+*/
+
 const MIN_WINDOW = 2;
 const MATCH_WINDOW = 5;
 const MAX_TEXT_DISTANCE = 0.75;
