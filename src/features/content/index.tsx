@@ -54,15 +54,21 @@ export function Content() {
 
   // Overwrite ctrl+a to allow text selection without also selecting inputs.
   const mainRef = useRef<HTMLElement | null>(null);
+  const textAreaRef = useRef<HTMLTextAreaElement | null>(null);
   useHotkeys(
     "ctrl+a",
     () => {
-      const selection = window.getSelection();
-      if (mainRef.current && selection) {
-        const range = document.createRange();
-        range.selectNodeContents(mainRef.current);
-        selection.removeAllRanges();
-        selection.addRange(range);
+      if (textAreaRef.current) {
+        textAreaRef.current.focus();
+        textAreaRef.current.select();
+      } else if (mainRef.current) {
+        const selection = window.getSelection();
+        if (selection) {
+          const range = document.createRange();
+          range.selectNodeContents(mainRef.current);
+          selection.removeAllRanges();
+          selection.addRange(range);
+        }
       }
     },
     { preventDefault: true },
@@ -78,6 +84,7 @@ export function Content() {
             {rawText}
           </div>
           <textarea
+            ref={textAreaRef}
             className="content col-start-1 row-start-1"
             style={{ ...style, cursor: "text", overflow: "hidden" }}
             value={rawText}
