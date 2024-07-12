@@ -1,7 +1,7 @@
 import { isMobileOrTablet } from "./device";
 
 type SubscriberFunction = (final_transcript: string, interim_transcript: string) => void;
-type ErrorSubscriberFunction = (running: boolean, error: SpeechRecognitionErrorEvent) => void;
+type ErrorSubscriberFunction = (error: SpeechRecognitionErrorEvent) => void;
 type EmptySubscriberFunction = () => void;
 
 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -80,7 +80,7 @@ export default class SpeechRecognizer {
       }
 
       for (let subscriber of this.errorSubscribers) {
-        subscriber(this.running, e);
+        subscriber(e);
       }
     };
 

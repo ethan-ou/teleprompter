@@ -1,6 +1,6 @@
 import { type TextElement, tokenize } from "./word-tokenizer";
 import { levenshteinDistance } from "./levenshtein";
-import { getAveragedPositions, resetPositions as resetAveragedPositions } from "./average-position";
+import { calculateMovingAverage } from "./moving-average";
 
 /*
   Algorithm used to match transcript to the text is a simple
@@ -61,13 +61,8 @@ export function matchText(transcript: TextElement[], text: TextElement[], isFina
   const textWindows = createTextWindows(text, Math.min(transcriptWindow.length, MATCH_WINDOW));
 
   const bestWindow = findBestTextWindow(transcriptWindow, textWindows);
-  if (bestWindow && isFinal) {
-    resetAveragedPositions();
-    return [bestWindow.at(0)!.index, bestWindow.at(-1)!.index];
-  }
-
   if (bestWindow) {
-    return getAveragedPositions(bestWindow.at(0)!.index, bestWindow.at(-1)!.index);
+    return calculateMovingAverage(bestWindow.at(0)!.index, bestWindow.at(-1)!.index);
   }
 }
 
@@ -87,9 +82,15 @@ function createTextWindows(tokens: TextElement[], length: number) {
 }
 
 function findBestTextWindow(transcript: TextElement[], textSlices: TextElement[][]) {
-  const transcriptText = transcript.map((text) => text.value).join(" ");
+  const transcriptText = transcript
+    .map((text) => text.value)
+    .join(" ")
+    .toLowerCase();
   const distances = textSlices.map((slice) => {
-    const sliceText = slice.map((text) => text.value).join(" ");
+    const sliceText = slice
+      .map((text) => text.value)
+      .join(" ")
+      .toLowerCase();
     return levenshteinDistance(transcriptText, sliceText) / transcriptText.length;
   });
 

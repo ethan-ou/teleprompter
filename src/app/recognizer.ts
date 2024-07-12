@@ -8,7 +8,7 @@ import {
 } from "../lib/speech-matcher";
 import { useNavbarStore } from "@/features/navbar/store";
 import { useContentStore } from "@/features/content/store";
-import { resetPositions } from "@/lib/average-position";
+import { resetMovingAverage } from "@/lib/moving-average";
 
 let speechRecognizer: SpeechRecognizer | null = null;
 
@@ -77,19 +77,10 @@ export const startTeleprompter = () => {
       }
     });
 
-    speechRecognizer.onerror((running) => {
-      if (!running) {
-        const { stop } = useNavbarStore.getState();
-        stop();
-        resetPositions();
-        resetTranscriptMemory();
-      }
-    });
-
     speechRecognizer.onend(() => {
       const { stop } = useNavbarStore.getState();
       stop();
-      resetPositions();
+      resetMovingAverage();
       resetTranscriptMemory();
     });
 

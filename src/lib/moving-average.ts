@@ -3,7 +3,7 @@ const NUM_AVERAGE = 3;
 
 let positions: [number, number][] = [];
 
-export function getAveragedPositions(start: number, end: number): [number, number] | undefined {
+export function calculateMovingAverage(start: number, end: number): [number, number] | undefined {
   positions.push([start, end]);
   positions = positions.slice(-NUM_AVERAGE);
 
@@ -20,28 +20,32 @@ export function getAveragedPositions(start: number, end: number): [number, numbe
   }
 
   return [
-    Math.max(Math.ceil(recentlyWeighedAverage(startValues)), 0),
-    Math.max(Math.ceil(recentlyWeighedAverage(endValues)), 0),
+    Math.max(Math.ceil(weightedMovingAverage(startValues)), 0),
+    Math.max(Math.ceil(weightedMovingAverage(endValues)), 0),
   ];
 }
 
-export function resetPositions() {
+export function resetMovingAverage() {
   positions = [];
 }
 
 /* Calculate average with more recent items being weighed
    more heavily than previous items. */
-function recentlyWeighedAverage(array: number[]) {
+function weightedMovingAverage(array: number[]) {
   let total = 0;
   let count = 0;
+  let prev;
 
   for (let i = 0; i < array.length; i++) {
+    // A hack to weigh averages closer to the last transcribed index.
+    let bias = prev !== undefined ? array[i] - prev : 0;
+
     const weighting = array.length - i;
-    total += array[i] * weighting;
+    total += (array[i] + bias) * weighting;
     count += weighting;
+
+    prev = array[i];
   }
 
-  // A hack to weigh averages closer to the last transcribed index.
-  const bias = (array.at(-1)! - array.at(0)!) * array.length;
-  return (total + bias) / count;
+  return total / count;
 }
