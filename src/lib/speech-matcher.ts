@@ -68,9 +68,9 @@ function createTextWindow(tokens: TextElement[], length: number) {
 }
 
 function findBestTextWindow(transcript: TextElement[], textSlices: TextElement[][]) {
-  const transcriptText = transcript.map((text) => text.value).join("");
+  const transcriptText = transcript.map((text) => text.value).join(" ");
   const distances = textSlices.map((slice) => {
-    const sliceText = slice.map((text) => text.value).join("");
+    const sliceText = slice.map((text) => text.value).join(" ");
     return levenshteinDistance(transcriptText, sliceText) / transcriptText.length;
   });
 

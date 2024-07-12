@@ -1,5 +1,5 @@
 const MIN_AVERAGE = 2;
-const NUM_AVERAGE = 6;
+const NUM_AVERAGE = 3;
 
 let positions: [number, number][] = [];
 
