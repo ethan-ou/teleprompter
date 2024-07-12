@@ -37,7 +37,7 @@ export function Navbar() {
     <nav
       role="navigation"
       aria-label="main navigation"
-      className="sticky top-0 z-10 flex w-full flex-wrap items-center justify-evenly gap-x-4 border-b border-neutral-800 bg-neutral-950/90 py-1 px-2 text-white backdrop-blur select-none min-[900px]:justify-between min-[1075px]:grid min-[1075px]:grid-cols-[3fr_1fr_3fr]"
+      className="sticky top-0 z-10 flex w-full flex-wrap items-center justify-evenly gap-x-4 border-b border-neutral-800 bg-neutral-950/90 py-1 px-2 text-white backdrop-blur select-none min-[850px]:justify-between min-[1075px]:grid min-[1075px]:grid-cols-[3fr_1fr_3fr]"
       {...(hideNavbar && { style: { display: "none" } })}
     >
       <div
@@ -62,15 +62,7 @@ export function Navbar() {
 }
 
 function ButtonSection({ focused }: { focused: boolean }) {
-  const {
-    status,
-    toggleEdit,
-    horizontallyFlipped,
-    flipHorizontally,
-    verticallyFlipped,
-    flipVertically,
-    resetTimer,
-  } = useNavbarStore((state) => state);
+  const { status, toggleEdit, mirror, toggleMirror, resetTimer } = useNavbarStore((state) => state);
 
   const setContent = useContentStore((state) => state.setContent);
   const setTokens = useContentStore((state) => state.setTokens);
@@ -111,31 +103,24 @@ function ButtonSection({ focused }: { focused: boolean }) {
   };
   useActionHotkeys(clearAction);
 
-  const horizontallyFlippedAction = {
-    action: () => flipHorizontally(),
+  const mirrorAction = {
+    action: () => toggleMirror(),
     disabled: status === "editing",
-    keys: ["h", "4"],
+    keys: ["m", "4"],
   };
-  useActionHotkeys(horizontallyFlippedAction);
-
-  const verticallyFlippedAction = {
-    action: () => flipVertically(),
-    disabled: status === "editing",
-    keys: ["v", "5"],
-  };
-  useActionHotkeys(verticallyFlippedAction);
+  useActionHotkeys(mirrorAction);
 
   const fullscreenAction = {
     action: () => (fullscreen.active ? fullscreen.exit() : fullscreen.enter()),
     disabled: false,
-    keys: ["f", "6"],
+    keys: ["f", "5"],
   };
   useActionHotkeys(fullscreenAction);
 
   const restartAction = {
     action: () => (resetPosition(), resetTimer(), window.scrollTo({ top: 0, behavior: "smooth" })),
     disabled: status === "started",
-    keys: ["r", "7"],
+    keys: ["r", "6"],
   };
   useActionHotkeys(restartAction);
 
@@ -184,30 +169,17 @@ function ButtonSection({ focused }: { focused: boolean }) {
           Clear <kbd>Del</kbd>
         </Tooltip>
       </TooltipContext>
-      <TooltipContext aria-disabled={horizontallyFlippedAction.disabled}>
+      <TooltipContext aria-disabled={mirrorAction.disabled}>
         <button
           className="button"
-          onClick={horizontallyFlippedAction.action}
-          disabled={horizontallyFlippedAction.disabled}
-          aria-label="Flip Horizontal"
+          onClick={mirrorAction.action}
+          disabled={mirrorAction.disabled}
+          aria-label="Mirror"
         >
-          <MoveHorizontal className={`icon ${horizontallyFlipped ? "yellow" : ""}`} />
+          <MoveHorizontal className={`icon ${mirror ? "yellow" : ""}`} />
         </button>
         <Tooltip>
-          Flip Horizontal <kbd>H</kbd>
-        </Tooltip>
-      </TooltipContext>
-      <TooltipContext aria-disabled={verticallyFlippedAction.disabled}>
-        <button
-          className="button"
-          onClick={verticallyFlippedAction.action}
-          disabled={verticallyFlippedAction.disabled}
-          aria-label="Flip Vertical"
-        >
-          <MoveVertical className={`icon ${verticallyFlipped ? "yellow" : ""}`} />
-        </button>
-        <Tooltip>
-          Flip Vertical <kbd>V</kbd>
+          Mirror <kbd>M</kbd>
         </Tooltip>
       </TooltipContext>
       <TooltipContext aria-disabled={fullscreenAction.disabled}>

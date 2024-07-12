@@ -12,7 +12,7 @@ export function Tooltip({
   return (
     <span
       className={clsx(
-        "pointer-events-none absolute z-10 text-nowrap rounded bg-neutral-800 py-1.5 px-2 text-[0.8rem] text-white opacity-0 transition-all delay-300 group-hover:opacity-100 group-aria-disabled:hidden",
+        "pointer-events-none absolute z-10 touch-none text-nowrap rounded bg-neutral-800 py-1.5 px-2 text-[0.8rem] text-white opacity-0 transition-all delay-300 group-hover:opacity-100 group-aria-disabled:hidden",
         top,
         className,
       )}

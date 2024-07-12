@@ -6,9 +6,7 @@ import { useHotkeys } from "react-hotkeys-hook";
 import { getBoundsStart } from "@/lib/speech-matcher";
 
 export function Content() {
-  const { status, horizontallyFlipped, verticallyFlipped, fontSize, margin, opacity, align } =
-    useNavbarStore((state) => state);
-
+  const { status, mirror, fontSize, margin, opacity, align } = useNavbarStore((state) => state);
   const { rawText, setContent, tokens, position, setPosition } = useContentStore((state) => state);
 
   const style: React.CSSProperties = {
@@ -86,7 +84,7 @@ export function Content() {
           className="content content-transition"
           style={{
             ...style,
-            transform: `scale(${horizontallyFlipped ? "-1" : "1"}, ${verticallyFlipped ? "-1" : "1"})`,
+            transform: `scaleX(${mirror ? "-1" : "1"})`,
           }}
         >
           {tokens.map((token, index) => (
