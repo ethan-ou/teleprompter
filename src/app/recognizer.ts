@@ -4,6 +4,7 @@ import {
   getTokensFromText,
   matchText,
   getBoundsStart,
+  resetTranscriptMemory,
 } from "../lib/speech-matcher";
 import { useNavbarStore } from "@/features/navbar/store";
 import { useContentStore } from "@/features/content/store";
@@ -31,7 +32,7 @@ export const startTeleprompter = () => {
     });
 
     speechRecognizer.onresult((final_transcript: string, interim_transcript: string) => {
-      const { textElements, search, start, end, setStart, setSearch, setEnd, setBounds } =
+      const { textElements, search, end, setStart, setSearch, setEnd, setBounds } =
         useContentStore.getState();
 
       if (final_transcript !== "") {
@@ -65,10 +66,6 @@ export const startTeleprompter = () => {
 
         if (foundMatch) {
           const [matchStart, matchEnd] = foundMatch;
-          if (matchStart < start) {
-            setStart(matchStart);
-          }
-
           setSearch(matchStart);
           setEnd(matchEnd);
         }
@@ -85,6 +82,7 @@ export const startTeleprompter = () => {
         const { stop } = useNavbarStore.getState();
         stop();
         resetPositions();
+        resetTranscriptMemory();
       }
     });
 
@@ -92,6 +90,7 @@ export const startTeleprompter = () => {
       const { stop } = useNavbarStore.getState();
       stop();
       resetPositions();
+      resetTranscriptMemory();
     });
 
     const { start } = useNavbarStore.getState();

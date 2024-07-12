@@ -37,37 +37,48 @@ export function getBoundsStart(tokens: TextElement[], index: number) {
   }
 }
 
-export function matchText(transcript: TextElement[], text: TextElement[], isFinal: boolean) {
-  const transcriptWindow = transcript.slice(-MATCH_WINDOW);
-  if (transcriptWindow.length < MIN_WINDOW) {
-    return;
-  }
+let transcriptMemory: TextElement[] = [];
 
-  const textWindow = createTextWindow(text, Math.min(transcriptWindow.length, MATCH_WINDOW));
-
-  let positions: [number, number] | undefined;
-  const bestWindow = findBestTextWindow(transcriptWindow, textWindow);
-  if (bestWindow) {
-    positions = getAveragedPositions(bestWindow.at(0)!.index, bestWindow.at(-1)!.index);
-  }
-
+function getTranscript(transcript: TextElement[], isFinal: boolean) {
   if (isFinal) {
-    resetAveragedPositions();
+    transcriptMemory = transcriptMemory.concat(transcript).slice(-MATCH_WINDOW);
+    return transcriptMemory;
   }
 
-  if (positions) {
-    return positions;
+  return transcript.length < MATCH_WINDOW
+    ? transcriptMemory.concat(transcript).slice(-MATCH_WINDOW)
+    : transcript.slice(-MATCH_WINDOW);
+}
+
+export function resetTranscriptMemory() {
+  transcriptMemory = [];
+}
+
+export function matchText(transcript: TextElement[], text: TextElement[], isFinal: boolean) {
+  const transcriptWindow = getTranscript(transcript, isFinal);
+  if (transcriptWindow.length < MIN_WINDOW) return;
+
+  const textWindows = createTextWindows(text, Math.min(transcriptWindow.length, MATCH_WINDOW));
+
+  const bestWindow = findBestTextWindow(transcriptWindow, textWindows);
+  if (bestWindow && isFinal) {
+    resetAveragedPositions();
+    return [bestWindow.at(0)!.index, bestWindow.at(-1)!.index];
+  }
+
+  if (bestWindow) {
+    return getAveragedPositions(bestWindow.at(0)!.index, bestWindow.at(-1)!.index);
   }
 }
 
-function createTextWindow(tokens: TextElement[], length: number) {
+function createTextWindows(tokens: TextElement[], length: number) {
   if (tokens.length <= length) {
     return [tokens];
   }
 
   const slices = [];
   let i = 0;
-  while (i < tokens.length - length) {
+  while (i < tokens.length - length + 1) {
     slices.push(tokens.slice(i, i + length));
     i++;
   }
