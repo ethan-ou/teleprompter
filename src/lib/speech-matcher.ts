@@ -1,4 +1,4 @@
-import { type TextElement, tokenize } from "./word-tokenizer";
+import { type Token, tokenize } from "./word-tokenizer";
 import { levenshteinDistance } from "./levenshtein";
 import { calculateMovingAverage } from "./moving-average";
 
@@ -15,6 +15,9 @@ import { calculateMovingAverage } from "./moving-average";
 const MIN_WINDOW = 3;
 const MATCH_WINDOW = 6;
 
+const TEXT_REGION_NEXT = 50;
+const TEXT_REGION_PREVIOUS = 10;
+
 export function getTokensFromText(text: string) {
   return tokenize(text).filter((element) => element.type === "TOKEN");
 }
@@ -23,39 +26,44 @@ export function getTokensFromText(text: string) {
   Avoid too much backtracking and too much forward prediction since it breaks the stability
   of the matching in its general usage. 
 */
-export function createTextRegion(tokens: TextElement[], index: number, next = 50, previous = 10) {
+export function createTextRegion(
+  tokens: Token[],
+  index: number,
+  next = TEXT_REGION_NEXT,
+  previous = TEXT_REGION_PREVIOUS,
+) {
   return tokens
     .slice(index - previous > 0 ? index - previous : 0, index + next)
     .filter((element) => element.type === "TOKEN");
 }
 
-export function getBoundsStart(tokens: TextElement[], index: number) {
-  const region = createTextRegion(tokens, index);
+export function getBoundsStart(tokens: Token[], index: number, existingRegion?: Token[]) {
+  const region = existingRegion ? existingRegion : createTextRegion(tokens, index);
   const firstBounds = region.at(-1);
   if (firstBounds) {
     return firstBounds.index + 1;
   }
 }
 
-let transcriptMemory: TextElement[] = [];
+let transcriptWindow: Token[] = [];
 
-function getTranscript(transcript: TextElement[], isFinal: boolean) {
+function getTranscriptWindow(transcript: Token[], isFinal: boolean) {
   if (isFinal) {
-    transcriptMemory = transcriptMemory.concat(transcript).slice(-MATCH_WINDOW);
-    return transcriptMemory;
+    transcriptWindow = transcriptWindow.concat(transcript).slice(-MATCH_WINDOW);
+    return transcriptWindow;
   }
 
   return transcript.length < MATCH_WINDOW
-    ? transcriptMemory.concat(transcript).slice(-MATCH_WINDOW)
+    ? transcriptWindow.concat(transcript).slice(-MATCH_WINDOW)
     : transcript.slice(-MATCH_WINDOW);
 }
 
-export function resetTranscriptMemory() {
-  transcriptMemory = [];
+export function resetTranscriptWindow() {
+  transcriptWindow = [];
 }
 
-export function matchText(transcript: TextElement[], text: TextElement[], isFinal: boolean) {
-  const transcriptWindow = getTranscript(transcript, isFinal);
+export function matchText(transcript: Token[], text: Token[], isFinal: boolean) {
+  const transcriptWindow = getTranscriptWindow(transcript, isFinal);
   if (transcriptWindow.length < MIN_WINDOW) return;
 
   const textWindows = createTextWindows(text, Math.min(transcriptWindow.length, MATCH_WINDOW));
@@ -66,7 +74,7 @@ export function matchText(transcript: TextElement[], text: TextElement[], isFina
   }
 }
 
-function createTextWindows(tokens: TextElement[], length: number) {
+function createTextWindows(tokens: Token[], length: number) {
   if (tokens.length <= length) {
     return [tokens];
   }
@@ -81,7 +89,7 @@ function createTextWindows(tokens: TextElement[], length: number) {
   return slices;
 }
 
-function findBestTextWindow(transcript: TextElement[], textSlices: TextElement[][]) {
+function findBestTextWindow(transcript: Token[], textSlices: Token[][]) {
   const transcriptText = transcript
     .map((text) => text.value)
     .join(" ")
@@ -102,18 +110,29 @@ function findBestTextWindow(transcript: TextElement[], textSlices: TextElement[]
     trying to find a best match in the whole text section. But it does
     rely on having not too much backtracking in the text.
   */
-  const lowDistanceIndex = distances.findIndex((distance) => distance < 0.1);
+  const lowDistanceIndex = distances.findIndex((distance) => distance <= 0.1);
   if (lowDistanceIndex > -1) {
-    return textSlices[lowDistanceIndex];
+    return textSlices[findBestIndex(distances, lowDistanceIndex)];
   }
 
-  const midDistanceIndex = distances.findIndex((distance) => distance < 0.3);
+  const midDistanceIndex = distances.findIndex((distance) => distance <= 0.3);
   if (midDistanceIndex > -1) {
-    return textSlices[midDistanceIndex];
+    return textSlices[findBestIndex(distances, midDistanceIndex)];
   }
 
   const highDistanceIndex = distances.findIndex((distance) => distance <= 0.5);
   if (highDistanceIndex > -1) {
     return textSlices[highDistanceIndex];
   }
+}
+
+/* Once a good index has been found, see if there's anything better
+   a little after the index. Sometimes, the best match is an index
+   after the current match. */
+function findBestIndex(distances: number[], index: number) {
+  const MAX_SEARCH_AREA = 2;
+
+  const selectedDistances = distances.slice(index, index + MAX_SEARCH_AREA + 1);
+  const minimumIndex = selectedDistances.indexOf(Math.min.apply(Math, selectedDistances));
+  return index + minimumIndex;
 }

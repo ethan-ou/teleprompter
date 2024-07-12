@@ -1,17 +1,17 @@
-export type TextElement = {
+export type Token = {
   type: "TOKEN" | "DELIMITER";
   value: string;
   index: number;
 };
 
 export const tokenize = (text: string | null) => {
-  const results: TextElement[] = [];
+  const results: Token[] = [];
 
   if (text === null) {
     return results;
   }
 
-  let current: TextElement | null = null;
+  let current: Token | null = null;
   let i = 0;
 
   while (i < text.length) {

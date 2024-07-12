@@ -20,18 +20,7 @@ export function Content() {
       })),
     );
 
-  const {
-    rawText,
-    setContent,
-    textElements,
-    start,
-    setStart,
-    end,
-    setEnd,
-    setSearch,
-    bounds,
-    setBounds,
-  } = useContentStore((state) => state);
+  const { rawText, setContent, tokens, position, setPosition } = useContentStore((state) => state);
 
   const style: React.CSSProperties = {
     fontSize: `${fontSize}px`,
@@ -45,7 +34,7 @@ export function Content() {
 
   useEffect(() => {
     if (status !== "editing") {
-      if (lastRef.current && end > 0) {
+      if (lastRef.current && position.end > 0) {
         const alignTop = lastRef.current.offsetTop - fontSize;
         const alignCenter =
           lastRef.current.offsetTop - document.documentElement.clientHeight / 2 + fontSize * 2;
@@ -111,39 +100,37 @@ export function Content() {
             transform: `scale(${horizontallyFlipped ? "-1" : "1"}, ${verticallyFlipped ? "-1" : "1"})`,
           }}
         >
-          {textElements.map((textElement, index, array) => {
-            const itemProps =
-              end > 0 && index === Math.min(end + 2, array.length - 1) ? { ref: lastRef } : {};
-            return (
-              <span
-                key={textElement.index}
-                onClick={() => {
-                  setStart(index - 1);
-                  setSearch(index - 1);
-                  setEnd(index - 1);
-                  const bounds = getBoundsStart(array, index - 1);
-                  if (bounds !== undefined) {
-                    setBounds(Math.min(bounds, array.length));
-                  }
-                }}
-                className={
-                  start > 0 && textElement.index <= start + 1
-                    ? "final-transcript"
-                    : end > 0 && textElement.index <= end + 1
-                      ? "interim-transcript"
-                      : status === "started" && bounds > 0 && textElement.index > bounds + 20
-                        ? "opacity-40"
-                        : status === "started" && bounds > 0 && textElement.index > bounds
-                          ? "opacity-60"
-                          : ""
-                }
-                {...itemProps}
-                dangerouslySetInnerHTML={{
-                  __html: escape(textElement.value).replace(/\n/g, "<br>"),
-                }}
-              />
-            );
-          })}
+          {tokens.map((token, index) => (
+            <span
+              // Position ref a little after the end index to scroll past line breaks and punctuation.
+              {...(index === Math.min(position.end + 2, tokens.length - 1) ? { ref: lastRef } : {})}
+              key={token.index}
+              onClick={() => {
+                const selectedPosition = index - 1;
+                const bounds = getBoundsStart(tokens, selectedPosition);
+                setPosition({
+                  start: selectedPosition,
+                  search: selectedPosition,
+                  end: selectedPosition,
+                  ...(bounds !== undefined && { bounds: Math.min(bounds, tokens.length) }),
+                });
+              }}
+              className={
+                token.index <= position.start
+                  ? "final-transcript"
+                  : token.index <= position.end
+                    ? "interim-transcript"
+                    : status === "started" && token.index > position.bounds + 20
+                      ? "opacity-40"
+                      : status === "started" && token.index > position.bounds
+                        ? "opacity-60"
+                        : ""
+              }
+              dangerouslySetInnerHTML={{
+                __html: escape(token.value).replace(/\n/g, "<br>"),
+              }}
+            />
+          ))}
         </div>
       )}
     </main>

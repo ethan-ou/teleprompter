@@ -46,11 +46,11 @@ export function Navbar() {
     resetTimer,
   } = useNavbarStore((state) => state);
 
-  const { setContent, setTextElements, resetTranscriptionIndices } = useContentStore(
+  const { setContent, setTokens, resetPosition } = useContentStore(
     useShallow((state) => ({
       setContent: state.setContent,
-      setTextElements: state.setTextElements,
-      resetTranscriptionIndices: state.resetPosition,
+      setTokens: state.setTokens,
+      resetPosition: state.resetPosition,
     })),
   );
 
@@ -74,7 +74,7 @@ export function Navbar() {
   useActionHotkeys(startAction);
 
   const editAction = {
-    action: () => (toggleEdit(), setTextElements()),
+    action: () => (toggleEdit(), setTokens()),
     disabled: status === "started",
     keys: ["e", "2"],
   };
@@ -84,7 +84,7 @@ export function Navbar() {
     action: () => {
       if (confirm("Are you sure you want to clear your script?")) {
         setContent("");
-        setTextElements();
+        setTokens();
       }
     },
     disabled: status === "started",
@@ -114,9 +114,7 @@ export function Navbar() {
   useActionHotkeys(fullscreenAction);
 
   const restartAction = {
-    action: () => (
-      resetTranscriptionIndices(), resetTimer(), window.scrollTo({ top: 0, behavior: "smooth" })
-    ),
+    action: () => (resetPosition(), resetTimer(), window.scrollTo({ top: 0, behavior: "smooth" })),
     disabled: status === "started",
     keys: ["r", "7"],
   };

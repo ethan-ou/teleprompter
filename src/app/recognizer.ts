@@ -4,7 +4,7 @@ import {
   getTokensFromText,
   matchText,
   getBoundsStart,
-  resetTranscriptMemory,
+  resetTranscriptWindow,
 } from "../lib/speech-matcher";
 import { useNavbarStore } from "@/features/navbar/store";
 import { useContentStore } from "@/features/content/store";
@@ -21,58 +21,53 @@ export const startTeleprompter = () => {
     speechRecognizer = new SpeechRecognizer();
 
     speechRecognizer.onstart(() => {
-      const { textElements, bounds, setBounds } = useContentStore.getState();
+      const { tokens, position, setPosition } = useContentStore.getState();
 
-      if (bounds === -1) {
-        const bounds = getBoundsStart(textElements, 0);
+      if (position.bounds < 0) {
+        const bounds = getBoundsStart(tokens, 0);
         if (bounds !== undefined) {
-          setBounds(bounds);
+          setPosition({ bounds: bounds });
         }
       }
     });
 
-    speechRecognizer.onresult((final_transcript: string, interim_transcript: string) => {
-      const { textElements, search, end, setStart, setSearch, setEnd, setBounds } =
-        useContentStore.getState();
+    speechRecognizer.onresult((finalTranscript: string, interimTranscript: string) => {
+      const { tokens, position, setPosition } = useContentStore.getState();
 
-      if (final_transcript !== "") {
-        const textRegion = createTextRegion(textElements, search);
-        const foundMatch = matchText(getTokensFromText(final_transcript), textRegion, true);
+      const textRegion = createTextRegion(tokens, position.search);
+      const boundStart = getBoundsStart(tokens, position.search, textRegion);
+
+      if (finalTranscript !== "") {
+        const foundMatch = matchText(getTokensFromText(finalTranscript), textRegion, true);
 
         if (foundMatch) {
-          const [matchStart, matchEnd] = foundMatch;
-          setStart(matchEnd);
-          setSearch(matchEnd);
-          setEnd(matchEnd);
+          const [, matchEnd] = foundMatch;
+          setPosition({
+            start: matchEnd,
+            search: matchEnd,
+            end: matchEnd,
+            ...(boundStart !== undefined && { bounds: boundStart }),
+          });
         } else {
-          setStart(end);
-          setSearch(end);
-          setEnd(end);
-        }
-
-        const boundStart = textRegion.at(-1);
-        if (boundStart) {
-          setBounds(boundStart.index);
+          setPosition({
+            start: position.end,
+            search: position.end,
+            end: position.end,
+            ...(boundStart !== undefined && { bounds: boundStart }),
+          });
         }
       }
 
-      if (interim_transcript !== "") {
-        const textRegion = createTextRegion(textElements, search);
-        const foundMatch = matchText(
-          getTokensFromText(interim_transcript),
-          createTextRegion(textElements, search),
-          false,
-        );
+      if (interimTranscript !== "") {
+        const foundMatch = matchText(getTokensFromText(interimTranscript), textRegion, false);
 
         if (foundMatch) {
           const [matchStart, matchEnd] = foundMatch;
-          setSearch(matchStart);
-          setEnd(matchEnd);
-        }
-
-        const boundStart = textRegion.at(-1);
-        if (boundStart) {
-          setBounds(boundStart.index);
+          setPosition({
+            search: matchStart,
+            end: matchEnd,
+            ...(boundStart !== undefined && { bounds: boundStart }),
+          });
         }
       }
     });
@@ -81,7 +76,7 @@ export const startTeleprompter = () => {
       const { stop } = useNavbarStore.getState();
       stop();
       resetMovingAverage();
-      resetTranscriptMemory();
+      resetTranscriptWindow();
     });
 
     const { start } = useNavbarStore.getState();
