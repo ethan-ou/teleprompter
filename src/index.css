@@ -74,6 +74,12 @@ body {
   resize: none;
 }
 
+.content-transition > span {
+  transition:
+    color 100ms linear,
+    opacity 1500ms ease-in;
+}
+
 .interim-transcript {
   color: hsl(48, 100%, 67%);
 }
@@ -84,4 +90,5 @@ body {
 
 .content > span:hover {
   color: hsl(348, 86%, 61%);
+  opacity: 100%;
 }

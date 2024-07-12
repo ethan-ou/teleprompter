@@ -12,7 +12,7 @@ import { getAveragedPositions, resetPositions as resetAveragedPositions } from "
   to avoid rapid jumps in text position.
 */
 
-const MIN_WINDOW = 2;
+const MIN_WINDOW = 3;
 const MATCH_WINDOW = 6;
 
 export function getTokensFromText(text: string) {
@@ -23,10 +23,18 @@ export function getTokensFromText(text: string) {
   Avoid too much backtracking and too much forward prediction since it breaks the stability
   of the matching in its general usage. 
 */
-export function createTextRegion(tokens: TextElement[], index: number, next = 40, previous = 10) {
+export function createTextRegion(tokens: TextElement[], index: number, next = 50, previous = 10) {
   return tokens
     .slice(index - previous > 0 ? index - previous : 0, index + next)
     .filter((element) => element.type === "TOKEN");
+}
+
+export function getBoundsStart(tokens: TextElement[], index: number) {
+  const region = createTextRegion(tokens, index);
+  const firstBounds = region.at(-1);
+  if (firstBounds) {
+    return firstBounds.index + 1;
+  }
 }
 
 export function matchText(transcript: TextElement[], text: TextElement[], isFinal: boolean) {

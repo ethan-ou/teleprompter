@@ -4,6 +4,7 @@ import { useNavbarStore } from "../navbar/store";
 import { useContentStore } from "./store";
 import { useShallow } from "zustand/react/shallow";
 import { useHotkeys } from "react-hotkeys-hook";
+import { getBoundsStart } from "@/lib/speech-matcher";
 
 export function Content() {
   const { fontSize, margin, status, opacity, horizontallyFlipped, verticallyFlipped, align } =
@@ -19,8 +20,18 @@ export function Content() {
       })),
     );
 
-  const { rawText, setContent, textElements, start, setStart, end, setEnd, setSearch } =
-    useContentStore((state) => state);
+  const {
+    rawText,
+    setContent,
+    textElements,
+    start,
+    setStart,
+    end,
+    setEnd,
+    setSearch,
+    bounds,
+    setBounds,
+  } = useContentStore((state) => state);
 
   const style: React.CSSProperties = {
     fontSize: `${fontSize}px`,
@@ -94,7 +105,7 @@ export function Content() {
         </div>
       ) : (
         <div
-          className="content"
+          className="content content-transition"
           style={{
             ...style,
             transform: `scale(${horizontallyFlipped ? "-1" : "1"}, ${verticallyFlipped ? "-1" : "1"})`,
@@ -110,13 +121,21 @@ export function Content() {
                   setStart(index - 1);
                   setSearch(index - 1);
                   setEnd(index - 1);
+                  const bounds = getBoundsStart(array, index - 1);
+                  if (bounds !== undefined) {
+                    setBounds(Math.min(bounds, array.length));
+                  }
                 }}
                 className={
                   start > 0 && textElement.index <= start + 1
                     ? "final-transcript"
                     : end > 0 && textElement.index <= end + 1
                       ? "interim-transcript"
-                      : ""
+                      : status === "started" && bounds > 0 && textElement.index > bounds + 20
+                        ? "opacity-40"
+                        : status === "started" && bounds > 0 && textElement.index > bounds
+                          ? "opacity-60"
+                          : ""
                 }
                 {...itemProps}
                 dangerouslySetInnerHTML={{

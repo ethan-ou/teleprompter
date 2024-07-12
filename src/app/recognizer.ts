@@ -1,5 +1,10 @@
 import SpeechRecognizer from "../lib/speech-recognizer";
-import { createTextRegion, getTokensFromText, matchText } from "../lib/speech-matcher";
+import {
+  createTextRegion,
+  getTokensFromText,
+  matchText,
+  getBoundsStart,
+} from "../lib/speech-matcher";
 import { useNavbarStore } from "@/features/navbar/store";
 import { useContentStore } from "@/features/content/store";
 import { resetPositions } from "@/lib/average-position";
@@ -14,16 +19,24 @@ export const startTeleprompter = () => {
 
     speechRecognizer = new SpeechRecognizer();
 
+    speechRecognizer.onstart(() => {
+      const { textElements, bounds, setBounds } = useContentStore.getState();
+
+      if (bounds === -1) {
+        const bounds = getBoundsStart(textElements, 0);
+        if (bounds !== undefined) {
+          setBounds(bounds);
+        }
+      }
+    });
+
     speechRecognizer.onresult((final_transcript: string, interim_transcript: string) => {
-      const { textElements, search, start, end, setStart, setSearch, setEnd } =
+      const { textElements, search, start, end, setStart, setSearch, setEnd, setBounds } =
         useContentStore.getState();
 
       if (final_transcript !== "") {
-        const foundMatch = matchText(
-          getTokensFromText(final_transcript),
-          createTextRegion(textElements, search),
-          true,
-        );
+        const textRegion = createTextRegion(textElements, search);
+        const foundMatch = matchText(getTokensFromText(final_transcript), textRegion, true);
 
         if (foundMatch) {
           const [matchStart, matchEnd] = foundMatch;
@@ -35,9 +48,15 @@ export const startTeleprompter = () => {
           setSearch(end);
           setEnd(end);
         }
+
+        const boundStart = textRegion.at(-1);
+        if (boundStart) {
+          setBounds(boundStart.index);
+        }
       }
 
       if (interim_transcript !== "") {
+        const textRegion = createTextRegion(textElements, search);
         const foundMatch = matchText(
           getTokensFromText(interim_transcript),
           createTextRegion(textElements, search),
@@ -52,6 +71,11 @@ export const startTeleprompter = () => {
 
           setSearch(matchStart);
           setEnd(matchEnd);
+        }
+
+        const boundStart = textRegion.at(-1);
+        if (boundStart) {
+          setBounds(boundStart.index);
         }
       }
     });

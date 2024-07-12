@@ -2,7 +2,7 @@ import { isMobileOrTablet } from "./device";
 
 type SubscriberFunction = (final_transcript: string, interim_transcript: string) => void;
 type ErrorSubscriberFunction = (running: boolean, error: SpeechRecognitionErrorEvent) => void;
-type EndSubscriberFunction = () => void;
+type EmptySubscriberFunction = () => void;
 
 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
@@ -13,9 +13,11 @@ if (!SpeechRecognition)
 
 export default class SpeechRecognizer {
   private recognizer: SpeechRecognition;
+
+  private startSubscribers: EmptySubscriberFunction[] = [];
   private subscribers: SubscriberFunction[] = [];
   private errorSubscribers: ErrorSubscriberFunction[] = [];
-  private endSubscribers: EndSubscriberFunction[] = [];
+  private endSubscribers: EmptySubscriberFunction[] = [];
 
   private running: boolean = false;
   private startedAt: number = new Date().getTime();
@@ -29,6 +31,12 @@ export default class SpeechRecognizer {
     this.recognizer.continuous = true;
     this.recognizer.interimResults = true;
     this.mobileOrTablet = isMobileOrTablet();
+
+    this.recognizer.onstart = (e) => {
+      for (let subscriber of this.startSubscribers) {
+        subscriber();
+      }
+    };
 
     this.recognizer.onresult = (e) => {
       this.restartCount = 0;
@@ -125,6 +133,10 @@ export default class SpeechRecognizer {
     this.recognizer.stop();
   }
 
+  onstart(subscriber: EmptySubscriberFunction): void {
+    this.startSubscribers.push(subscriber);
+  }
+
   onresult(subscriber: SubscriberFunction): void {
     this.subscribers.push(subscriber);
   }
@@ -133,7 +145,7 @@ export default class SpeechRecognizer {
     this.errorSubscribers.push(subscriber);
   }
 
-  onend(subscriber: EndSubscriberFunction): void {
+  onend(subscriber: EmptySubscriberFunction): void {
     this.endSubscribers.push(subscriber);
   }
 }
