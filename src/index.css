@@ -58,6 +58,10 @@ body {
   @apply size-7;
 }
 
+kbd {
+  @apply inline rounded border border-neutral-600 bg-neutral-800 px-1 text-center font-mono text-xs text-neutral-200 shadow-[0px_1px_0px_0px_rgba(255,255,255,0.1)];
+}
+
 /* Content styles */
 .content {
   @apply size-full border-0 bg-neutral-950 outline-0 focus:outline-0;

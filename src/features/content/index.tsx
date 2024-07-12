@@ -2,23 +2,12 @@ import { useEffect, useRef } from "react";
 import { escape } from "@/lib/html-escaper";
 import { useNavbarStore } from "../navbar/store";
 import { useContentStore } from "./store";
-import { useShallow } from "zustand/react/shallow";
 import { useHotkeys } from "react-hotkeys-hook";
 import { getBoundsStart } from "@/lib/speech-matcher";
 
 export function Content() {
-  const { fontSize, margin, status, opacity, horizontallyFlipped, verticallyFlipped, align } =
-    useNavbarStore(
-      useShallow((state) => ({
-        fontSize: state.fontSize,
-        margin: state.margin,
-        status: state.status,
-        opacity: state.opacity,
-        horizontallyFlipped: state.horizontallyFlipped,
-        verticallyFlipped: state.verticallyFlipped,
-        align: state.align,
-      })),
-    );
+  const { status, horizontallyFlipped, verticallyFlipped, fontSize, margin, opacity, align } =
+    useNavbarStore((state) => state);
 
   const { rawText, setContent, tokens, position, setPosition } = useContentStore((state) => state);
 
