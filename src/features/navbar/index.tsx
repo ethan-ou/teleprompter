@@ -136,7 +136,7 @@ function ButtonSection({ focused }: { focused: boolean }) {
 
   const restartAction = {
     action: () => (resetPosition(), resetTimer(), window.scrollTo({ top: 0, behavior: "smooth" })),
-    disabled: status === "started",
+    disabled: status !== "stopped",
     keys: ["r", "8"],
   };
   useActionHotkeys(restartAction);
