@@ -80,7 +80,7 @@ kbd {
 
 .content-transition > span {
   transition:
-    color 100ms linear,
+    color 100ms ease-out,
     opacity 1500ms ease-in;
 }
 

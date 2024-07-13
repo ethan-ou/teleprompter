@@ -65,3 +65,13 @@ export function useInterval(callback: () => void, delay: number | null) {
     };
   }, [delay]);
 }
+
+export function useEffectInterval(callback: () => void, delay: number | null) {
+  useEffect(() => {
+    if (delay === null) {
+      callback();
+    }
+  });
+
+  useInterval(callback, delay);
+}

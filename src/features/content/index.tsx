@@ -4,6 +4,8 @@ import { useNavbarStore } from "../navbar/store";
 import { useContentStore } from "./store";
 import { useHotkeys } from "react-hotkeys-hook";
 import { getBoundsStart } from "@/lib/speech-matcher";
+import { useEffectInterval } from "@/app/hooks";
+import { clsx } from "@/lib/css";
 
 export function Content() {
   const { status, mirror, fontSize, margin, opacity, align } = useNavbarStore((state) => state);
@@ -19,25 +21,28 @@ export function Content() {
 
   const lastRef = useRef<null | HTMLDivElement>(null);
 
-  useEffect(() => {
-    if (status !== "editing") {
-      if (lastRef.current && position.end > 0) {
-        const alignTop = lastRef.current.offsetTop - fontSize;
-        const alignCenter =
-          lastRef.current.offsetTop - document.documentElement.clientHeight / 2 + fontSize * 2;
+  useEffectInterval(
+    () => {
+      if (status !== "editing") {
+        if (lastRef.current && position.end > 0) {
+          const alignTop = lastRef.current.offsetTop - fontSize;
+          const alignCenter =
+            lastRef.current.offsetTop - document.documentElement.clientHeight / 2 + fontSize * 2;
 
-        window.scrollTo({
-          top: align === "center" ? alignCenter : alignTop,
-          behavior: "smooth",
-        });
-      } else {
-        window.scrollTo({
-          top: 0,
-          behavior: "smooth",
-        });
+          window.scrollTo({
+            top: align === "center" ? alignCenter : alignTop,
+            behavior: "smooth",
+          });
+        } else {
+          window.scrollTo({
+            top: 0,
+            behavior: "smooth",
+          });
+        }
       }
-    }
-  });
+    },
+    status === "started" ? 750 : null,
+  );
 
   // Overwrite ctrl+a to allow text selection without also selecting inputs.
   const mainRef = useRef<HTMLElement | null>(null);
@@ -81,7 +86,7 @@ export function Content() {
         </div>
       ) : (
         <div
-          className="content content-transition"
+          className={clsx("content", status === "started" ? "content-transition" : "")}
           style={{
             ...style,
             transform: `scaleX(${mirror ? "-1" : "1"})`,
@@ -109,9 +114,11 @@ export function Content() {
                     ? "interim-transcript"
                     : status === "started" && token.index > position.bounds + 20
                       ? "opacity-40"
-                      : status === "started" && token.index > position.bounds
+                      : status === "started" && token.index > position.bounds + 10
                         ? "opacity-60"
-                        : ""
+                        : status === "started" && token.index > position.bounds
+                          ? "opacity-80"
+                          : ""
               }
               dangerouslySetInnerHTML={{
                 __html: escape(token.value).replace(/\n/g, "<br>"),
