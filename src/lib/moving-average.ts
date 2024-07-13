@@ -41,7 +41,7 @@ function weightedMovingAverage(array: number[]) {
     let bias = prev !== undefined ? array[i] - prev : 0;
 
     const weighting = array.length - i;
-    total += (array[i] + bias * 2) * weighting;
+    total += (array[i] + bias) * weighting;
     count += weighting;
 
     prev = array[i];

@@ -123,20 +123,8 @@ function ButtonSection({
   };
   useActionHotkeys(fullscreenAction);
 
-  const hasHidden = useRef(false);
   const hideAction = {
     action: () => setHide((prev) => !prev),
-    actionConfirm: () => {
-      if (
-        !hide &&
-        !hasHidden.current &&
-        confirm("To show the menu again, press the 'H' key on your keyboard.")
-      ) {
-        setHide(() => true), (hasHidden.current = true);
-      } else {
-        if ((!hide && hasHidden.current) || hide) setHide((prev) => !prev);
-      }
-    },
     disabled: status === "editing",
     keys: ["h", "6"],
   };
@@ -223,7 +211,7 @@ function ButtonSection({
       <TooltipContext aria-disabled={hideAction.disabled}>
         <button
           className="button"
-          onClick={hideAction.actionConfirm}
+          onClick={hideAction.action}
           disabled={hideAction.disabled}
           aria-label={hide ? "Hide Menu" : "Show Menu"}
         >
