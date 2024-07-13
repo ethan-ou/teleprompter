@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useRef, useEffect } from "react";
 import { escape } from "@/lib/html-escaper";
 import { useNavbarStore } from "../navbar/store";
 import { useContentStore } from "./store";
@@ -8,7 +8,9 @@ import { useEffectInterval } from "@/app/hooks";
 import { clsx } from "@/lib/css";
 
 export function Content() {
-  const { status, mirror, fontSize, margin, opacity, align } = useNavbarStore((state) => state);
+  const { status, mirror, fontSize, margin, opacity, align, cast, setCast, hide } = useNavbarStore(
+    (state) => state,
+  );
   const { rawText, setContent, tokens, position, setPosition } = useContentStore((state) => state);
 
   const style: React.CSSProperties = {

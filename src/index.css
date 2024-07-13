@@ -64,7 +64,7 @@ kbd {
 
 /* Content styles */
 .content {
-  @apply size-full border-0 bg-neutral-950 outline-0 focus:outline-0;
+  @apply size-full border-0 outline-0 focus:outline-0;
   display: block;
   appearance: unset;
   overflow-y: auto;
@@ -76,6 +76,7 @@ kbd {
   cursor: default;
   padding-bottom: 75vh;
   resize: none;
+  z-index: 1;
 }
 
 .content-transition > span {

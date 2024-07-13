@@ -4,10 +4,12 @@ import { persist } from "zustand/middleware";
 export interface NavbarState {
   status: "editing" | "started" | "stopped";
   mirror: boolean;
+  hide: boolean;
   fontSize: number;
   margin: number;
   opacity: number;
   timer: number;
+  cast: boolean;
   align: "top" | "center";
 }
 
@@ -16,6 +18,8 @@ export interface NavbarActions {
   start: () => void;
   stop: () => void;
   toggleMirror: () => void;
+  toggleHide: () => void;
+  setCast: (value: boolean) => void;
   setFontSize: (value: number) => void;
   setMargin: (value: number) => void;
   setOpacity: (value: number) => void;
@@ -29,15 +33,19 @@ export const useNavbarStore = create<NavbarState & NavbarActions>()(
     (set) => ({
       status: "stopped",
       mirror: false,
+      hide: false,
       fontSize: 60,
       margin: 10,
       opacity: 80,
       timer: 0,
+      cast: false,
       align: "top",
       toggleEdit: () =>
         set((state) => ({
           status: state.status === "editing" ? "stopped" : "editing",
         })),
+      toggleHide: () => set((state) => ({ hide: !state.hide })),
+      setCast: (value: boolean) => set(() => ({ cast: value })),
       start: () => set(() => ({ status: "started" })),
       stop: () => set(() => ({ status: "stopped" })),
       toggleMirror: () => set((state) => ({ mirror: !state.mirror })),
@@ -52,6 +60,7 @@ export const useNavbarStore = create<NavbarState & NavbarActions>()(
       name: "navbar",
       partialize: (state) => ({
         mirror: state.mirror,
+        hide: state.hide,
         fontSize: state.fontSize,
         margin: state.margin,
         opacity: state.opacity,

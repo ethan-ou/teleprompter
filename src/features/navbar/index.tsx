@@ -1,14 +1,12 @@
-import { useFullScreen, useInterval } from "@/app/hooks";
-
+import { useFullScreen } from "@/app/hooks";
 import { startTeleprompter, stopTeleprompter } from "@/app/recognizer";
 import { useNavbarStore } from "./store";
 import { useContentStore } from "../content/store";
+import { useInterval } from "@/app/hooks";
 
 import {
   Pencil,
   MoveHorizontal,
-  MoveVertical,
-  RefreshCw,
   Play,
   Pause,
   Expand,
@@ -20,30 +18,36 @@ import {
   SunDim,
   SunMedium,
   EyeOff,
+  Airplay,
+  Undo2,
 } from "lucide-react";
 
 import { useHotkeys } from "react-hotkeys-hook";
-import { useState, useRef } from "react";
+import { useState, forwardRef } from "react";
 import { DragInput } from "@/components/DragInput";
 import { Tooltip, TooltipContext } from "@/components/Tooltip";
+import { clsx } from "@/lib/css";
 
-export function Navbar() {
+export const Navbar = forwardRef<HTMLElement>((props, ref) => {
   const [focused, setFocused] = useState(false);
-  const [hideNavbar, setHideNavbar] = useState(false);
+  const hide = useNavbarStore((state) => state.hide);
 
   return (
     <nav
+      ref={ref}
       role="navigation"
       aria-label="main navigation"
-      className="sticky top-0 z-10 flex w-full flex-wrap items-center justify-evenly gap-x-4 border-b border-neutral-800 bg-neutral-950/90 py-1 px-2 text-white backdrop-blur select-none min-[850px]:justify-between min-[1075px]:grid min-[1075px]:grid-cols-[3fr_1fr_3fr]"
-      {...(hideNavbar && { style: { display: "none" } })}
+      className={clsx(
+        "top-0 z-10 flex w-full flex-wrap items-center justify-evenly gap-x-4 border-b border-neutral-800 bg-neutral-950/90 py-2 px-3 text-white backdrop-blur transition delay-200 duration-300 ease-in select-none hover:opacity-100 min-[850px]:justify-between min-[1075px]:grid min-[1075px]:grid-cols-[3fr_1fr_3fr]",
+        hide ? "fixed opacity-0 hover:opacity-100 active:opacity-100" : "sticky opacity-100",
+      )}
     >
       <div
         className="flex flex-wrap items-center gap-x-1"
         onFocus={() => setFocused(() => true)}
         onBlur={() => setFocused(() => false)}
       >
-        <ButtonSection focused={focused} hide={hideNavbar} setHide={setHideNavbar} />
+        <ButtonSection focused={focused} />
       </div>
       <div className="flex justify-center text-3xl text-neutral-300 max-[480px]:hidden">
         <TimerSection />
@@ -57,18 +61,11 @@ export function Navbar() {
       </div>
     </nav>
   );
-}
+});
 
-function ButtonSection({
-  focused,
-  hide,
-  setHide,
-}: {
-  focused: boolean;
-  hide: boolean;
-  setHide: React.Dispatch<React.SetStateAction<boolean>>;
-}) {
-  const { status, toggleEdit, mirror, toggleMirror, resetTimer } = useNavbarStore((state) => state);
+function ButtonSection({ focused }: { focused: boolean }) {
+  const { status, toggleEdit, mirror, toggleMirror, resetTimer, hide, toggleHide, cast, setCast } =
+    useNavbarStore((state) => state);
 
   const setContent = useContentStore((state) => state.setContent);
   const setTokens = useContentStore((state) => state.setTokens);
@@ -124,16 +121,23 @@ function ButtonSection({
   useActionHotkeys(fullscreenAction);
 
   const hideAction = {
-    action: () => setHide((prev) => !prev),
+    action: () => toggleHide(),
     disabled: status === "editing",
     keys: ["h", "6"],
   };
   useActionHotkeys(hideAction);
 
+  const castScreenAction = {
+    action: () => setCast(!cast),
+    disabled: false,
+    keys: ["s", "7"],
+  };
+  useActionHotkeys(castScreenAction);
+
   const restartAction = {
     action: () => (resetPosition(), resetTimer(), window.scrollTo({ top: 0, behavior: "smooth" })),
     disabled: status === "started",
-    keys: ["r", "7"],
+    keys: ["r", "8"],
   };
   useActionHotkeys(restartAction);
 
@@ -141,7 +145,12 @@ function ButtonSection({
     <>
       <TooltipContext aria-disabled={startAction.disabled}>
         <button
-          className="button"
+          className={clsx(
+            "button group/button mr-1 flex items-center gap-2 rounded-lg border disabled:border-neutral-900 disabled:bg-transparent",
+            status === "started"
+              ? "border-red-500/30 bg-red-700/10 hover:border-red-500/40 hover:bg-red-700/20"
+              : "border-green-500/30 bg-green-700/10 hover:border-green-500/40 hover:bg-green-700/20",
+          )}
           disabled={startAction.disabled}
           onClick={startAction.action}
           aria-label={status === "started" ? "Stop" : "Start"}
@@ -151,6 +160,16 @@ function ButtonSection({
           ) : (
             <Pause className="icon red-fill" />
           )}
+          <span
+            className={clsx(
+              "pr-1 group-disabled/button:text-neutral-800",
+              status === "started"
+                ? "pr-1.5 text-red-300/90 group-hover/button:text-red-300"
+                : "pr-1 text-green-300/80 group-hover/button:text-green-300/90",
+            )}
+          >
+            {status === "started" ? "Stop " : "Start"}
+          </span>
         </button>
         <Tooltip>
           {status === "started" ? "Stop" : "Start"} <kbd>Space</kbd>
@@ -221,6 +240,19 @@ function ButtonSection({
           Hide Menu <kbd>H</kbd>
         </Tooltip>
       </TooltipContext>
+      <TooltipContext aria-disabled={castScreenAction.disabled}>
+        <button
+          className="button"
+          onClick={castScreenAction.action}
+          disabled={castScreenAction.disabled}
+          aria-label={cast ? "Stop Casting" : "Cast Screen"}
+        >
+          <Airplay className={`icon ${cast ? "yellow" : ""}`} />
+        </button>
+        <Tooltip>
+          {cast ? "Stop Casting" : "Cast Screen"} <kbd>S</kbd>
+        </Tooltip>
+      </TooltipContext>
       <TooltipContext aria-disabled={restartAction.disabled}>
         <button
           className="button"
@@ -228,7 +260,7 @@ function ButtonSection({
           disabled={restartAction.disabled}
           aria-label="Reset to Top"
         >
-          <RefreshCw className="icon" />
+          <Undo2 className="icon" />
         </button>
         <Tooltip>
           Reset to Top <kbd>R</kbd>
@@ -311,10 +343,10 @@ function SliderSection() {
             max={sizeSlider.max}
             aria-label="Font Size"
           >
-            <AArrowUp />
+            <AArrowUp className="size-7" />
           </DragInput>
         </div>
-        <Tooltip top="top-9">
+        <Tooltip>
           Font Size{" "}
           <span className="text-neutral-400">
             <kbd>-</kbd> or <kbd>+</kbd>
@@ -331,10 +363,10 @@ function SliderSection() {
             max={marginSlider.max}
             aria-label="Margin"
           >
-            <Minimize2 className="rotate-45" />
+            <Minimize2 className="size-7 rotate-45" />
           </DragInput>
         </div>
-        <Tooltip top="top-9">
+        <Tooltip>
           Margin{" "}
           <span className="text-neutral-400">
             <kbd>{"["}</kbd> or <kbd>{"]"}</kbd>
@@ -360,7 +392,7 @@ function SliderSection() {
             )}
           </DragInput>
         </div>
-        <Tooltip top="top-9">
+        <Tooltip>
           Brightness{" "}
           <span className="text-neutral-400">
             <kbd>;</kbd> or <kbd>'</kbd>
@@ -374,7 +406,7 @@ function SliderSection() {
         >
           <TooltipContext>
             <AlignCenter />
-            <Tooltip top="top-[2.1rem]">
+            <Tooltip>
               Align{" "}
               <span className="text-neutral-400">
                 <kbd>T</kbd> or <kbd>C</kbd>

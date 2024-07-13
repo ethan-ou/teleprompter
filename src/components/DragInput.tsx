@@ -83,7 +83,7 @@ export function DragInput({
 
   return (
     <label
-      className="flex touch-none items-center gap-2 py-0.5 px-1 align-middle focus-within:outline-2 focus-within:outline-blue-500"
+      className="flex touch-none items-center gap-2 py-0.5 px-1 align-middle text-lg focus-within:outline-2 focus-within:outline-blue-500"
       onClick={(e) => e.preventDefault()}
       title={title}
     >
