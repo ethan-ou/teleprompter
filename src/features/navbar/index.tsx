@@ -19,19 +19,17 @@ import {
   AlignCenter,
   SunDim,
   SunMedium,
+  EyeOff,
 } from "lucide-react";
 
 import { useHotkeys } from "react-hotkeys-hook";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { DragInput } from "@/components/DragInput";
 import { Tooltip, TooltipContext } from "@/components/Tooltip";
 
 export function Navbar() {
   const [focused, setFocused] = useState(false);
   const [hideNavbar, setHideNavbar] = useState(false);
-  useHotkeys("shift+h", () => {
-    setHideNavbar((prev) => !prev);
-  });
 
   return (
     <nav
@@ -45,7 +43,7 @@ export function Navbar() {
         onFocus={() => setFocused(() => true)}
         onBlur={() => setFocused(() => false)}
       >
-        <ButtonSection focused={focused} />
+        <ButtonSection focused={focused} hide={hideNavbar} setHide={setHideNavbar} />
       </div>
       <div className="flex justify-center text-3xl text-neutral-300 max-[480px]:hidden">
         <TimerSection />
@@ -61,7 +59,15 @@ export function Navbar() {
   );
 }
 
-function ButtonSection({ focused }: { focused: boolean }) {
+function ButtonSection({
+  focused,
+  hide,
+  setHide,
+}: {
+  focused: boolean;
+  hide: boolean;
+  setHide: React.Dispatch<React.SetStateAction<boolean>>;
+}) {
   const { status, toggleEdit, mirror, toggleMirror, resetTimer } = useNavbarStore((state) => state);
 
   const setContent = useContentStore((state) => state.setContent);
@@ -117,10 +123,29 @@ function ButtonSection({ focused }: { focused: boolean }) {
   };
   useActionHotkeys(fullscreenAction);
 
+  const hasHidden = useRef(false);
+  const hideAction = {
+    action: () => setHide((prev) => !prev),
+    actionConfirm: () => {
+      if (
+        !hide &&
+        !hasHidden.current &&
+        confirm("To show the menu again, press the 'H' key on your keyboard.")
+      ) {
+        setHide(() => true), (hasHidden.current = true);
+      } else {
+        if ((!hide && hasHidden.current) || hide) setHide((prev) => !prev);
+      }
+    },
+    disabled: status === "editing",
+    keys: ["h", "6"],
+  };
+  useActionHotkeys(hideAction);
+
   const restartAction = {
     action: () => (resetPosition(), resetTimer(), window.scrollTo({ top: 0, behavior: "smooth" })),
     disabled: status === "started",
-    keys: ["r", "6"],
+    keys: ["r", "7"],
   };
   useActionHotkeys(restartAction);
 
@@ -187,12 +212,25 @@ function ButtonSection({ focused }: { focused: boolean }) {
           className="button"
           onClick={fullscreenAction.action}
           disabled={fullscreenAction.disabled}
-          aria-label={fullscreen.active ? "Exit Fullscreen (f)" : "Fullscreen (f)"}
+          aria-label={fullscreen.active ? "Exit Fullscreen" : "Fullscreen"}
         >
           <Expand className={`icon ${fullscreen.active ? "yellow" : ""}`} />
         </button>
         <Tooltip>
           {fullscreen.active ? "Exit Fullscreen" : "Fullscreen"} <kbd>F</kbd>
+        </Tooltip>
+      </TooltipContext>
+      <TooltipContext aria-disabled={hideAction.disabled}>
+        <button
+          className="button"
+          onClick={hideAction.actionConfirm}
+          disabled={hideAction.disabled}
+          aria-label={hide ? "Hide Menu" : "Show Menu"}
+        >
+          <EyeOff className={`icon ${hide ? "yellow" : ""}`} />
+        </button>
+        <Tooltip>
+          Hide Menu <kbd>H</kbd>
         </Tooltip>
       </TooltipContext>
       <TooltipContext aria-disabled={restartAction.disabled}>
@@ -243,8 +281,8 @@ function SliderSection() {
     max: 150,
     value: fontSize,
     action: setFontSize,
-    incrementKeys: ["shift+Equal", "ctrl+shift+period"],
-    decrementKeys: ["shift+Minus", "ctrl+shift+comma"],
+    incrementKeys: ["Equal", "ctrl+shift+period"],
+    decrementKeys: ["Minus", "ctrl+shift+comma"],
   };
   useSliderHotkeys(sizeSlider);
 
@@ -254,8 +292,8 @@ function SliderSection() {
     max: 36,
     value: margin,
     action: setMargin,
-    incrementKeys: ["shift+BracketRight"],
-    decrementKeys: ["shift+BracketLeft"],
+    incrementKeys: ["BracketRight"],
+    decrementKeys: ["BracketLeft"],
   };
   useSliderHotkeys(marginSlider);
 
@@ -265,8 +303,8 @@ function SliderSection() {
     max: 100,
     value: opacity,
     action: setOpacity,
-    incrementKeys: ["shift+Quote"],
-    decrementKeys: ["shift+Semicolon"],
+    incrementKeys: ["Quote"],
+    decrementKeys: ["Semicolon"],
   };
   useSliderHotkeys(contrastSlider);
 
@@ -288,7 +326,12 @@ function SliderSection() {
             <AArrowUp />
           </DragInput>
         </div>
-        <Tooltip top="top-9">Font Size</Tooltip>
+        <Tooltip top="top-9">
+          Font Size{" "}
+          <span className="text-neutral-400">
+            <kbd>-</kbd> or <kbd>+</kbd>
+          </span>
+        </Tooltip>
       </TooltipContext>
       <TooltipContext>
         <div className="w-20">
@@ -303,7 +346,12 @@ function SliderSection() {
             <Minimize2 className="rotate-45" />
           </DragInput>
         </div>
-        <Tooltip top="top-9">Margin</Tooltip>
+        <Tooltip top="top-9">
+          Margin{" "}
+          <span className="text-neutral-400">
+            <kbd>{"["}</kbd> or <kbd>{"]"}</kbd>
+          </span>
+        </Tooltip>
       </TooltipContext>
       <TooltipContext>
         <div className="w-20">
@@ -324,7 +372,12 @@ function SliderSection() {
             )}
           </DragInput>
         </div>
-        <Tooltip top="top-9">Brightness</Tooltip>
+        <Tooltip top="top-9">
+          Brightness{" "}
+          <span className="text-neutral-400">
+            <kbd>;</kbd> or <kbd>'</kbd>
+          </span>
+        </Tooltip>
       </TooltipContext>
       <div>
         <label
