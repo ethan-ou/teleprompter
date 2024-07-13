@@ -12,7 +12,7 @@ export const Capture = forwardRef<HTMLDivElement>((props, ref) => {
   } = useScreenCapture();
 
   useEffect(() => {
-    if (cast && !captureRunning) captureStart(setCast);
+    if (cast && !captureRunning) captureStart(setCast, () => setCast(false));
     if (!cast && captureRunning) captureStop();
   }, [cast]);
 
@@ -20,7 +20,7 @@ export const Capture = forwardRef<HTMLDivElement>((props, ref) => {
     <div ref={ref} className="fixed size-full">
       <video
         ref={videoRef}
-        className="z-0 bg-transparent opacity-50"
+        className="z-0 bg-neutral-950 opacity-50"
         style={{ height: "inherit", width: "inherit" }}
         autoPlay
       ></video>

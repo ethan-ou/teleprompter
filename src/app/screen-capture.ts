@@ -4,15 +4,28 @@ export function useScreenCapture() {
   const videoElementRef = useRef<HTMLVideoElement | null>(null);
 
   return {
-    start: (callback?: (success: boolean) => void) => {
-      startCapture().then((stream) => {
-        if (stream && videoElementRef.current) {
-          videoElementRef.current.srcObject = stream;
-          return callback ? callback(true) : undefined;
-        }
+    start: (callback: (success: boolean) => void, onEnd: (e: Event) => void) => {
+      const srcObject = videoElementRef.current
+        ? (videoElementRef.current.srcObject as MediaStream | null)
+        : null;
 
-        return callback ? callback(false) : undefined;
-      });
+      if (srcObject === null || (srcObject && !srcObject.active)) {
+        startCapture().then((stream) => {
+          if (stream && videoElementRef.current) {
+            stream.getTracks().forEach((track) => {
+              track.onended = (e) => {
+                onEnd(e);
+                videoElementRef.current && stopCapture(videoElementRef.current);
+              };
+            });
+
+            videoElementRef.current.srcObject = stream;
+            return callback(true);
+          }
+
+          return callback(false);
+        });
+      }
     },
     stop: () => {
       if (videoElementRef.current) {
