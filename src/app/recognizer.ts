@@ -8,7 +8,6 @@ import {
 } from "../lib/speech-matcher";
 import { useNavbarStore } from "@/features/navbar/store";
 import { useContentStore } from "@/features/content/store";
-import { resetMovingAverage } from "@/lib/moving-average";
 
 let speechRecognizer: SpeechRecognizer | null = null;
 
@@ -38,7 +37,12 @@ export const startTeleprompter = () => {
       const boundStart = getBoundsStart(tokens, position.search, textRegion);
 
       if (finalTranscript !== "") {
-        const foundMatch = matchText(getTokensFromText(finalTranscript), textRegion, true);
+        const foundMatch = matchText(
+          getTokensFromText(finalTranscript),
+          textRegion,
+          position.search,
+          true,
+        );
 
         if (foundMatch) {
           const [, matchEnd] = foundMatch;
@@ -59,7 +63,12 @@ export const startTeleprompter = () => {
       }
 
       if (interimTranscript !== "") {
-        const foundMatch = matchText(getTokensFromText(interimTranscript), textRegion, false);
+        const foundMatch = matchText(
+          getTokensFromText(interimTranscript),
+          textRegion,
+          position.search,
+          false,
+        );
 
         if (foundMatch) {
           const [matchStart, matchEnd] = foundMatch;
@@ -75,7 +84,6 @@ export const startTeleprompter = () => {
     speechRecognizer.onend(() => {
       const { stop } = useNavbarStore.getState();
       stop();
-      resetMovingAverage();
       resetTranscriptWindow();
     });
 

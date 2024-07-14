@@ -1,6 +1,6 @@
 import { type Token, tokenize } from "./word-tokenizer";
 import { levenshteinDistance } from "./levenshtein";
-import { calculateMovingAverage } from "./moving-average";
+import { calculateMovingAverage, resetMovingAverage } from "./moving-average";
 
 /*
   Algorithm used to match transcript to the text is a simple
@@ -60,15 +60,21 @@ function getTranscriptWindow(transcript: Token[], isFinal: boolean) {
 
 export function resetTranscriptWindow() {
   transcriptWindow = [];
+  resetMovingAverage();
 }
 
-export function matchText(transcript: Token[], text: Token[], isFinal: boolean) {
+export function matchText(
+  transcript: Token[],
+  text: Token[],
+  currentIndex: number,
+  isFinal: boolean,
+) {
   const transcriptWindow = getTranscriptWindow(transcript, isFinal);
   if (transcriptWindow.length < MIN_WINDOW) return;
 
   const textWindows = createTextWindows(text, Math.min(transcriptWindow.length, MATCH_WINDOW));
 
-  const bestWindow = findBestTextWindow(transcriptWindow, textWindows);
+  const bestWindow = findBestTextWindow(transcriptWindow, textWindows, currentIndex);
   if (bestWindow) {
     return calculateMovingAverage(bestWindow.at(0)!.index, bestWindow.at(-1)!.index);
   }
@@ -89,17 +95,28 @@ function createTextWindows(tokens: Token[], length: number) {
   return slices;
 }
 
-function findBestTextWindow(transcript: Token[], textSlices: Token[][]) {
+function findBestTextWindow(transcript: Token[], textSlices: Token[][], currentIndex: number) {
   const transcriptText = transcript
     .map((text) => text.value)
     .join(" ")
     .toLowerCase();
   const distances = textSlices.map((slice) => {
+    /* 
+    Text further from the current position should have a lower chance
+    of being a correct match. 
+    
+    The optimum position should be the current +2 or +3 since
+    most speech will be read just ahead of the current index.
+    */
+    const firstIndex = slice.at(0);
+    const weight =
+      1 + Math.abs(currentIndex + 2 - (firstIndex ? firstIndex.index : currentIndex + 2)) * 0.03;
+
     const sliceText = slice
       .map((text) => text.value)
       .join(" ")
       .toLowerCase();
-    return levenshteinDistance(transcriptText, sliceText) / transcriptText.length;
+    return (levenshteinDistance(transcriptText, sliceText) / transcriptText.length) * weight;
   });
 
   /*
@@ -112,18 +129,29 @@ function findBestTextWindow(transcript: Token[], textSlices: Token[][]) {
   */
   const lowDistanceIndex = distances.findIndex((distance) => distance <= 0.1);
   if (lowDistanceIndex > -1) {
+    console.log(
+      textSlices[findBestIndex(distances, lowDistanceIndex)],
+      distances[lowDistanceIndex],
+    );
     return textSlices[findBestIndex(distances, lowDistanceIndex)];
   }
 
   const midDistanceIndex = distances.findIndex((distance) => distance <= 0.3);
   if (midDistanceIndex > -1) {
+    console.log(
+      textSlices[findBestIndex(distances, midDistanceIndex)],
+      distances[midDistanceIndex],
+    );
     return textSlices[findBestIndex(distances, midDistanceIndex)];
   }
 
   const highDistanceIndex = distances.findIndex((distance) => distance <= 0.5);
   if (highDistanceIndex > -1) {
-    return textSlices[highDistanceIndex];
+    console.log(textSlices[highDistanceIndex], distances[highDistanceIndex]);
+    return textSlices[findBestIndex(distances, highDistanceIndex)];
   }
+
+  console.log("Miss", Math.min(...distances));
 }
 
 /* Once a good index has been found, see if there's anything better
