@@ -1,29 +1,42 @@
-import { useEffect, forwardRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useScreenCapture } from "@/app/screen-capture";
 import { useNavbarStore } from "../navbar/store";
+import { useResizeObserver } from "@/app/resize-observer";
 
-export const Capture = forwardRef<HTMLDivElement>((props, ref) => {
+export function Capture() {
+  const documentRef = useRef<HTMLElement>(document.documentElement);
   const { cast, setCast } = useNavbarStore((state) => state);
-  const {
-    start: captureStart,
-    stop: captureStop,
-    ref: videoRef,
-    running: captureRunning,
-  } = useScreenCapture();
+  const { start, stop, ref, running } = useScreenCapture();
+  const [height, setHeight] = useState<number>(0);
 
   useEffect(() => {
-    if (cast && !captureRunning) captureStart(setCast, () => setCast(false));
-    if (!cast && captureRunning) captureStop();
+    if (cast && !running) start(setCast, () => setCast(false));
+    if (!cast && running) stop();
   }, [cast]);
 
+  // Resize the video element to always be 100vh minus the navbar
+  // or any elements above the capture window.
+  useResizeObserver({
+    ref: documentRef,
+    onResize: () => {
+      if (ref.current) {
+        setHeight(() =>
+          ref.current
+            ? Array.from(ref.current.getClientRects()).reduce((accum, curr) => accum + curr.y, 0)
+            : 0,
+        );
+      }
+    },
+  });
+
   return (
-    <div ref={ref} className="fixed size-full">
-      <video
-        ref={videoRef}
-        className="z-0 bg-neutral-950 opacity-50"
-        style={{ height: "inherit", width: "inherit" }}
-        autoPlay
-      ></video>
-    </div>
+    <video
+      ref={ref}
+      className="fixed z-0 w-full overflow-hidden bg-neutral-950 opacity-50"
+      style={{
+        height: `calc(100vh - ${height}px)`,
+      }}
+      autoPlay
+    ></video>
   );
-});
+}

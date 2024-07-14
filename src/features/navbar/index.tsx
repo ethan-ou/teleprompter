@@ -23,18 +23,17 @@ import {
 } from "lucide-react";
 
 import { useHotkeys } from "react-hotkeys-hook";
-import { useState, forwardRef } from "react";
+import { useState } from "react";
 import { DragInput } from "@/components/DragInput";
 import { Tooltip, TooltipContext } from "@/components/Tooltip";
 import { clsx } from "@/lib/css";
 
-export const Navbar = forwardRef<HTMLElement>((props, ref) => {
+export function Navbar() {
   const [focused, setFocused] = useState(false);
   const hide = useNavbarStore((state) => state.hide);
 
   return (
     <nav
-      ref={ref}
       role="navigation"
       aria-label="main navigation"
       className={clsx(
@@ -61,7 +60,7 @@ export const Navbar = forwardRef<HTMLElement>((props, ref) => {
       </div>
     </nav>
   );
-});
+}
 
 function ButtonSection({ focused }: { focused: boolean }) {
   const { status, toggleEdit, mirror, toggleMirror, resetTimer, hide, toggleHide, cast, setCast } =
