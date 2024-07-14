@@ -129,29 +129,18 @@ function findBestTextWindow(transcript: Token[], textSlices: Token[][], currentI
   */
   const lowDistanceIndex = distances.findIndex((distance) => distance <= 0.1);
   if (lowDistanceIndex > -1) {
-    console.log(
-      textSlices[findBestIndex(distances, lowDistanceIndex)],
-      distances[lowDistanceIndex],
-    );
     return textSlices[findBestIndex(distances, lowDistanceIndex)];
   }
 
   const midDistanceIndex = distances.findIndex((distance) => distance <= 0.3);
   if (midDistanceIndex > -1) {
-    console.log(
-      textSlices[findBestIndex(distances, midDistanceIndex)],
-      distances[midDistanceIndex],
-    );
     return textSlices[findBestIndex(distances, midDistanceIndex)];
   }
 
   const highDistanceIndex = distances.findIndex((distance) => distance <= 0.5);
   if (highDistanceIndex > -1) {
-    console.log(textSlices[highDistanceIndex], distances[highDistanceIndex]);
     return textSlices[findBestIndex(distances, highDistanceIndex)];
   }
-
-  console.log("Miss", Math.min(...distances));
 }
 
 /* Once a good index has been found, see if there's anything better
