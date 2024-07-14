@@ -26,10 +26,12 @@ export function DragInput({
   step,
   children,
   title,
+  speed = 1,
   ...props
 }: {
   value: number;
   onValueChange: (value: number) => void;
+  speed?: number;
 } & React.DetailedHTMLProps<React.InputHTMLAttributes<HTMLInputElement>, HTMLInputElement>) {
   const constrain = createConstraints(min, max, step);
 
@@ -62,7 +64,7 @@ export function DragInput({
     // Only change the value if the drag was actually started.
     const onUpdate = (event: MouseEvent) => {
       if (startValue) {
-        onValueChange(constrain(snapshot + event.clientX - startValue));
+        onValueChange(constrain(snapshot + (event.clientX - startValue) * speed));
       }
     };
 

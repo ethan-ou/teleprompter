@@ -373,6 +373,7 @@ function SliderSection() {
             step={marginSlider.step}
             min={marginSlider.min}
             max={marginSlider.max}
+            speed={0.5}
             aria-label="Margin"
           >
             <Minimize2 className="size-7 rotate-45" />
