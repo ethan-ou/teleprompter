@@ -1,4 +1,4 @@
-import { useRef, useEffect } from "react";
+import { useRef } from "react";
 import { escape } from "@/lib/html-escaper";
 import { useNavbarStore } from "../navbar/store";
 import { useContentStore } from "./store";
@@ -8,9 +8,7 @@ import { useEffectInterval } from "@/app/hooks";
 import { clsx } from "@/lib/css";
 
 export function Content() {
-  const { status, mirror, fontSize, margin, opacity, align, cast, setCast, hide } = useNavbarStore(
-    (state) => state,
-  );
+  const { status, mirror, fontSize, margin, opacity, align } = useNavbarStore((state) => state);
   const { rawText, setContent, tokens, position, setPosition } = useContentStore((state) => state);
 
   const style: React.CSSProperties = {
@@ -18,7 +16,11 @@ export function Content() {
     paddingLeft: `${margin}vw`,
     paddingRight: `${margin * 0.66}vw`,
     opacity: opacity / 100,
-    paddingTop: align === "center" ? `calc(50vh - ${fontSize * 2}px)` : "0.5rem",
+    paddingTop: {
+      top: "1rem",
+      center: `calc(50vh - ${fontSize * 2}px)`,
+      bottom: `calc(${(3 / 4) * 100}vh -  ${fontSize * 2}px)`,
+    }[align],
   };
 
   const lastRef = useRef<null | HTMLDivElement>(null);
@@ -27,12 +29,18 @@ export function Content() {
     () => {
       if (status !== "editing") {
         if (lastRef.current && position.end > 0) {
-          const alignTop = lastRef.current.offsetTop - fontSize;
-          const alignCenter =
-            lastRef.current.offsetTop - document.documentElement.clientHeight / 2 + fontSize * 2;
-
           window.scrollTo({
-            top: align === "center" ? alignCenter : alignTop,
+            top: {
+              top: lastRef.current.offsetTop - fontSize,
+              center:
+                lastRef.current.offsetTop -
+                document.documentElement.clientHeight / 2 +
+                fontSize * 2,
+              bottom:
+                lastRef.current.offsetTop -
+                (3 / 4) * document.documentElement.clientHeight +
+                fontSize * 2,
+            }[align],
             behavior: "smooth",
           });
         } else {

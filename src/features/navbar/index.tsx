@@ -1,6 +1,6 @@
 import { useFullScreen } from "@/app/hooks";
 import { startTeleprompter, stopTeleprompter } from "@/app/recognizer";
-import { useNavbarStore } from "./store";
+import { Align, useNavbarStore } from "./store";
 import { useContentStore } from "../content/store";
 import { useInterval } from "@/app/hooks";
 
@@ -37,7 +37,7 @@ export function Navbar() {
       role="navigation"
       aria-label="main navigation"
       className={clsx(
-        "top-0 z-10 flex w-full flex-wrap items-center justify-evenly gap-x-4 border-b border-neutral-800 bg-neutral-950/90 py-2 px-3 text-white backdrop-blur transition delay-200 duration-300 ease-in select-none hover:opacity-100 min-[950px]:justify-between min-[1075px]:grid min-[1075px]:grid-cols-[3fr_1fr_3fr]",
+        "top-0 z-10 flex w-full flex-wrap items-center justify-evenly gap-x-4 border-b border-neutral-800 bg-neutral-950/90 py-2 px-3 text-white backdrop-blur transition delay-200 duration-300 ease-in select-none hover:opacity-100 min-[975px]:justify-between min-[1075px]:grid min-[1075px]:grid-cols-[3fr_1fr_3fr]",
         hide ? "fixed opacity-0 hover:opacity-100 active:opacity-100" : "sticky opacity-100",
       )}
     >
@@ -329,6 +329,7 @@ function SliderSection() {
 
   useHotkeys("t", () => setAlign("top"));
   useHotkeys("c", () => setAlign("center"));
+  useHotkeys("b", () => setAlign("bottom"));
 
   return (
     <>
@@ -348,7 +349,8 @@ function SliderSection() {
         <Tooltip>
           Font Size{" "}
           <span className="text-neutral-400">
-            <kbd>-</kbd> or <kbd>+</kbd>
+            <kbd>-</kbd>
+            <kbd>+</kbd>
           </span>
         </Tooltip>
       </TooltipContext>
@@ -368,7 +370,8 @@ function SliderSection() {
         <Tooltip>
           Margin{" "}
           <span className="text-neutral-400">
-            <kbd>{"["}</kbd> or <kbd>{"]"}</kbd>
+            <kbd>{"["}</kbd>
+            <kbd>{"]"}</kbd>
           </span>
         </Tooltip>
       </TooltipContext>
@@ -394,7 +397,8 @@ function SliderSection() {
         <Tooltip>
           Brightness{" "}
           <span className="text-neutral-400">
-            <kbd>;</kbd> or <kbd>'</kbd>
+            <kbd>;</kbd>
+            <kbd>'</kbd>
           </span>
         </Tooltip>
       </TooltipContext>
@@ -408,18 +412,15 @@ function SliderSection() {
             <Tooltip>
               Align{" "}
               <span className="text-neutral-400">
-                <kbd>T</kbd> or <kbd>C</kbd>
+                <kbd>T</kbd>
+                <kbd>C</kbd>
+                <kbd>B</kbd>
               </span>
             </Tooltip>
           </TooltipContext>
           <select
             className="border-0 focus-visible:outline-0"
-            onChange={(e) => {
-              const value = e.target.value;
-              if (value === "top" || value === "center") {
-                setAlign(value);
-              }
-            }}
+            onChange={(e) => setAlign(e.target.value as Align)}
             value={align}
           >
             <option className="bg-black" value="top">
@@ -427,6 +428,9 @@ function SliderSection() {
             </option>
             <option className="bg-black" value="center">
               Center
+            </option>
+            <option className="bg-black" value="bottom">
+              Bottom
             </option>
           </select>
         </label>

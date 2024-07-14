@@ -1,8 +1,11 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
+export type Status = "editing" | "started" | "stopped";
+export type Align = "top" | "center" | "bottom";
+
 export interface NavbarState {
-  status: "editing" | "started" | "stopped";
+  status: Status;
   mirror: boolean;
   hide: boolean;
   fontSize: number;
@@ -10,7 +13,7 @@ export interface NavbarState {
   opacity: number;
   timer: number;
   cast: boolean;
-  align: "top" | "center";
+  align: Align;
 }
 
 export interface NavbarActions {
@@ -25,7 +28,7 @@ export interface NavbarActions {
   setOpacity: (value: number) => void;
   incrementTimer: () => void;
   resetTimer: () => void;
-  setAlign: (value: "top" | "center") => void;
+  setAlign: (value: Align) => void;
 }
 
 export const useNavbarStore = create<NavbarState & NavbarActions>()(
@@ -54,7 +57,7 @@ export const useNavbarStore = create<NavbarState & NavbarActions>()(
       setOpacity: (value: number) => set(() => ({ opacity: value })),
       incrementTimer: () => set((state) => ({ timer: state.timer + 1 })),
       resetTimer: () => set(() => ({ timer: 0 })),
-      setAlign: (value: "top" | "center") => set(() => ({ align: value })),
+      setAlign: (value: Align) => set(() => ({ align: value })),
     }),
     {
       name: "navbar",
