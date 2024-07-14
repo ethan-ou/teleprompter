@@ -1,14 +1,12 @@
 {
-  "name": "vite-template-redux",
-  "private": true,
+  "name": "voice-activated-teleprompter",
   "version": "0.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "start": "vite",
     "build": "vite build",
-    "preview": "vite preview",
-    "format": "prettier --write ."
+    "preview": "vite preview"
   },
   "dependencies": {
     "lucide-react": "^0.408.0",

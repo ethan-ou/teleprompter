@@ -72,7 +72,7 @@ function ButtonSection({ focused }: { focused: boolean }) {
   const { status, toggleEdit, mirror, toggleMirror, resetTimer, hide, toggleHide, cast, setCast } =
     useNavbarStore((state) => state);
 
-  const setContent = useContentStore((state) => state.setContent);
+  const setContent = useContentStore((state) => state.setText);
   const setTokens = useContentStore((state) => state.setTokens);
   const resetPosition = useContentStore((state) => state.resetPosition);
 

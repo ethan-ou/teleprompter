@@ -17,9 +17,9 @@ export interface NavbarState {
 }
 
 export interface NavbarActions {
-  toggleEdit: () => void;
   start: () => void;
   stop: () => void;
+  toggleEdit: () => void;
   toggleMirror: () => void;
   toggleHide: () => void;
   setCast: (value: boolean) => void;
@@ -60,7 +60,7 @@ export const useNavbarStore = create<NavbarState & NavbarActions>()(
       setAlign: (value: Align) => set(() => ({ align: value })),
     }),
     {
-      name: "navbar",
+      name: "teleprompter:settings",
       partialize: (state) => ({
         mirror: state.mirror,
         hide: state.hide,

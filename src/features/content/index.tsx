@@ -9,7 +9,7 @@ import { clsx } from "@/lib/css";
 
 export function Content() {
   const { status, mirror, fontSize, margin, opacity, align } = useNavbarStore((state) => state);
-  const { rawText, setContent, tokens, position, setPosition } = useContentStore((state) => state);
+  const { text, setText, tokens, position, setPosition } = useContentStore((state) => state);
 
   const style: React.CSSProperties = {
     fontSize: `${fontSize}px`,
@@ -83,14 +83,14 @@ export function Content() {
           {/* Use an invisible div to force an increase in textarea sizing.
               This should have exactly the same size and properties as the textarea. */}
           <div className="content invisible col-start-1 row-start-1" style={style}>
-            {rawText}
+            {text}
           </div>
           <textarea
             ref={textAreaRef}
             className="content col-start-1 row-start-1"
             style={{ ...style, cursor: "text", overflow: "hidden" }}
-            value={rawText}
-            onChange={(e) => setContent(e.target.value || "")}
+            value={text}
+            onChange={(e) => setText(e.target.value || "")}
             placeholder="Enter your content here..."
           />
         </div>
