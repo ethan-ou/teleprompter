@@ -28,6 +28,7 @@ import { DragInput } from "@/components/DragInput";
 import { Tooltip, TooltipContext } from "@/components/Tooltip";
 import { clsx } from "@/lib/css";
 import { isMobileOrTablet } from "@/lib/device";
+import { resetTranscriptWindow } from "@/lib/speech-matcher";
 
 const mobileOrTablet = isMobileOrTablet();
 
@@ -139,8 +140,13 @@ function ButtonSection({ focused }: { focused: boolean }) {
   useActionHotkeys(castScreenAction);
 
   const restartAction = {
-    action: () => (resetPosition(), resetTimer(), window.scrollTo({ top: 0, behavior: "smooth" })),
-    disabled: status !== "stopped",
+    action: () => (
+      resetPosition(),
+      resetTimer(),
+      resetTranscriptWindow(),
+      window.scrollTo({ top: 0, behavior: "smooth" })
+    ),
+    disabled: status === "editing",
     keys: ["r", "8"],
   };
   useActionHotkeys(restartAction);
