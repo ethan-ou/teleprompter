@@ -37,7 +37,7 @@ export function Navbar() {
       role="navigation"
       aria-label="main navigation"
       className={clsx(
-        "top-0 z-10 flex w-full flex-wrap items-center justify-evenly gap-x-4 border-b border-neutral-800 bg-neutral-950/90 py-2 px-3 text-white backdrop-blur transition delay-200 duration-300 ease-in select-none hover:opacity-100 min-[850px]:justify-between min-[1075px]:grid min-[1075px]:grid-cols-[3fr_1fr_3fr]",
+        "top-0 z-10 flex w-full flex-wrap items-center justify-evenly gap-x-4 border-b border-neutral-800 bg-neutral-950/90 py-2 px-3 text-white backdrop-blur transition delay-200 duration-300 ease-in select-none hover:opacity-100 min-[950px]:justify-between min-[1075px]:grid min-[1075px]:grid-cols-[3fr_1fr_3fr]",
         hide ? "fixed opacity-0 hover:opacity-100 active:opacity-100" : "sticky opacity-100",
       )}
     >
@@ -308,7 +308,7 @@ function SliderSection() {
   const marginSlider = {
     step: 2,
     min: 0,
-    max: 36,
+    max: 40,
     value: margin,
     action: setMargin,
     incrementKeys: ["BracketRight"],
@@ -353,7 +353,7 @@ function SliderSection() {
         </Tooltip>
       </TooltipContext>
       <TooltipContext>
-        <div className="w-20">
+        <div className="w-[4.75rem]">
           <DragInput
             value={marginSlider.value}
             onValueChange={marginSlider.action}
