@@ -27,6 +27,9 @@ import { useState } from "react";
 import { DragInput } from "@/components/DragInput";
 import { Tooltip, TooltipContext } from "@/components/Tooltip";
 import { clsx } from "@/lib/css";
+import { isMobileOrTablet } from "@/lib/device";
+
+const mobileOrTablet = isMobileOrTablet();
 
 export function Navbar() {
   const [focused, setFocused] = useState(false);
@@ -37,8 +40,10 @@ export function Navbar() {
       role="navigation"
       aria-label="main navigation"
       className={clsx(
-        "top-0 z-10 flex w-full flex-wrap items-center justify-evenly gap-x-4 border-b border-neutral-800 bg-neutral-950/90 py-2 px-3 text-white backdrop-blur transition delay-200 duration-300 ease-in select-none hover:opacity-100 min-[975px]:justify-between min-[1075px]:grid min-[1075px]:grid-cols-[3fr_1fr_3fr]",
-        hide ? "fixed opacity-0 hover:opacity-100 active:opacity-100" : "sticky opacity-100",
+        "top-0 z-10 flex w-full flex-wrap items-center justify-evenly gap-x-4 gap-y-1 border-b border-neutral-800 bg-neutral-950/90 py-2 px-3 text-white backdrop-blur transition delay-200 duration-300 ease-in select-none hover:opacity-100 min-[925px]:justify-between",
+        hide
+          ? "fixed opacity-0 focus-within:opacity-100 hover:opacity-100 focus:opacity-100 active:opacity-100"
+          : "sticky opacity-100",
       )}
     >
       <div
@@ -48,7 +53,7 @@ export function Navbar() {
       >
         <ButtonSection focused={focused} />
       </div>
-      <div className="flex justify-center text-3xl text-neutral-300 max-[480px]:hidden">
+      <div className="flex justify-center text-3xl text-neutral-300 max-[1000px]:hidden">
         <TimerSection />
       </div>
       <div
@@ -142,7 +147,7 @@ function ButtonSection({ focused }: { focused: boolean }) {
 
   return (
     <>
-      <TooltipContext aria-disabled={startAction.disabled}>
+      <TooltipContext aria-disabled={startAction.disabled || mobileOrTablet}>
         <button
           className={clsx(
             "button group/button mr-1 flex items-center gap-2 rounded-lg border disabled:border-neutral-900 disabled:bg-transparent",
@@ -174,7 +179,7 @@ function ButtonSection({ focused }: { focused: boolean }) {
           {status === "started" ? "Stop" : "Start"} <kbd>Space</kbd>
         </Tooltip>
       </TooltipContext>
-      <TooltipContext aria-disabled={editAction.disabled}>
+      <TooltipContext aria-disabled={editAction.disabled || mobileOrTablet}>
         <button
           className="button"
           onClick={editAction.action}
@@ -187,7 +192,7 @@ function ButtonSection({ focused }: { focused: boolean }) {
           Edit <kbd>E</kbd>
         </Tooltip>
       </TooltipContext>
-      <TooltipContext aria-disabled={clearAction.disabled}>
+      <TooltipContext aria-disabled={clearAction.disabled || mobileOrTablet}>
         <button
           className="button"
           onClick={clearAction.action}
@@ -200,7 +205,7 @@ function ButtonSection({ focused }: { focused: boolean }) {
           Clear <kbd>Del</kbd>
         </Tooltip>
       </TooltipContext>
-      <TooltipContext aria-disabled={mirrorAction.disabled}>
+      <TooltipContext aria-disabled={mirrorAction.disabled || mobileOrTablet}>
         <button
           className="button"
           onClick={mirrorAction.action}
@@ -213,7 +218,7 @@ function ButtonSection({ focused }: { focused: boolean }) {
           Mirror <kbd>M</kbd>
         </Tooltip>
       </TooltipContext>
-      <TooltipContext aria-disabled={fullscreenAction.disabled}>
+      <TooltipContext aria-disabled={fullscreenAction.disabled || mobileOrTablet}>
         <button
           className="button"
           onClick={fullscreenAction.action}
@@ -226,7 +231,7 @@ function ButtonSection({ focused }: { focused: boolean }) {
           {fullscreen.active ? "Exit Fullscreen" : "Fullscreen"} <kbd>F</kbd>
         </Tooltip>
       </TooltipContext>
-      <TooltipContext aria-disabled={hideAction.disabled}>
+      <TooltipContext aria-disabled={hideAction.disabled || mobileOrTablet}>
         <button
           className="button"
           onClick={hideAction.action}
@@ -239,7 +244,7 @@ function ButtonSection({ focused }: { focused: boolean }) {
           Hide Menu <kbd>H</kbd>
         </Tooltip>
       </TooltipContext>
-      <TooltipContext aria-disabled={castScreenAction.disabled}>
+      <TooltipContext aria-disabled={castScreenAction.disabled || mobileOrTablet}>
         <button
           className="button"
           onClick={castScreenAction.action}
@@ -252,7 +257,7 @@ function ButtonSection({ focused }: { focused: boolean }) {
           {cast ? "Stop Casting" : "Cast Screen"} <kbd>S</kbd>
         </Tooltip>
       </TooltipContext>
-      <TooltipContext aria-disabled={restartAction.disabled}>
+      <TooltipContext aria-disabled={restartAction.disabled || mobileOrTablet}>
         <button
           className="button"
           onClick={restartAction.action}
@@ -333,7 +338,7 @@ function SliderSection() {
 
   return (
     <>
-      <TooltipContext>
+      <TooltipContext aria-disabled={mobileOrTablet}>
         <div className="w-20">
           <DragInput
             value={sizeSlider.value}
@@ -354,7 +359,7 @@ function SliderSection() {
           </span>
         </Tooltip>
       </TooltipContext>
-      <TooltipContext>
+      <TooltipContext aria-disabled={mobileOrTablet}>
         <div className="w-[4.75rem]">
           <DragInput
             value={marginSlider.value}
@@ -375,7 +380,7 @@ function SliderSection() {
           </span>
         </Tooltip>
       </TooltipContext>
-      <TooltipContext>
+      <TooltipContext aria-disabled={mobileOrTablet}>
         <div className="w-20">
           <DragInput
             value={contrastSlider.value}
@@ -407,7 +412,7 @@ function SliderSection() {
           className="flex gap-1 px-1 focus-within:outline-2 focus-within:outline-blue-500"
           aria-label="Align"
         >
-          <TooltipContext>
+          <TooltipContext aria-disabled={mobileOrTablet}>
             <AlignCenter />
             <Tooltip>
               Align{" "}

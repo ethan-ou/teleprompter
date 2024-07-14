@@ -39,11 +39,15 @@ export function useScreenCapture() {
 
 export async function startCapture() {
   try {
-    const stream = await navigator.mediaDevices.getDisplayMedia({
-      video: true,
-      audio: false,
-    });
-    return stream;
+    if (navigator && navigator.mediaDevices && navigator.mediaDevices.getDisplayMedia) {
+      const stream = await navigator.mediaDevices.getDisplayMedia({
+        video: true,
+        audio: false,
+      });
+      return stream;
+    } else {
+      throw new Error("Screen capture is not available on your device.");
+    }
   } catch (error) {
     if (error instanceof Error) {
       alert(error.message);
