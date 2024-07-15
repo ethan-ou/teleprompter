@@ -33,9 +33,10 @@ export function DragInput({
   onValueChange: (value: number) => void;
   speed?: number;
 } & React.DetailedHTMLProps<React.InputHTMLAttributes<HTMLInputElement>, HTMLInputElement>) {
-  const constrain = createConstraints(min, max, step);
+  const constrain = useCallback(createConstraints(min, max, step), [min, max, step]);
 
   const inputRef = useRef<HTMLInputElement>(null);
+  const [dragging, setDragging] = useState<boolean>(false);
 
   // We are creating a snapshot of the values when the drag starts
   // because the [value] will itself change & we need the original
@@ -51,37 +52,42 @@ export function DragInput({
     (event: React.MouseEvent<HTMLSpanElement, MouseEvent>) => {
       setStartValue(() => event.clientX);
       setSnapshot(() => value);
+      setDragging(() => true);
       document.documentElement.style.cursor = "ew-resize";
       document.body.style.pointerEvents = "none";
     },
-    [value],
+    [value, setStartValue, setSnapshot, setDragging],
   );
+
+  // Only change the value if the drag was actually started.
+  const onUpdate = useCallback(
+    (event: MouseEvent) => {
+      if (dragging && startValue) {
+        onValueChange(constrain(snapshot + (event.clientX - startValue) * speed));
+      }
+    },
+    [dragging, startValue, onValueChange, constrain, snapshot, speed],
+  );
+
+  // Stop the drag operation now.
+  const onEnd = useCallback(() => {
+    setStartValue(() => 0);
+    setDragging(() => false);
+    document.documentElement.style.cursor = "";
+    document.body.style.pointerEvents = "";
+  }, [setStartValue, setDragging]);
 
   // We use document events to update and end the drag operation
   // because the mouse may not be present over the label during
   // the operation..
   useEffect(() => {
-    // Only change the value if the drag was actually started.
-    const onUpdate = (event: MouseEvent) => {
-      if (startValue) {
-        onValueChange(constrain(snapshot + (event.clientX - startValue) * speed));
-      }
-    };
-
-    // Stop the drag operation now.
-    const onEnd = () => {
-      setStartValue(() => 0);
-      document.documentElement.style.cursor = "";
-      document.body.style.pointerEvents = "";
-    };
-
-    document.addEventListener("pointermove", onUpdate);
-    document.addEventListener("pointerup", onEnd);
+    document.addEventListener("pointermove", onUpdate, { capture: true });
+    document.addEventListener("pointerup", onEnd, { capture: true });
     return () => {
-      document.removeEventListener("pointermove", onUpdate);
-      document.removeEventListener("pointerup", onEnd);
+      document.removeEventListener("pointermove", onUpdate, { capture: true });
+      document.removeEventListener("pointerup", onEnd, { capture: true });
     };
-  }, [startValue, onValueChange, snapshot]);
+  }, [onUpdate, onEnd]);
 
   return (
     <label
