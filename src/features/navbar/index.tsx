@@ -52,7 +52,7 @@ export function Navbar() {
         }}
         className="group absolute -bottom-2 left-1/2 z-20 h-6 w-1/2 -translate-x-1/2 translate-y-1/2 hover:cursor-pointer"
       >
-        <div className="h-2 w-full rounded-full transition delay-75 group-hover:bg-neutral-700/95 group-active:bg-neutral-700/95"></div>
+        <div className="h-2 w-full rounded-full transition delay-75 group-hover:bg-neutral-700/85 group-active:bg-neutral-700/85"></div>
       </button>
       <div
         className="flex flex-wrap items-center gap-x-1"
