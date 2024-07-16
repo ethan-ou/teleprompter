@@ -258,7 +258,7 @@ function ButtonSection({ focused }: { focused: boolean }) {
       </TooltipContext>
       <TooltipContext aria-disabled={hideAction.disabled || mobileOrTablet}>
         <button
-          className={clsx("button", mobileOrTablet ? "hidden" : "")}
+          className="button"
           onClick={hideAction.action}
           disabled={hideAction.disabled}
           aria-label={hide ? "Hide Menu" : "Show Menu"}
@@ -273,7 +273,7 @@ function ButtonSection({ focused }: { focused: boolean }) {
         aria-disabled={castScreenAction.disabled || mobileOrTablet}
       >
         <button
-          className="button"
+          className={clsx("button", mobileOrTablet ? "hidden" : "")}
           onClick={castScreenAction.action}
           disabled={castScreenAction.disabled}
           aria-label={cast ? "Stop Casting" : "Cast Screen"}
