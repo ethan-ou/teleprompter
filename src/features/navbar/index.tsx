@@ -314,7 +314,7 @@ function TimerSection() {
         .toString()
         .padStart(2, "0")}
       :
-      {Math.floor(timer / 60)
+      {Math.floor((timer / 60) % 60)
         .toString()
         .padStart(2, "0")}
       :{(timer % 60).toString().padStart(2, "0")}
