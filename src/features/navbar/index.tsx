@@ -69,8 +69,17 @@ export function Navbar() {
 }
 
 function ButtonSection({ focused }: { focused: boolean }) {
-  const { status, toggleEdit, mirror, toggleMirror, resetTimer, hide, toggleHide, cast, setCast } =
-    useNavbarStore((state) => state);
+  const {
+    status,
+    toggleEdit,
+    mirror,
+    toggleMirror,
+    resetTimer,
+    hide,
+    toggleHide,
+    cast,
+    setCast,
+  } = useNavbarStore((state) => state);
 
   const setContent = useContentStore((state) => state.setText);
   const setTokens = useContentStore((state) => state.setTokens);
@@ -79,7 +88,8 @@ function ButtonSection({ focused }: { focused: boolean }) {
   const fullscreen = useFullScreen();
 
   const startAction = {
-    action: () => (status === "stopped" ? startTeleprompter() : stopTeleprompter()),
+    action: () =>
+      status === "stopped" ? startTeleprompter() : stopTeleprompter(),
     disabled: status === "editing",
     keys: ["1"],
   };
@@ -224,7 +234,9 @@ function ButtonSection({ focused }: { focused: boolean }) {
           Mirror <kbd>M</kbd>
         </Tooltip>
       </TooltipContext>
-      <TooltipContext aria-disabled={fullscreenAction.disabled || mobileOrTablet}>
+      <TooltipContext
+        aria-disabled={fullscreenAction.disabled || mobileOrTablet}
+      >
         <button
           className="button"
           onClick={fullscreenAction.action}
@@ -250,7 +262,9 @@ function ButtonSection({ focused }: { focused: boolean }) {
           Hide Menu <kbd>H</kbd>
         </Tooltip>
       </TooltipContext>
-      <TooltipContext aria-disabled={castScreenAction.disabled || mobileOrTablet}>
+      <TooltipContext
+        aria-disabled={castScreenAction.disabled || mobileOrTablet}
+      >
         <button
           className="button"
           onClick={castScreenAction.action}
@@ -302,8 +316,16 @@ function TimerSection() {
 }
 
 function SliderSection() {
-  const { fontSize, setFontSize, margin, setMargin, opacity, setOpacity, align, setAlign } =
-    useNavbarStore((state) => state);
+  const {
+    fontSize,
+    setFontSize,
+    margin,
+    setMargin,
+    opacity,
+    setOpacity,
+    align,
+    setAlign,
+  } = useNavbarStore((state) => state);
 
   const sizeSlider = {
     step: 5,
@@ -319,7 +341,7 @@ function SliderSection() {
   const marginSlider = {
     step: 2,
     min: 0,
-    max: 40,
+    max: 44,
     value: margin,
     action: setMargin,
     incrementKeys: ["BracketRight"],
@@ -480,18 +502,14 @@ function useSliderHotkeys({
   incrementKeys: string[];
   decrementKeys: string[];
 }) {
-  useHotkeys(incrementKeys, () => action(value + step <= max ? value + step : value), [
+  useHotkeys(
     incrementKeys,
-    action,
-    value,
-    step,
-    max,
-  ]);
-  useHotkeys(decrementKeys, () => action(value - step >= min ? value - step : value), [
+    () => action(value + step <= max ? value + step : value),
+    [incrementKeys, action, value, step, max],
+  );
+  useHotkeys(
     decrementKeys,
-    action,
-    value,
-    step,
-    max,
-  ]);
+    () => action(value - step >= min ? value - step : value),
+    [decrementKeys, action, value, step, max],
+  );
 }

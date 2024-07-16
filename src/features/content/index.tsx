@@ -8,13 +8,17 @@ import { useEffectInterval } from "@/app/hooks";
 import { clsx } from "@/lib/css";
 
 export function Content() {
-  const { status, mirror, fontSize, margin, opacity, align } = useNavbarStore((state) => state);
-  const { text, setText, tokens, position, setPosition } = useContentStore((state) => state);
+  const { status, mirror, fontSize, margin, opacity, align } = useNavbarStore(
+    (state) => state,
+  );
+  const { text, setText, tokens, position, setPosition } = useContentStore(
+    (state) => state,
+  );
 
   const style: React.CSSProperties = {
     fontSize: `${fontSize}px`,
     paddingLeft: `${margin}vw`,
-    paddingRight: `${margin * 0.66}vw`,
+    paddingRight: `${margin * 0.75}vw`,
     opacity: opacity / 100,
     paddingTop: {
       top: "1rem",
@@ -82,7 +86,10 @@ export function Content() {
         <div className="grid">
           {/* Use an invisible div to force an increase in textarea sizing.
               This should have exactly the same size and properties as the textarea. */}
-          <div className="content invisible col-start-1 row-start-1" style={style}>
+          <div
+            className="content invisible col-start-1 row-start-1"
+            style={style}
+          >
             {text}
           </div>
           <textarea
@@ -96,7 +103,10 @@ export function Content() {
         </div>
       ) : (
         <div
-          className={clsx("content", status === "started" ? "content-transition" : "")}
+          className={clsx(
+            "content",
+            status === "started" ? "content-transition" : "",
+          )}
           style={{
             ...style,
             transform: `scaleX(${mirror ? "-1" : "1"})`,
@@ -105,7 +115,9 @@ export function Content() {
           {tokens.map((token, index) => (
             <span
               // Position ref a little after the end index to scroll past line breaks and punctuation.
-              {...(index === Math.min(position.end + 2, tokens.length - 1) ? { ref: lastRef } : {})}
+              {...(index === Math.min(position.end + 2, tokens.length - 1)
+                ? { ref: lastRef }
+                : {})}
               key={token.index}
               onClick={() => {
                 const selectedPosition = index - 1;
@@ -114,7 +126,9 @@ export function Content() {
                   start: selectedPosition,
                   search: selectedPosition,
                   end: selectedPosition,
-                  ...(bounds !== undefined && { bounds: Math.min(bounds, tokens.length) }),
+                  ...(bounds !== undefined && {
+                    bounds: Math.min(bounds, tokens.length),
+                  }),
                 });
               }}
               className={
@@ -124,7 +138,8 @@ export function Content() {
                     ? "interim-transcript"
                     : status === "started" && token.index > position.bounds + 20
                       ? "opacity-40"
-                      : status === "started" && token.index > position.bounds + 10
+                      : status === "started" &&
+                          token.index > position.bounds + 10
                         ? "opacity-60"
                         : status === "started" && token.index > position.bounds
                           ? "opacity-80"
