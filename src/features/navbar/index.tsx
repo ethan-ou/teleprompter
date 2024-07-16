@@ -46,14 +46,6 @@ export function Navbar() {
         hide ? "fixed -translate-y-full" : "sticky translate-y-0",
       )}
     >
-      <button
-        onPointerUp={() => {
-          toggleHide();
-        }}
-        className="group absolute -bottom-2 left-1/2 z-20 h-6 w-1/2 -translate-x-1/2 translate-y-1/2 hover:cursor-pointer"
-      >
-        <div className="h-2 w-full rounded-full transition delay-75 group-hover:bg-neutral-700/85 group-active:bg-neutral-700/85"></div>
-      </button>
       <div
         className="flex flex-wrap items-center gap-x-1"
         onFocus={() => setFocused(() => true)}
@@ -71,6 +63,13 @@ export function Navbar() {
       >
         <SliderSection />
       </div>
+      <button
+        type="button"
+        onClick={() => toggleHide()}
+        className="group absolute -bottom-2 left-1/2 z-20 h-6 w-1/2 -translate-x-1/2 translate-y-1/2 hover:cursor-pointer"
+      >
+        <div className="h-2 w-full rounded-full transition delay-75 group-hover:bg-neutral-700/85 group-focus:bg-neutral-700/85 group-active:bg-neutral-700/85"></div>
+      </button>
     </nav>
   );
 }
@@ -161,6 +160,7 @@ function ButtonSection({ focused }: { focused: boolean }) {
     <>
       <TooltipContext aria-disabled={startAction.disabled || mobileOrTablet}>
         <button
+          type="button"
           className={clsx(
             "button group/button flex items-center gap-2 rounded-lg disabled:border-neutral-900 disabled:bg-transparent hover:disabled:border-neutral-900 hover:disabled:bg-transparent sm:mr-1 sm:border",
             status === "started"
@@ -193,6 +193,7 @@ function ButtonSection({ focused }: { focused: boolean }) {
       </TooltipContext>
       <TooltipContext aria-disabled={editAction.disabled || mobileOrTablet}>
         <button
+          type="button"
           className="button"
           onClick={editAction.action}
           disabled={editAction.disabled}
@@ -206,6 +207,7 @@ function ButtonSection({ focused }: { focused: boolean }) {
       </TooltipContext>
       <TooltipContext aria-disabled={clearAction.disabled || mobileOrTablet}>
         <button
+          type="button"
           className="button"
           onClick={clearAction.action}
           disabled={clearAction.disabled}
@@ -219,6 +221,7 @@ function ButtonSection({ focused }: { focused: boolean }) {
       </TooltipContext>
       <TooltipContext aria-disabled={mirrorAction.disabled || mobileOrTablet}>
         <button
+          type="button"
           className="button"
           onClick={mirrorAction.action}
           disabled={mirrorAction.disabled}
@@ -232,6 +235,7 @@ function ButtonSection({ focused }: { focused: boolean }) {
       </TooltipContext>
       <TooltipContext aria-disabled={fullscreenAction.disabled || mobileOrTablet}>
         <button
+          type="button"
           className="button"
           onClick={fullscreenAction.action}
           disabled={fullscreenAction.disabled}
@@ -245,6 +249,7 @@ function ButtonSection({ focused }: { focused: boolean }) {
       </TooltipContext>
       <TooltipContext aria-disabled={hideAction.disabled || mobileOrTablet}>
         <button
+          type="button"
           className="button"
           onClick={hideAction.action}
           disabled={hideAction.disabled}
