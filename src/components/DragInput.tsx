@@ -32,8 +32,15 @@ export function DragInput({
   value: number;
   onValueChange: (value: number) => void;
   speed?: number;
-} & React.DetailedHTMLProps<React.InputHTMLAttributes<HTMLInputElement>, HTMLInputElement>) {
-  const constrain = useCallback(createConstraints(min, max, step), [min, max, step]);
+} & React.DetailedHTMLProps<
+  React.InputHTMLAttributes<HTMLInputElement>,
+  HTMLInputElement
+>) {
+  const constrain = useCallback(createConstraints(min, max, step), [
+    min,
+    max,
+    step,
+  ]);
 
   const inputRef = useRef<HTMLInputElement>(null);
   const [dragging, setDragging] = useState<boolean>(false);
@@ -63,7 +70,9 @@ export function DragInput({
   const onUpdate = useCallback(
     (event: MouseEvent) => {
       if (dragging && startValue) {
-        onValueChange(constrain(snapshot + (event.clientX - startValue) * speed));
+        onValueChange(
+          constrain(snapshot + (event.clientX - startValue) * speed),
+        );
       }
     },
     [dragging, startValue, onValueChange, constrain, snapshot, speed],
@@ -81,11 +90,11 @@ export function DragInput({
   // because the mouse may not be present over the label during
   // the operation..
   useEffect(() => {
-    document.addEventListener("pointermove", onUpdate, { capture: true });
-    document.addEventListener("pointerup", onEnd, { capture: true });
+    document.addEventListener("pointermove", onUpdate);
+    document.addEventListener("pointerup", onEnd);
     return () => {
-      document.removeEventListener("pointermove", onUpdate, { capture: true });
-      document.removeEventListener("pointerup", onEnd, { capture: true });
+      document.removeEventListener("pointermove", onUpdate);
+      document.removeEventListener("pointerup", onEnd);
     };
   }, [onUpdate, onEnd]);
 
@@ -109,7 +118,9 @@ export function DragInput({
         max={max}
         autoComplete="false"
         spellCheck="false"
-        onBlur={(e) => onValueChange(constrain(parseInt(e.currentTarget.value, 10) || 0))}
+        onBlur={(e) =>
+          onValueChange(constrain(parseInt(e.currentTarget.value, 10) || 0))
+        }
         onKeyUp={(e) => {
           if (e.key === "Enter") {
             onValueChange(constrain(parseInt(e.currentTarget.value, 10) || 0));

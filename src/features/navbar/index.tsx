@@ -35,18 +35,25 @@ const mobileOrTablet = isMobileOrTablet();
 export function Navbar() {
   const [focused, setFocused] = useState(false);
   const hide = useNavbarStore((state) => state.hide);
+  const toggleHide = useNavbarStore((state) => state.toggleHide);
 
   return (
     <nav
       role="navigation"
       aria-label="main navigation"
       className={clsx(
-        "top-0 z-10 flex w-full flex-wrap items-center justify-evenly gap-x-4 gap-y-1 border-b border-neutral-800 bg-neutral-950/90 py-2 px-3 text-white backdrop-blur transition delay-200 duration-300 ease-in select-none hover:opacity-100 min-[925px]:justify-between",
-        hide
-          ? "fixed opacity-0 focus-within:opacity-100 hover:opacity-100 focus:opacity-100 active:opacity-100"
-          : "sticky opacity-100",
+        "top-0 z-10 flex w-full flex-wrap items-center justify-evenly gap-x-4 gap-y-1 border-b border-neutral-800 bg-neutral-950/90 py-2 px-3 text-white backdrop-blur transition select-none hover:opacity-100 min-[925px]:justify-between",
+        hide ? "fixed -translate-y-full" : "sticky translate-y-0",
       )}
     >
+      <button
+        onPointerUp={() => {
+          toggleHide();
+        }}
+        className="group absolute -bottom-2 left-1/2 z-20 h-6 w-1/2 -translate-x-1/2 translate-y-1/2 hover:cursor-pointer"
+      >
+        <div className="h-2 w-full rounded-full transition delay-75 group-hover:bg-neutral-700/95 group-active:bg-neutral-700/95"></div>
+      </button>
       <div
         className="flex flex-wrap items-center gap-x-1"
         onFocus={() => setFocused(() => true)}
@@ -137,7 +144,7 @@ function ButtonSection({ focused }: { focused: boolean }) {
 
   const hideAction = {
     action: () => toggleHide(),
-    disabled: status === "editing",
+    disabled: false,
     keys: ["h", "6"],
   };
   useActionHotkeys(hideAction);
