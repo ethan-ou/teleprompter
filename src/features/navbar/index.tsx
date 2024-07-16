@@ -173,10 +173,10 @@ function ButtonSection({ focused }: { focused: boolean }) {
       <TooltipContext aria-disabled={startAction.disabled || mobileOrTablet}>
         <button
           className={clsx(
-            "button group/button mr-1 flex items-center gap-2 rounded-lg border disabled:border-neutral-900 disabled:bg-transparent",
+            "button group/button flex items-center gap-2 rounded-lg disabled:border-neutral-900 disabled:bg-transparent sm:mr-1 sm:border",
             status === "started"
-              ? "border-red-500/30 bg-red-700/10 hover:border-red-500/40 hover:bg-red-700/20"
-              : "border-green-500/30 bg-green-700/10 hover:border-green-500/40 hover:bg-green-700/20",
+              ? "sm:border-red-500/30 sm:bg-red-700/10 sm:hover:border-red-500/40 sm:hover:bg-red-700/20"
+              : "sm:border-green-500/30 sm:bg-green-700/10 sm:hover:border-green-500/40 sm:hover:bg-green-700/20",
           )}
           disabled={startAction.disabled}
           onClick={startAction.action}
@@ -189,7 +189,7 @@ function ButtonSection({ focused }: { focused: boolean }) {
           )}
           <span
             className={clsx(
-              "pr-1 group-disabled/button:text-neutral-800",
+              "hidden pr-1 group-disabled/button:text-neutral-800 sm:inline",
               status === "started"
                 ? "pr-1.5 text-red-300/90 group-hover/button:text-red-300"
                 : "pr-1 text-green-300/80 group-hover/button:text-green-300/90",
@@ -245,7 +245,7 @@ function ButtonSection({ focused }: { focused: boolean }) {
         aria-disabled={fullscreenAction.disabled || mobileOrTablet}
       >
         <button
-          className="button"
+          className={clsx("button", mobileOrTablet ? "hidden" : "")}
           onClick={fullscreenAction.action}
           disabled={fullscreenAction.disabled}
           aria-label={fullscreen.active ? "Exit Fullscreen" : "Fullscreen"}
