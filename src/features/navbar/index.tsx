@@ -162,7 +162,7 @@ function ButtonSection({ focused }: { focused: boolean }) {
       <TooltipContext aria-disabled={startAction.disabled || mobileOrTablet}>
         <button
           className={clsx(
-            "button group/button flex items-center gap-2 rounded-lg disabled:border-neutral-900 disabled:bg-transparent sm:mr-1 sm:border",
+            "button group/button flex items-center gap-2 rounded-lg disabled:border-neutral-900 disabled:bg-transparent hover:disabled:border-neutral-900 hover:disabled:bg-transparent sm:mr-1 sm:border",
             status === "started"
               ? "sm:border-red-500/30 sm:bg-red-700/10 sm:hover:border-red-500/40 sm:hover:bg-red-700/20"
               : "sm:border-green-500/30 sm:bg-green-700/10 sm:hover:border-green-500/40 sm:hover:bg-green-700/20",
