@@ -245,7 +245,7 @@ function ButtonSection({ focused }: { focused: boolean }) {
         aria-disabled={fullscreenAction.disabled || mobileOrTablet}
       >
         <button
-          className={clsx("button", mobileOrTablet ? "hidden" : "")}
+          className="button"
           onClick={fullscreenAction.action}
           disabled={fullscreenAction.disabled}
           aria-label={fullscreen.active ? "Exit Fullscreen" : "Fullscreen"}
@@ -258,12 +258,12 @@ function ButtonSection({ focused }: { focused: boolean }) {
       </TooltipContext>
       <TooltipContext aria-disabled={hideAction.disabled || mobileOrTablet}>
         <button
-          className="button"
+          className={clsx("button", mobileOrTablet ? "hidden" : "")}
           onClick={hideAction.action}
           disabled={hideAction.disabled}
           aria-label={hide ? "Hide Menu" : "Show Menu"}
         >
-          <EyeOff className={`icon ${hide ? "yellow" : ""}`} />
+          <EyeOff className={`icon`} />
         </button>
         <Tooltip>
           Hide Menu <kbd>H</kbd>
