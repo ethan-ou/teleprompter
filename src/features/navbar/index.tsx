@@ -76,17 +76,8 @@ export function Navbar() {
 }
 
 function ButtonSection({ focused }: { focused: boolean }) {
-  const {
-    status,
-    toggleEdit,
-    mirror,
-    toggleMirror,
-    resetTimer,
-    hide,
-    toggleHide,
-    cast,
-    setCast,
-  } = useNavbarStore((state) => state);
+  const { status, toggleEdit, mirror, toggleMirror, resetTimer, hide, toggleHide, cast, setCast } =
+    useNavbarStore((state) => state);
 
   const setContent = useContentStore((state) => state.setText);
   const setTokens = useContentStore((state) => state.setTokens);
@@ -95,10 +86,9 @@ function ButtonSection({ focused }: { focused: boolean }) {
   const fullscreen = useFullScreen();
 
   const startAction = {
-    action: () =>
-      status === "stopped" ? startTeleprompter() : stopTeleprompter(),
+    action: () => (status === "stopped" ? startTeleprompter() : stopTeleprompter()),
     disabled: status === "editing",
-    keys: ["1"],
+    keys: [],
   };
 
   useHotkeys(
@@ -107,12 +97,11 @@ function ButtonSection({ focused }: { focused: boolean }) {
     { enabled: !startAction.disabled && !focused, preventDefault: true },
     [startAction.action, focused],
   );
-  useActionHotkeys(startAction);
 
   const editAction = {
     action: () => (toggleEdit(), setTokens()),
     disabled: status === "started",
-    keys: ["e", "2"],
+    keys: ["e"],
   };
   useActionHotkeys(editAction);
 
@@ -124,35 +113,35 @@ function ButtonSection({ focused }: { focused: boolean }) {
       }
     },
     disabled: status === "started",
-    keys: ["delete", "3"],
+    keys: ["delete"],
   };
   useActionHotkeys(clearAction);
 
   const mirrorAction = {
     action: () => toggleMirror(),
     disabled: status === "editing",
-    keys: ["m", "4"],
+    keys: ["m"],
   };
   useActionHotkeys(mirrorAction);
 
   const fullscreenAction = {
     action: () => (fullscreen.active ? fullscreen.exit() : fullscreen.enter()),
     disabled: false,
-    keys: ["f", "5"],
+    keys: ["f"],
   };
   useActionHotkeys(fullscreenAction);
 
   const hideAction = {
     action: () => toggleHide(),
     disabled: false,
-    keys: ["h", "6"],
+    keys: ["h"],
   };
   useActionHotkeys(hideAction);
 
   const castScreenAction = {
     action: () => setCast(!cast),
     disabled: false,
-    keys: ["s", "7"],
+    keys: ["s"],
   };
   useActionHotkeys(castScreenAction);
 
@@ -164,7 +153,7 @@ function ButtonSection({ focused }: { focused: boolean }) {
       window.scrollTo({ top: 0, behavior: "smooth" })
     ),
     disabled: status === "editing",
-    keys: ["r", "8"],
+    keys: ["r"],
   };
   useActionHotkeys(restartAction);
 
@@ -241,9 +230,7 @@ function ButtonSection({ focused }: { focused: boolean }) {
           Mirror <kbd>M</kbd>
         </Tooltip>
       </TooltipContext>
-      <TooltipContext
-        aria-disabled={fullscreenAction.disabled || mobileOrTablet}
-      >
+      <TooltipContext aria-disabled={fullscreenAction.disabled || mobileOrTablet}>
         <button
           className="button"
           onClick={fullscreenAction.action}
@@ -269,21 +256,21 @@ function ButtonSection({ focused }: { focused: boolean }) {
           Hide Menu <kbd>H</kbd>
         </Tooltip>
       </TooltipContext>
-      <TooltipContext
-        aria-disabled={castScreenAction.disabled || mobileOrTablet}
-      >
-        <button
-          className={clsx("button", mobileOrTablet ? "hidden" : "")}
-          onClick={castScreenAction.action}
-          disabled={castScreenAction.disabled}
-          aria-label={cast ? "Stop Casting" : "Cast Screen"}
-        >
-          <Airplay className={`icon ${cast ? "yellow" : ""}`} />
-        </button>
-        <Tooltip>
-          {cast ? "Stop Casting" : "Cast Screen"} <kbd>S</kbd>
-        </Tooltip>
-      </TooltipContext>
+      {!mobileOrTablet && (
+        <TooltipContext aria-disabled={castScreenAction.disabled || mobileOrTablet}>
+          <button
+            className="button"
+            onClick={castScreenAction.action}
+            disabled={castScreenAction.disabled}
+            aria-label={cast ? "Stop Casting" : "Cast Screen"}
+          >
+            <Airplay className={`icon ${cast ? "yellow" : ""}`} />
+          </button>
+          <Tooltip>
+            {cast ? "Stop Casting" : "Cast Screen"} <kbd>S</kbd>
+          </Tooltip>
+        </TooltipContext>
+      )}
       <TooltipContext aria-disabled={restartAction.disabled || mobileOrTablet}>
         <button
           className="button"
@@ -323,16 +310,8 @@ function TimerSection() {
 }
 
 function SliderSection() {
-  const {
-    fontSize,
-    setFontSize,
-    margin,
-    setMargin,
-    opacity,
-    setOpacity,
-    align,
-    setAlign,
-  } = useNavbarStore((state) => state);
+  const { fontSize, setFontSize, margin, setMargin, opacity, setOpacity, align, setAlign } =
+    useNavbarStore((state) => state);
 
   const sizeSlider = {
     step: 5,
@@ -509,14 +488,18 @@ function useSliderHotkeys({
   incrementKeys: string[];
   decrementKeys: string[];
 }) {
-  useHotkeys(
+  useHotkeys(incrementKeys, () => action(value + step <= max ? value + step : value), [
     incrementKeys,
-    () => action(value + step <= max ? value + step : value),
-    [incrementKeys, action, value, step, max],
-  );
-  useHotkeys(
+    action,
+    value,
+    step,
+    max,
+  ]);
+  useHotkeys(decrementKeys, () => action(value - step >= min ? value - step : value), [
     decrementKeys,
-    () => action(value - step >= min ? value - step : value),
-    [decrementKeys, action, value, step, max],
-  );
+    action,
+    value,
+    step,
+    max,
+  ]);
 }
