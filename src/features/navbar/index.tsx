@@ -28,7 +28,7 @@ import { DragInput } from "@/components/DragInput";
 import { Tooltip, TooltipContext } from "@/components/Tooltip";
 import { clsx } from "@/lib/css";
 import { isMobileOrTablet } from "@/lib/device";
-import { resetTranscriptWindow } from "@/lib/speech-matcher";
+import { getBoundsStart, resetTranscriptWindow } from "@/lib/speech-matcher";
 
 const mobileOrTablet = isMobileOrTablet();
 
@@ -79,8 +79,9 @@ function ButtonSection({ focused }: { focused: boolean }) {
     useNavbarStore((state) => state);
 
   const setContent = useContentStore((state) => state.setText);
+  const tokens = useContentStore((state) => state.tokens);
   const setTokens = useContentStore((state) => state.setTokens);
-  const resetPosition = useContentStore((state) => state.resetPosition);
+  const setPosition = useContentStore((state) => state.setPosition);
 
   const fullscreen = useFullScreen();
 
@@ -147,7 +148,14 @@ function ButtonSection({ focused }: { focused: boolean }) {
 
   const restartAction = {
     action: () => {
-      resetPosition();
+      const selectedPosition = -1;
+      const boundStart = getBoundsStart(tokens, 0);
+      setPosition({
+        start: selectedPosition,
+        end: selectedPosition,
+        search: selectedPosition,
+        ...(boundStart !== undefined && { bounds: boundStart }),
+      });
       resetTimer();
       resetTranscriptWindow();
       window.scrollTo({ top: 0, behavior: "smooth" });

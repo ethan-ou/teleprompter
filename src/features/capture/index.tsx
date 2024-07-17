@@ -22,10 +22,7 @@ export function Capture() {
       if (ref.current) {
         setHeight(() =>
           ref.current
-            ? Array.from(ref.current.getClientRects()).reduce(
-                (accum, curr) => accum + curr.y,
-                0,
-              )
+            ? Array.from(ref.current.getClientRects()).reduce((accum, curr) => accum + curr.y, 0)
             : 0,
         );
       }
@@ -35,7 +32,7 @@ export function Capture() {
   return (
     <video
       ref={ref}
-      className="fixed z-0 w-screen overflow-hidden bg-neutral-950 opacity-50"
+      className="fixed z-0 w-full overflow-hidden bg-neutral-950 opacity-50"
       style={{
         height: `calc(100vh - ${height}px)`,
       }}

@@ -19,7 +19,6 @@ export interface ContentActions {
   setText: (text: string) => void;
   setTokens: () => void;
   setPosition: (position: Partial<Position>) => void;
-  resetPosition: () => void;
 }
 
 const initialText = `This is a voice-activated teleprompter. To use it, press Start on the top-left and speak into your microphone.
@@ -51,8 +50,6 @@ export const useContentStore = create<ContentState & ContentActions>()(
         })),
       setTokens: () => set((state) => ({ tokens: tokenize(state.text) })),
       setPosition: (position) => set((prev) => ({ position: { ...prev.position, ...position } })),
-      resetPosition: () =>
-        set(() => ({ position: { start: -1, search: -1, end: -1, bounds: -1 } })),
     }),
     {
       name: "teleprompter:content",

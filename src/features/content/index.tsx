@@ -135,7 +135,7 @@ export function Content() {
   return (
     <main ref={mainRef}>
       {status === "editing" ? (
-        <div className="grid">
+        <div className="grid grid-cols-1 grid-rows-1">
           {/* Use an invisible div to force an increase in textarea sizing.
               This should have exactly the same size and properties as the textarea. */}
           <div className="content invisible col-start-1 row-start-1" style={style}>
