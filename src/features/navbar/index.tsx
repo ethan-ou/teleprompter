@@ -42,7 +42,7 @@ export function Navbar() {
       role="navigation"
       aria-label="main navigation"
       className={clsx(
-        "top-0 z-10 flex w-full flex-wrap items-center justify-evenly gap-x-4 gap-y-1 border-b border-neutral-800 bg-neutral-950/90 py-2 px-3 text-white backdrop-blur transition select-none hover:opacity-100 min-[925px]:justify-between",
+        "top-0 z-10 flex w-full flex-wrap items-center justify-evenly gap-x-4 gap-y-1 border-b border-neutral-800 bg-neutral-950/90 py-2 px-3 text-white backdrop-blur transition select-none hover:opacity-100 min-[925px]:justify-between lg:grid lg:grid-cols-[3fr_1fr_3fr]",
         hide ? "fixed -translate-y-full" : "sticky translate-y-0",
       )}
     >
@@ -53,7 +53,7 @@ export function Navbar() {
       >
         <ButtonSection focused={focused} />
       </div>
-      <div className="flex justify-center text-3xl text-neutral-300 max-[1000px]:hidden">
+      <div className="hidden justify-center text-3xl text-neutral-300 lg:flex">
         <TimerSection />
       </div>
       <div
