@@ -21,7 +21,7 @@ export interface NavbarActions {
   stop: () => void;
   toggleEdit: () => void;
   toggleMirror: () => void;
-  toggleHide: () => void;
+  setHide: (value: boolean) => void;
   setCast: (value: boolean) => void;
   setFontSize: (value: number) => void;
   setMargin: (value: number) => void;
@@ -47,7 +47,7 @@ export const useNavbarStore = create<NavbarState & NavbarActions>()(
         set((state) => ({
           status: state.status === "editing" ? "stopped" : "editing",
         })),
-      toggleHide: () => set((state) => ({ hide: !state.hide })),
+      setHide: (value: boolean) => set(() => ({ hide: value })),
       setCast: (value: boolean) => set(() => ({ cast: value })),
       start: () => set(() => ({ status: "started" })),
       stop: () => set(() => ({ status: "stopped" })),

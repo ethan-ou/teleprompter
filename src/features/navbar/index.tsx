@@ -35,7 +35,7 @@ const mobileOrTablet = isMobileOrTablet();
 export function Navbar() {
   const [focused, setFocused] = useState(false);
   const hide = useNavbarStore((state) => state.hide);
-  const toggleHide = useNavbarStore((state) => state.toggleHide);
+  const setHide = useNavbarStore((state) => state.setHide);
 
   return (
     <nav
@@ -65,17 +65,17 @@ export function Navbar() {
       </div>
       <button
         type="button"
-        onClick={() => toggleHide()}
-        className="group absolute -bottom-2 left-1/2 z-20 h-6 w-1/2 -translate-x-1/2 translate-y-1/2 hover:cursor-pointer"
+        onClick={() => setHide(!hide)}
+        className="group absolute -bottom-2 left-1/2 z-20 h-6 w-full -translate-x-1/2 translate-y-1/2 hover:cursor-pointer focus:outline-0"
       >
-        <div className="h-2 w-full rounded-full transition delay-75 group-hover:bg-neutral-700/85 group-focus:bg-neutral-700/85 group-active:bg-neutral-700/85"></div>
+        <div className="m-auto h-2 w-1/2 max-w-lg rounded-full transition delay-75 group-hover:bg-neutral-700/85 group-focus:bg-neutral-700/85 group-focus:outline-2 group-active:bg-neutral-700/85"></div>
       </button>
     </nav>
   );
 }
 
 function ButtonSection({ focused }: { focused: boolean }) {
-  const { status, toggleEdit, mirror, toggleMirror, resetTimer, hide, toggleHide, cast, setCast } =
+  const { status, toggleEdit, mirror, toggleMirror, resetTimer, hide, setHide, cast, setCast } =
     useNavbarStore((state) => state);
 
   const setContent = useContentStore((state) => state.setText);
@@ -124,14 +124,15 @@ function ButtonSection({ focused }: { focused: boolean }) {
   useActionHotkeys(mirrorAction);
 
   const fullscreenAction = {
-    action: () => (fullscreen.active ? fullscreen.exit() : fullscreen.enter()),
+    action: () =>
+      fullscreen.active ? (fullscreen.exit(), setHide(false)) : (fullscreen.enter(), setHide(true)),
     disabled: false,
     keys: ["f"],
   };
   useActionHotkeys(fullscreenAction);
 
   const hideAction = {
-    action: () => toggleHide(),
+    action: () => setHide(!hide),
     disabled: false,
     keys: ["h"],
   };
