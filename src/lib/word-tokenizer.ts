@@ -101,3 +101,15 @@ export const getNextSentence = (tokens: Token[], index: number) => {
 
   return tokens.at(-1);
 };
+
+export const getNextWordIndex = (tokens: Token[], index: number) => {
+  let i = index + 1;
+  while (i >= 0 && i < tokens.length) {
+    if (tokens[i].type === "TOKEN") {
+      return i;
+    }
+    i++;
+  }
+
+  return tokens.length - 1;
+};

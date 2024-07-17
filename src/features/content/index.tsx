@@ -6,7 +6,7 @@ import { useHotkeys } from "react-hotkeys-hook";
 import { getBoundsStart, resetTranscriptWindow } from "@/lib/speech-matcher";
 import { useEffectInterval } from "@/app/hooks";
 import { clsx } from "@/lib/css";
-import { getNextSentence, getPrevSentence } from "@/lib/word-tokenizer";
+import { getNextSentence, getNextWordIndex, getPrevSentence } from "@/lib/word-tokenizer";
 
 export function Content() {
   const { status, mirror, fontSize, margin, opacity, align, toggleEdit } = useNavbarStore(
@@ -161,7 +161,9 @@ export function Content() {
           {tokens.map((token, index) => (
             <span
               // Position ref a little after the end index to scroll past line breaks and punctuation.
-              {...(index === Math.min(position.end + 2, tokens.length - 1) ? { ref: lastRef } : {})}
+              {...(index === Math.min(getNextWordIndex(tokens, position.end), tokens.length - 1)
+                ? { ref: lastRef }
+                : {})}
               key={token.index}
               onClick={() => {
                 const selectedPosition = index - 1;
