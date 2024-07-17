@@ -3,15 +3,16 @@ import { escape } from "@/lib/html-escaper";
 import { useNavbarStore } from "../navbar/store";
 import { useContentStore } from "./store";
 import { useHotkeys } from "react-hotkeys-hook";
-import { getBoundsStart } from "@/lib/speech-matcher";
+import { getBoundsStart, resetTranscriptWindow } from "@/lib/speech-matcher";
 import { useEffectInterval } from "@/app/hooks";
 import { clsx } from "@/lib/css";
+import { getNextSentence, getPrevSentence } from "@/lib/word-tokenizer";
 
 export function Content() {
-  const { status, mirror, fontSize, margin, opacity, align } = useNavbarStore(
+  const { status, mirror, fontSize, margin, opacity, align, toggleEdit } = useNavbarStore(
     (state) => state,
   );
-  const { text, setText, tokens, position, setPosition } = useContentStore(
+  const { text, setText, tokens, position, setPosition, setTokens } = useContentStore(
     (state) => state,
   );
 
@@ -78,6 +79,57 @@ export function Content() {
       }
     },
     { preventDefault: true },
+    [],
+  );
+
+  useHotkeys(
+    "esc",
+    () => (toggleEdit(), setTokens()),
+    {
+      enableOnFormTags: ["textarea"],
+      enabled: status === "editing",
+    },
+    [toggleEdit, setTokens],
+  );
+
+  useHotkeys(
+    ["ArrowLeft"],
+    () => {
+      const token = getPrevSentence(tokens, position.search);
+      if (token) {
+        const selectedPosition = token.index - 1;
+        const boundStart = getBoundsStart(tokens, selectedPosition);
+        setPosition({
+          start: selectedPosition,
+          end: selectedPosition,
+          search: selectedPosition,
+          ...(boundStart !== undefined && { bounds: boundStart }),
+        });
+        resetTranscriptWindow();
+      }
+    },
+    { enabled: status !== "editing" },
+    [tokens, position.search, getPrevSentence, getBoundsStart, setPosition],
+  );
+
+  useHotkeys(
+    ["ArrowRight"],
+    () => {
+      const token = getNextSentence(tokens, position.search);
+      if (token) {
+        const selectedPosition = token.index - 1;
+        const boundStart = getBoundsStart(tokens, selectedPosition);
+        setPosition({
+          start: selectedPosition,
+          end: selectedPosition,
+          search: selectedPosition,
+          ...(boundStart !== undefined && { bounds: boundStart }),
+        });
+        resetTranscriptWindow();
+      }
+    },
+    { enabled: status !== "editing" },
+    [tokens, position.search, getPrevSentence, getBoundsStart, setPosition],
   );
 
   return (
@@ -86,10 +138,7 @@ export function Content() {
         <div className="grid">
           {/* Use an invisible div to force an increase in textarea sizing.
               This should have exactly the same size and properties as the textarea. */}
-          <div
-            className="content invisible col-start-1 row-start-1"
-            style={style}
-          >
+          <div className="content invisible col-start-1 row-start-1" style={style}>
             {text}
           </div>
           <textarea
@@ -103,10 +152,7 @@ export function Content() {
         </div>
       ) : (
         <div
-          className={clsx(
-            "content",
-            status === "started" ? "content-transition" : "",
-          )}
+          className={clsx("content select-none", status === "started" ? "content-transition" : "")}
           style={{
             ...style,
             transform: `scaleX(${mirror ? "-1" : "1"})`,
@@ -115,9 +161,7 @@ export function Content() {
           {tokens.map((token, index) => (
             <span
               // Position ref a little after the end index to scroll past line breaks and punctuation.
-              {...(index === Math.min(position.end + 2, tokens.length - 1)
-                ? { ref: lastRef }
-                : {})}
+              {...(index === Math.min(position.end + 2, tokens.length - 1) ? { ref: lastRef } : {})}
               key={token.index}
               onClick={() => {
                 const selectedPosition = index - 1;
@@ -138,8 +182,7 @@ export function Content() {
                     ? "interim-transcript"
                     : status === "started" && token.index > position.bounds + 20
                       ? "opacity-40"
-                      : status === "started" &&
-                          token.index > position.bounds + 10
+                      : status === "started" && token.index > position.bounds + 10
                         ? "opacity-60"
                         : status === "started" && token.index > position.bounds
                           ? "opacity-80"

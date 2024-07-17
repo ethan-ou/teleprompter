@@ -1,5 +1,7 @@
+export type TokenType = "TOKEN" | "DELIMITER";
+
 export type Token = {
-  type: "TOKEN" | "DELIMITER";
+  type: TokenType;
   value: string;
   index: number;
 };
@@ -60,4 +62,42 @@ export const tokenize = (text: string | null) => {
   }
 
   return results;
+};
+
+export const getPrevSentence = (tokens: Token[], index: number) => {
+  let i = index - 1;
+  let prevToken: Token | undefined;
+  while (i >= 0 && i < tokens.length) {
+    const token = tokens[i];
+    if (token.type === "TOKEN") {
+      prevToken = token;
+    }
+    if (
+      token.type === "DELIMITER" &&
+      (token.value.includes(".") || token.value.includes("\n")) &&
+      prevToken
+    ) {
+      return prevToken;
+    }
+    i--;
+  }
+
+  return tokens.at(0);
+};
+
+export const getNextSentence = (tokens: Token[], index: number) => {
+  let i = index + 1;
+  let nextToken = false;
+  while (i >= 0 && i < tokens.length) {
+    const token = tokens[i];
+    if (token.type === "DELIMITER" && (token.value.includes(".") || token.value.includes("\n"))) {
+      nextToken = true;
+    }
+    if (token.type === "TOKEN" && nextToken) {
+      return token;
+    }
+    i++;
+  }
+
+  return tokens.at(-1);
 };

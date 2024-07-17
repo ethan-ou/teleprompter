@@ -13,18 +13,25 @@ export const useFullScreen = () => {
   }, []);
 
   const enter = useCallback(() => {
+    const keyboardLock = () => {
+      if ("keyboard" in navigator && "lock" in navigator.keyboard) {
+        navigator.keyboard.lock(["Escape"]);
+      }
+    };
+
     if (document.fullscreenElement) {
-      return document.exitFullscreen().then(() => {
-        return node.current.requestFullscreen();
-      });
+      return document
+        .exitFullscreen()
+        .then(() => node.current.requestFullscreen())
+        .then(() => keyboardLock());
     } else if (node.current) {
-      return node.current.requestFullscreen();
+      return node.current.requestFullscreen().then(() => keyboardLock());
     }
   }, []);
 
   const exit = useCallback(() => {
     if (document.fullscreenElement === node.current) {
-      return document.exitFullscreen();
+      return document.exitFullscreen().then(() => navigator.keyboard.unlock());
     }
     return Promise.resolve();
   }, []);
