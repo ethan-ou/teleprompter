@@ -248,7 +248,7 @@ function ButtonSection({ focused }: { focused: boolean }) {
           {fullscreen.active ? "Exit Fullscreen" : "Fullscreen"} <kbd>F</kbd>
         </Tooltip>
       </TooltipContext>
-      <TooltipContext aria-disabled={hideAction.disabled || mobileOrTablet}>
+      {/* <TooltipContext aria-disabled={hideAction.disabled || mobileOrTablet}>
         <button
           type="button"
           className="button"
@@ -261,7 +261,7 @@ function ButtonSection({ focused }: { focused: boolean }) {
         <Tooltip>
           Hide Menu <kbd>H</kbd>
         </Tooltip>
-      </TooltipContext>
+      </TooltipContext> */}
       {!mobileOrTablet && (
         <TooltipContext aria-disabled={castScreenAction.disabled || mobileOrTablet}>
           <button
