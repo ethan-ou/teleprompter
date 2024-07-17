@@ -66,9 +66,9 @@ export function Navbar() {
       <button
         type="button"
         onClick={() => setHide(!hide)}
-        className="group absolute -bottom-2 left-1/2 z-20 h-6 w-full -translate-x-1/2 translate-y-1/2 hover:cursor-pointer focus:outline-0"
+        className="group absolute -bottom-2 left-1/2 z-20 h-6 w-1/2 -translate-x-1/2 translate-y-1/2 hover:cursor-pointer focus:outline-0"
       >
-        <div className="m-auto h-2 w-1/2 max-w-lg rounded-full transition delay-75 group-hover:bg-neutral-700/85 group-focus:bg-neutral-700/85 group-focus:outline-2 group-active:bg-neutral-700/85"></div>
+        <div className="m-auto h-2 w-full rounded-full transition delay-75 group-hover:bg-neutral-700/85 group-focus:bg-neutral-700/85 group-focus:outline-2 group-active:bg-neutral-700/85"></div>
       </button>
     </nav>
   );
