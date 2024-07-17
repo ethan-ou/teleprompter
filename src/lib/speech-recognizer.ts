@@ -11,6 +11,10 @@ if (!SpeechRecognition)
     `This browser doesn't support speech recognition. Try using Google Chrome to run this app.`,
   );
 
+// Assume a restart amount of once per second is an infinite loop.
+const RESTART_TIME_WINDOW = 60 * 1000;
+const RESTART_QUANTITY = 60;
+
 export default class SpeechRecognizer {
   private recognizer: SpeechRecognition;
 
@@ -21,8 +25,8 @@ export default class SpeechRecognizer {
 
   private running: boolean = false;
   private startedAt: number = new Date().getTime();
-  private restartCount: number = 0;
   private mobileOrTablet: boolean = isMobileOrTablet();
+  private previousRestarts: number[] = [];
 
   constructor() {
     this.recognizer = new SpeechRecognition();
@@ -39,8 +43,6 @@ export default class SpeechRecognizer {
     };
 
     this.recognizer.onresult = (e) => {
-      this.restartCount = 0;
-
       let finalTranscript = "";
       let interimTranscript = "";
 
@@ -89,12 +91,17 @@ export default class SpeechRecognizer {
         Add restarts if the recognition stops.
       */
       if (this.running) {
-        const timeSinceStart = new Date().getTime() - this.startedAt;
-        this.restartCount++;
+        const now = Date.now();
+        this.previousRestarts.push(now);
+        this.previousRestarts = this.previousRestarts.filter(
+          (restart) => restart > now - RESTART_TIME_WINDOW,
+        );
+        const timeSinceStart = now - this.startedAt;
+
         // If multiple speech recogntion tabs are being used,
         // the service may go into an infinite loop.
         // See: https://stackoverflow.com/a/30007684
-        if (this.restartCount > 50) {
+        if (this.previousRestarts.length > RESTART_QUANTITY) {
           alert(
             "Speech recognition is repeatedly stopping. Close any other browser tabs and reload the page.",
           );
@@ -122,14 +129,15 @@ export default class SpeechRecognizer {
     this.recognizer.start();
     this.running = true;
     this.startedAt = new Date().getTime();
-    this.restartCount = 0;
+    this.previousRestarts = [];
   }
 
   stop(): void {
     // Make sure running is set to false before calling stop.
     // Otherwise, the recognizer will continue restarting.
-    this.running = false;
     this.recognizer.stop();
+    this.running = false;
+    this.previousRestarts = [];
   }
 
   onstart(subscriber: EmptySubscriberFunction): void {
