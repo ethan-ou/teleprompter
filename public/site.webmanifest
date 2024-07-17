@@ -1,14 +1,14 @@
 {
-  "name": "Voice Activated Teleprompter",
+  "name": "Teleprompter",
   "short_name": "Teleprompter",
   "icons": [
     {
-      "src": "/voice-activated-teleprompter/android-chrome-192x192.png",
+      "src": "/teleprompter/android-chrome-192x192.png",
       "sizes": "192x192",
       "type": "image/png"
     },
     {
-      "src": "/voice-activated-teleprompter/android-chrome-512x512.png",
+      "src": "/teleprompter/android-chrome-512x512.png",
       "sizes": "512x512",
       "type": "image/png"
     }

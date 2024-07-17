@@ -5,7 +5,7 @@ import tailwindcss from "@tailwindcss/vite";
 
 export default defineConfig(({ command }) => ({
   plugins: [preact(), tailwindcss()],
-  base: command === "build" ? "/voice-activated-teleprompter/" : "/",
+  base: command === "build" ? "/teleprompter/" : "/",
   resolve: {
     alias: {
       "@": resolve(__dirname, "./src"),
