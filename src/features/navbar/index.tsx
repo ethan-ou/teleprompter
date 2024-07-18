@@ -83,7 +83,7 @@ function ButtonSection({ focused }: { focused: boolean }) {
   const setTokens = useContentStore((state) => state.setTokens);
   const setPosition = useContentStore((state) => state.setPosition);
 
-  const fullscreen = useFullScreen((active) => setHide(!active));
+  const fullscreen = useFullScreen((active) => setHide(active));
 
   const startAction = {
     action: () => (status === "stopped" ? startTeleprompter() : stopTeleprompter()),
