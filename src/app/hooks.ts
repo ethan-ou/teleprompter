@@ -1,12 +1,13 @@
 import { useState, useRef, useEffect, useCallback, useMemo } from "react";
 
-export const useFullScreen = () => {
+export const useFullScreen = (onChange?: (active: boolean) => void) => {
   const [active, setActive] = useState<boolean>(false);
   const node = useRef<HTMLElement>(document.documentElement);
 
   useEffect(() => {
     const handleChange = () => {
       setActive(document.fullscreenElement === node.current);
+      onChange && onChange(document.fullscreenElement === node.current);
     };
     document.addEventListener("fullscreenchange", handleChange);
     return () => document.removeEventListener("fullscreenchange", handleChange);

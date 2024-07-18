@@ -83,7 +83,7 @@ function ButtonSection({ focused }: { focused: boolean }) {
   const setTokens = useContentStore((state) => state.setTokens);
   const setPosition = useContentStore((state) => state.setPosition);
 
-  const fullscreen = useFullScreen();
+  const fullscreen = useFullScreen((active) => setHide(!active));
 
   const startAction = {
     action: () => (status === "stopped" ? startTeleprompter() : stopTeleprompter()),
@@ -125,8 +125,7 @@ function ButtonSection({ focused }: { focused: boolean }) {
   useActionHotkeys(mirrorAction);
 
   const fullscreenAction = {
-    action: () =>
-      fullscreen.active ? (fullscreen.exit(), setHide(false)) : (fullscreen.enter(), setHide(true)),
+    action: () => (fullscreen.active ? fullscreen.exit() : fullscreen.enter()),
     disabled: false,
     keys: ["f"],
   };
