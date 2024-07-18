@@ -93,7 +93,7 @@ export function Content() {
   );
 
   useHotkeys(
-    ["ArrowLeft"],
+    ["ArrowLeft", "ArrowUp", "PageUp"],
     () => {
       const token = getPrevSentence(tokens, position.search);
       if (token) {
@@ -113,7 +113,7 @@ export function Content() {
   );
 
   useHotkeys(
-    ["ArrowRight"],
+    ["ArrowRight", "ArrowDown", "PageDown"],
     () => {
       const token = getNextSentence(tokens, position.search);
       if (token) {
