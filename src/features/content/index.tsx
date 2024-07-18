@@ -19,7 +19,7 @@ export function Content() {
   const style: React.CSSProperties = {
     fontSize: `${fontSize}px`,
     paddingLeft: `${margin}vw`,
-    paddingRight: `${margin * 1 - Math.min(fontSize / 80, 1) * 0.25}vw`,
+    paddingRight: `${margin * 1 - Math.min(fontSize / 50, 1) * 0.25}vw`,
     opacity: opacity / 100,
     paddingTop: {
       top: "1rem",
