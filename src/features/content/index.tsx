@@ -56,7 +56,7 @@ export function Content() {
         }
       }
     },
-    status === "started" ? 500 : null,
+    status === "started" ? 750 : null,
   );
 
   // Overwrite ctrl+a to allow text selection without also selecting inputs.
