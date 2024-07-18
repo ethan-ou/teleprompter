@@ -19,7 +19,8 @@ export function Content() {
   const style: React.CSSProperties = {
     fontSize: `${fontSize}px`,
     paddingLeft: `${margin}vw`,
-    paddingRight: `${margin * 1 - Math.min(fontSize / 80, 1) * 0.4}vw`,
+    // Add more space to the right side for improved readability
+    paddingRight: `${margin * 0.8 - Math.min(fontSize / 80, 1) * 0.4}vw`,
     opacity: opacity / 100,
     paddingTop: {
       top: "1rem",
