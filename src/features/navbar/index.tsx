@@ -98,6 +98,15 @@ function ButtonSection({ focused }: { focused: boolean }) {
     [startAction.action, focused],
   );
 
+  useHotkeys(
+    "esc",
+    startAction.action,
+    {
+      enabled: status === "started",
+    },
+    [status, stopTeleprompter],
+  );
+
   const editAction = {
     action: () => (toggleEdit(), setTokens()),
     disabled: status === "started",
