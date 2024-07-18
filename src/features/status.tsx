@@ -11,10 +11,10 @@ export const Status = ({ className, ...props }: React.ComponentPropsWithoutRef<"
       className={clsx(
         "pointer-events-none fixed z-30 size-full touch-none",
         status === "started" && fullscreen.active
-          ? "[box-shadow:inset_0px_0px_0px_0.25rem_rgba(255,0,0,0.3)]"
+          ? "[box-shadow:inset_0px_0px_0px_0.25rem_rgb(255,0,0)]"
           : "",
         status === "editing" && fullscreen.active
-          ? "[box-shadow:inset_0px_0px_0px_0.25rem_rgba(255,255,0,0.3)]"
+          ? "[box-shadow:inset_0px_0px_0px_0.25rem_rgb(255,255,0)]"
           : "",
         className,
       )}
