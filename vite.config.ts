@@ -1,10 +1,10 @@
 import { defineConfig } from "vite";
-import preact from "@preact/preset-vite";
+import react from "@vitejs/plugin-react";
 import { resolve } from "path";
 import tailwindcss from "@tailwindcss/vite";
 
 export default defineConfig(({ command }) => ({
-  plugins: [preact(), tailwindcss()],
+  plugins: [react(), tailwindcss()],
   base: command === "build" ? "/teleprompter/" : "/",
   resolve: {
     alias: {
