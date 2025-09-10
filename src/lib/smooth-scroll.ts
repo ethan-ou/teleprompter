@@ -20,7 +20,7 @@ export function scroll(options: {
 }): Promise<void> {
   const x = options.left ?? 0;
   const y = options.top ?? 0;
-  const duration = options.duration ?? 750;
+  const duration = options.duration ?? 1000;
 
   if (options.behavior === "auto") {
     window.scrollTo(x, y);

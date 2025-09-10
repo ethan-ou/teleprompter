@@ -38,7 +38,7 @@ export function Content() {
         if (lastRef.current && position.end > 0) {
           scroll({
             top: {
-              top: lastRef.current.offsetTop - fontSize,
+              top: lastRef.current.offsetTop,
               center:
                 lastRef.current.offsetTop -
                 document.documentElement.clientHeight / 2 +
@@ -58,7 +58,7 @@ export function Content() {
         }
       }
     },
-    status === "started" ? 1000 : null,
+    status === "started" ? 2000 : null,
   );
 
   // Overwrite ctrl+a to allow text selection without also selecting inputs.
