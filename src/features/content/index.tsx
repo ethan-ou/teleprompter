@@ -7,6 +7,7 @@ import { getBoundsStart, resetTranscriptWindow } from "@/lib/speech-matcher";
 import { useEffectInterval } from "@/app/hooks";
 import { clsx } from "@/lib/css";
 import { getNextSentence, getNextWordIndex, getPrevSentence } from "@/lib/word-tokenizer";
+import { scroll } from "@/lib/smooth-scroll";
 
 export function Content() {
   const { status, mirror, fontSize, margin, opacity, align, toggleEdit } = useNavbarStore(
@@ -35,7 +36,7 @@ export function Content() {
     () => {
       if (status !== "editing") {
         if (lastRef.current && position.end > 0) {
-          window.scrollTo({
+          scroll({
             top: {
               top: lastRef.current.offsetTop - fontSize,
               center:
@@ -50,14 +51,14 @@ export function Content() {
             behavior: "smooth",
           });
         } else {
-          window.scrollTo({
+          scroll({
             top: 0,
             behavior: "smooth",
           });
         }
       }
     },
-    status === "started" ? 750 : null,
+    status === "started" ? 1000 : null,
   );
 
   // Overwrite ctrl+a to allow text selection without also selecting inputs.
