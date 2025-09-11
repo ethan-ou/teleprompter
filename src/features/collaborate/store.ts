@@ -4,6 +4,7 @@ import { TrysteroProvider } from "@/app/y-webrtc-trystero";
 import { selfId } from "@/app/y-webrtc-trystero";
 import { Position } from "../content/store";
 import { joinRoom } from "trystero/mqtt";
+import { generatePassphrase } from "@/lib/generate-passphrase";
 
 const APP_ID = "voice-teleprompter-4DRPRcq3FJmdfwgHnKMOy";
 
@@ -30,7 +31,11 @@ export const useCollaborateStore = create<RoomState & RoomActions>()((set, get) 
   creatorId: null,
   isCreator: () => get().creatorId === selfId,
   createRoom: async (content: { text: string; position: Position }): Promise<string> => {
-    const roomId = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    const roomId = generatePassphrase({
+      capitalize: true,
+      numWords: 3,
+      wordSeparator: "",
+    });
     set({
       creatorId: selfId,
     });
@@ -95,7 +100,6 @@ export const useCollaborateStore = create<RoomState & RoomActions>()((set, get) 
 
     try {
       if (state.provider) {
-        state.provider.room?.disconnect();
         await state.provider.trystero.leave();
         state.provider.destroy();
       }

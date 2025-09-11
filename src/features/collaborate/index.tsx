@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Tooltip, TooltipContext } from "@/components/Tooltip";
 import { Dialog, Input } from "@base-ui-components/react";
 import { UsersRound, X, Copy, Check } from "lucide-react";
@@ -11,7 +11,14 @@ export function Collaborate() {
   const [copied, setCopied] = useState(false);
   const content = useContent();
 
-  const { roomId: currentRoom, status, createRoom, joinRoom, leaveRoom } = useCollaborateStore();
+  const {
+    roomId: currentRoom,
+    status,
+    createRoom,
+    joinRoom,
+    leaveRoom,
+    isCreator,
+  } = useCollaborateStore();
 
   const isConnected = status === "connected";
 
@@ -45,6 +52,9 @@ export function Collaborate() {
     try {
       await navigator.clipboard.writeText(currentRoom || "");
       setCopied(true);
+      setTimeout(() => {
+        setCopied(false);
+      }, 3000);
     } catch (error) {
       console.error("Failed to copy room ID:", error);
     }
@@ -72,9 +82,12 @@ export function Collaborate() {
           </Dialog.Close>
           {isConnected ? (
             <>
-              <div className="text-center">
-                <h3 className="text-lg font-semibold">Connected to Room</h3>
-                <div className="mt-2">
+              <div className="flex flex-col items-center gap-2">
+                <h3 className="text-lg font-semibold">
+                  Connected to Room {isCreator() ? "(Host)" : "(Guest)"}
+                </h3>
+
+                <div>
                   <div className="flex items-center justify-center gap-1">
                     <code className="rounded border border-neutral-700 bg-neutral-800 px-3 py-1 font-mono select-all">
                       {currentRoom}
@@ -93,7 +106,11 @@ export function Collaborate() {
                     </button>
                   </div>
                 </div>
+                <p className="text-center text-sm text-neutral-400">
+                  Collaborators can edit text and sync to voice.
+                </p>
               </div>
+
               <button
                 type="button"
                 onClick={handleLeaveRoom}
@@ -114,13 +131,17 @@ export function Collaborate() {
                 Create a Room
               </button>
 
-              <p className="text-neutral-400">OR</p>
+              <div className="flex w-full items-center">
+                <div className="h-px flex-1 bg-neutral-800"></div>
+                <span className="px-4 text-sm text-neutral-500">OR</span>
+                <div className="h-px flex-1 bg-neutral-800"></div>
+              </div>
 
               <div className="flex w-full gap-1">
                 <Input
                   value={joinRoomId}
                   onChange={(e) => setJoinRoomId(e.target.value)}
-                  placeholder="Enter Room ID"
+                  placeholder="Enter Room Name"
                   className="h-10 w-full rounded-md border border-neutral-700 pl-3.5 text-base text-neutral-100 focus:outline-2 focus:-outline-offset-1 focus:outline-blue-800"
                   onKeyDown={(e) => {
                     if (e.key === "Enter") {
