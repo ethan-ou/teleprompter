@@ -7,7 +7,7 @@ import {
   resetTranscriptWindow,
 } from "../lib/speech-matcher";
 import { useNavbarStore } from "@/features/navbar/store";
-import { useContentStore } from "@/features/content/store";
+import { getContent } from "@/features/content/store";
 
 let speechRecognizer: SpeechRecognizer | null = null;
 
@@ -20,7 +20,7 @@ export const startTeleprompter = () => {
     speechRecognizer = new SpeechRecognizer();
 
     speechRecognizer.onstart(() => {
-      const { tokens, position, setPosition } = useContentStore.getState();
+      const { tokens, position, setPosition } = getContent();
 
       if (position.bounds < 0) {
         const bounds = getBoundsStart(tokens, 0);
@@ -31,7 +31,7 @@ export const startTeleprompter = () => {
     });
 
     speechRecognizer.onresult((finalTranscript: string, interimTranscript: string) => {
-      const { tokens, position, setPosition } = useContentStore.getState();
+      const { tokens, position, setPosition } = getContent();
 
       const textRegion = createTextRegion(tokens, position.search);
       const boundStart = getBoundsStart(tokens, position.search, textRegion);
