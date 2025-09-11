@@ -17,9 +17,9 @@ import {
   AlignCenter,
   SunDim,
   SunMedium,
-  EyeOff,
-  Airplay,
   Undo2,
+  MonitorUp,
+  UsersRound,
 } from "lucide-react";
 
 import { useHotkeys } from "react-hotkeys-hook";
@@ -29,6 +29,8 @@ import { Tooltip, TooltipContext } from "@/components/Tooltip";
 import { clsx } from "@/lib/css";
 import { isMobileOrTablet } from "@/lib/device";
 import { getBoundsStart, resetTranscriptWindow } from "@/lib/speech-matcher";
+import { Dialog, Input, Tabs } from "@base-ui-components/react";
+import { Collaborate } from "../collaborate";
 
 const mobileOrTablet = isMobileOrTablet();
 
@@ -42,7 +44,7 @@ export function Navbar() {
       role="navigation"
       aria-label="main navigation"
       className={clsx(
-        "top-0 z-10 flex w-full flex-wrap items-center justify-evenly gap-x-4 gap-y-1 border-b border-neutral-800 bg-neutral-950/90 py-2 px-3 text-white backdrop-blur transition select-none hover:opacity-100 min-[925px]:justify-between",
+        "top-0 z-10 flex w-full flex-wrap items-center justify-evenly gap-x-4 gap-y-1 border-b border-neutral-800 bg-neutral-950/90 px-3 py-2 text-white backdrop-blur transition select-none hover:opacity-100 min-[925px]:justify-between",
         hide ? "fixed -translate-y-full" : "sticky translate-y-0",
       )}
     >
@@ -173,13 +175,21 @@ function ButtonSection({ focused }: { focused: boolean }) {
   };
   useActionHotkeys(restartAction);
 
+  // const collaborateAction = {
+  //   action: () => {
+  //     setCollaborate(!collaborate);
+  //   },
+  //   disabled: false,
+  //   keys: [""],
+  // };
+
   return (
     <>
       <TooltipContext aria-disabled={startAction.disabled || mobileOrTablet}>
         <button
           type="button"
           className={clsx(
-            "button group/button flex items-center gap-2 rounded-lg disabled:border-neutral-900 disabled:bg-transparent hover:disabled:border-neutral-900 hover:disabled:bg-transparent sm:mr-1 sm:border",
+            "button group/button flex items-center gap-2 rounded-md disabled:border-neutral-900 disabled:bg-transparent hover:disabled:border-neutral-900 hover:disabled:bg-transparent sm:mr-1 sm:border",
             status === "started"
               ? "sm:border-red-500/30 sm:bg-red-700/10 sm:hover:border-red-500/40 sm:hover:bg-red-700/20"
               : "sm:border-green-500/30 sm:bg-green-700/10 sm:hover:border-green-500/40 sm:hover:bg-green-700/20",
@@ -220,6 +230,19 @@ function ButtonSection({ focused }: { focused: boolean }) {
         </button>
         <Tooltip>
           Edit <kbd>E</kbd>
+        </Tooltip>
+      </TooltipContext>
+      <TooltipContext aria-disabled={restartAction.disabled || mobileOrTablet}>
+        <button
+          className="button"
+          onClick={restartAction.action}
+          disabled={restartAction.disabled}
+          aria-label="Reset to Top"
+        >
+          <Undo2 className="icon" />
+        </button>
+        <Tooltip>
+          Reset to Top <kbd>R</kbd>
         </Tooltip>
       </TooltipContext>
       <TooltipContext aria-disabled={clearAction.disabled || mobileOrTablet}>
@@ -264,20 +287,6 @@ function ButtonSection({ focused }: { focused: boolean }) {
           {fullscreen.active ? "Exit Fullscreen" : "Fullscreen"} <kbd>F</kbd>
         </Tooltip>
       </TooltipContext>
-      {/* <TooltipContext aria-disabled={hideAction.disabled || mobileOrTablet}>
-        <button
-          type="button"
-          className="button"
-          onClick={hideAction.action}
-          disabled={hideAction.disabled}
-          aria-label={hide ? "Hide Menu" : "Show Menu"}
-        >
-          <EyeOff className={`icon`} />
-        </button>
-        <Tooltip>
-          Hide Menu <kbd>H</kbd>
-        </Tooltip>
-      </TooltipContext> */}
       {!mobileOrTablet && (
         <TooltipContext aria-disabled={castScreenAction.disabled || mobileOrTablet}>
           <button
@@ -286,26 +295,14 @@ function ButtonSection({ focused }: { focused: boolean }) {
             disabled={castScreenAction.disabled}
             aria-label={cast ? "Stop Casting" : "Cast Screen"}
           >
-            <Airplay className={`icon ${cast ? "yellow" : ""}`} />
+            <MonitorUp className={`icon ${cast ? "yellow" : ""}`} />
           </button>
           <Tooltip>
             {cast ? "Stop Casting" : "Cast Screen"} <kbd>S</kbd>
           </Tooltip>
         </TooltipContext>
       )}
-      <TooltipContext aria-disabled={restartAction.disabled || mobileOrTablet}>
-        <button
-          className="button"
-          onClick={restartAction.action}
-          disabled={restartAction.disabled}
-          aria-label="Reset to Top"
-        >
-          <Undo2 className="icon" />
-        </button>
-        <Tooltip>
-          Reset to Top <kbd>R</kbd>
-        </Tooltip>
-      </TooltipContext>
+      <Collaborate />
     </>
   );
 }
