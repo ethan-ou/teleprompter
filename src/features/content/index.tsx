@@ -1,7 +1,7 @@
-import { useRef, useEffect } from "react";
+import { useRef } from "react";
 import { escape } from "@/lib/html-escaper";
 import { useNavbarStore } from "../navbar/store";
-import { useContent, setGlobalContentAccessor } from "./store";
+import { useContent } from "./store";
 import { useHotkeys } from "react-hotkeys-hook";
 import { getBoundsStart, resetTranscriptWindow } from "@/lib/speech-matcher";
 import { useEffectInterval } from "@/app/hooks";
@@ -14,15 +14,6 @@ export function Content() {
     (state) => state,
   );
   const { text, setText, tokens, position, setPosition, setTokens } = useContent();
-
-  // Set up global content accessor for non-React contexts
-  useEffect(() => {
-    setGlobalContentAccessor({
-      getTokens: () => tokens,
-      getPosition: () => position,
-      setPosition: setPosition,
-    });
-  }, [tokens, position, setPosition]);
 
   const style: React.CSSProperties = {
     fontSize: `${fontSize}px`,

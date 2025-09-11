@@ -3,6 +3,7 @@ import { persist } from "zustand/middleware";
 import { type Token, tokenize } from "@/lib/word-tokenizer";
 import { useCollaborateStore } from "@/features/collaborate/store";
 import { useY } from "@/app/use-yjs";
+import { Doc } from "yjs";
 
 export type Position = {
   start: number;
@@ -74,7 +75,7 @@ export const useLocalContentStore = create<ContentState & ContentActions>()(
  */
 export function useContent() {
   const localStore = useLocalContentStore();
-  const { status, ydoc, isCreator, isConnected } = useCollaborateStore();
+  const { ydoc, isCreator, isConnected } = useCollaborateStore();
 
   // Get the Y.Map only when in room
   const contentMap = isConnected() && ydoc ? ydoc.getMap("content") : null;
@@ -83,71 +84,82 @@ export function useContent() {
   const roomContentData = useY(contentMap) as { text?: string; position?: Position } | null;
 
   // If in room, return room content with room actions
-  if (isConnected() && ydoc && contentMap) {
+  if (isConnected() && ydoc && roomContentData) {
     const text = roomContentData?.text || "";
-    const position = roomContentData?.position || {
-      start: -1,
-      search: -1,
-      end: -1,
-      bounds: -1,
-    };
+    const position = roomContentData?.position || defaultPosition;
 
     return {
       text,
       tokens: tokenize(text),
       position,
-      // For live teleprompter scenarios, avoid setting
-      // the position of the teleprompter.
-      setText: (text: string) => {
-        ydoc.transact(() => {
-          contentMap.set("text", text);
-        });
-
-        // Room creators also save to local storage
-        if (isCreator()) {
-          localStore.setText(text);
-        }
-      },
-      setTokens: () => {}, // Tokens are computed from text
-      setPosition: (position: Partial<Position>) => {
-        ydoc.transact(() => {
-          const currentPos = contentMap.get("position") || {
-            start: -1,
-            search: -1,
-            end: -1,
-            bounds: -1,
-          };
-          contentMap.set("position", { ...currentPos, ...position });
-        });
-
-        // Room creators also save to local storage
-        if (isCreator()) {
-          localStore.setPosition(position);
-        }
-      },
+      ...createRoomContentActions(ydoc, contentMap, localStore, isCreator),
     };
   }
 
   return localStore;
-} // Global accessor for non-React contexts (like the recognizer)
-// This will need to be kept in sync with the current content state
-let globalContentAccessor: {
-  getTokens: () => Token[];
-  getPosition: () => Position;
-  setPosition: (position: Partial<Position>) => void;
-} | null = null;
-
-export function setGlobalContentAccessor(accessor: typeof globalContentAccessor) {
-  globalContentAccessor = accessor;
 }
 
-export function getGlobalContentState() {
-  if (!globalContentAccessor) {
-    throw new Error("Global content accessor not initialized");
-  }
+const defaultPosition: Position = {
+  start: -1,
+  search: -1,
+  end: -1,
+  bounds: -1,
+};
+
+function createRoomContentActions(
+  ydoc: Doc,
+  contentMap: any,
+  localStore: ContentState & ContentActions,
+  isCreator: () => boolean,
+) {
   return {
-    tokens: globalContentAccessor.getTokens(),
-    position: globalContentAccessor.getPosition(),
-    setPosition: globalContentAccessor.setPosition,
+    setText: (text: string) => {
+      ydoc.transact(() => {
+        contentMap.set("text", text);
+      });
+
+      // Room creators also save to local storage
+      if (isCreator()) {
+        localStore.setText(text);
+      }
+    },
+    setTokens: () => {}, // Tokens are computed from text
+    setPosition: (position: Partial<Position>) => {
+      ydoc.transact(() => {
+        const currentPos = contentMap.get("position") || defaultPosition;
+        contentMap.set("position", { ...currentPos, ...position });
+      });
+
+      // Room creators also save to local storage
+      if (isCreator()) {
+        localStore.setPosition(position);
+      }
+    },
+  };
+}
+
+// Content accessor for non-React contexts
+export function getContent() {
+  const collaborate = useCollaborateStore.getState();
+  const local = useLocalContentStore.getState();
+
+  if (collaborate.isConnected() && collaborate.ydoc) {
+    const contentMap = collaborate.ydoc.getMap("content");
+    const text = (contentMap.get("text") as string) || "";
+    const position = (contentMap.get("position") as Position) || defaultPosition;
+
+    return {
+      tokens: tokenize(text),
+      position,
+      ...createRoomContentActions(collaborate.ydoc, contentMap, local, collaborate.isCreator),
+    };
+  }
+
+  return {
+    tokens: local.tokens,
+    position: local.position,
+    setText: local.setText,
+    setTokens: local.setTokens,
+    setPosition: local.setPosition,
   };
 }
