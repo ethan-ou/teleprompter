@@ -1,5 +1,5 @@
 import { equalityDeep } from "lib0/function";
-import { useRef, useSyncExternalStore } from "react";
+import { useCallback, useMemo, useRef, useSyncExternalStore } from "react";
 import * as Y from "yjs";
 
 export type YJsonPrimitive = string | number | boolean | null | Uint8Array;
@@ -24,16 +24,19 @@ export function useY<YType extends Y.AbstractType<any>>(
   yData: YType | null,
 ): YTypeToJson<YType> | null {
   const prevDataRef = useRef<YJsonValue | null>(null);
+  const subscribe = useMemo(() => {
+    if (yData) {
+      return (callback: () => void) => {
+        yData.observeDeep(callback);
+        return () => yData.unobserveDeep(callback);
+      };
+    }
 
-  return useSyncExternalStore(
-    (callback) => {
-      if (!yData) return () => {};
-      yData.observeDeep(callback);
-      return () => yData.unobserveDeep(callback);
-    },
-    // Note: React requires reference equality
-    () => {
-      if (!yData) return null;
+    return () => () => {};
+  }, [yData]);
+
+  const getSnapshot = useCallback(() => {
+    if (yData) {
       const data = yData.toJSON();
       if (equalityDeep(prevDataRef.current, data)) {
         return prevDataRef.current;
@@ -41,7 +44,18 @@ export function useY<YType extends Y.AbstractType<any>>(
         prevDataRef.current = data;
         return prevDataRef.current;
       }
-    },
-    () => yData?.toJSON() || null,
-  );
+    }
+
+    return null;
+  }, [yData]);
+
+  const getServerSnapshot = useCallback(() => {
+    if (yData) {
+      return yData.toJSON();
+    }
+
+    return null;
+  }, [yData]);
+
+  return useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
 }

@@ -13,7 +13,6 @@ export interface RoomState {
   provider: TrysteroProvider | null;
   ydoc: Y.Doc | null;
   creatorId: string | null;
-  peerIds: string[];
 }
 
 export interface RoomActions {
@@ -21,7 +20,6 @@ export interface RoomActions {
   createRoom: (content: { text: string; position: Position }) => Promise<string>;
   joinRoom: (roomId: string, content?: { text: string; position: Position }) => Promise<void>;
   leaveRoom: () => void;
-  getYDoc: () => Y.Doc | null;
 }
 
 export const useCollaborateStore = create<RoomState & RoomActions>()((set, get) => ({
@@ -30,7 +28,6 @@ export const useCollaborateStore = create<RoomState & RoomActions>()((set, get) 
   provider: null,
   ydoc: null,
   creatorId: null,
-  peerIds: [],
   isCreator: () => get().creatorId === selfId,
   createRoom: async (content: { text: string; position: Position }): Promise<string> => {
     const roomId = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
@@ -63,16 +60,8 @@ export const useCollaborateStore = create<RoomState & RoomActions>()((set, get) 
       const provider = new TrysteroProvider(roomId, ydoc, {
         trysteroRoom: joinRoom({ appId: APP_ID }, roomId),
         maxConns: 5,
+        filterBcConns: false,
       });
-
-      // Set up peer tracking and room creator detection
-      if (state.isCreator()) {
-        const roomMeta = ydoc.getMap("roomMeta");
-        ydoc.transact(() => {
-          roomMeta.set("creatorId", selfId);
-          roomMeta.set("createdAt", Date.now());
-        });
-      }
 
       // Initialize with content if provided and we're the room creator
       if (content && state.isCreator()) {
@@ -82,33 +71,6 @@ export const useCollaborateStore = create<RoomState & RoomActions>()((set, get) 
           contentMap.set("position", content.position);
         });
       }
-
-      // Set up peer tracking via provider events
-      provider.on("peers", (event) => {
-        console.log(event);
-        const allPeers = [...event.trysteroPeers, ...event.bcPeers];
-        set({ peerIds: allPeers });
-
-        // Check if room creator left
-        const state = get();
-        if (state.creatorId && !allPeers.includes(state.creatorId) && state.creatorId !== selfId) {
-          console.log("Room creator left, leaving room");
-          // Room creator left and we're not the creator - leave the room
-          state.leaveRoom();
-        }
-      });
-
-      // Monitor room metadata changes to detect the creator
-      const roomMeta = ydoc.getMap("roomMeta");
-      const updateCreatorInfo = () => {
-        const creatorId = roomMeta.get("creatorId") as string | undefined;
-        if (creatorId) {
-          set({ creatorId });
-        }
-      };
-
-      roomMeta.observe(updateCreatorInfo);
-      updateCreatorInfo();
 
       set({
         provider,
@@ -123,19 +85,18 @@ export const useCollaborateStore = create<RoomState & RoomActions>()((set, get) 
         provider: null,
         ydoc: null,
         creatorId: null,
-        peerIds: [],
       });
       throw error;
     }
   },
 
-  leaveRoom: (): void => {
+  leaveRoom: async () => {
     const state = get();
 
     try {
       if (state.provider) {
-        // Remove any event listeners before destroying
-        state.provider.off("peers", () => {});
+        state.provider.room?.disconnect();
+        await state.provider.trystero.leave();
         state.provider.destroy();
       }
 
@@ -152,11 +113,6 @@ export const useCollaborateStore = create<RoomState & RoomActions>()((set, get) 
       provider: null,
       ydoc: null,
       creatorId: null,
-      peerIds: [],
     });
-  },
-
-  getYDoc: (): Y.Doc | null => {
-    return get().ydoc;
   },
 }));

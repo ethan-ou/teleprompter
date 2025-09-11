@@ -1,7 +1,6 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { type Token, tokenize } from "@/lib/word-tokenizer";
-import { useEffect } from "react";
 import { useCollaborateStore } from "@/features/collaborate/store";
 import { useY } from "@/app/use-yjs";
 
@@ -75,35 +74,15 @@ export const useLocalContentStore = create<ContentState & ContentActions>()(
  */
 export function useContent() {
   const localStore = useLocalContentStore();
-  const { status, ydoc, isCreator } = useCollaborateStore();
+  const { status, ydoc, isCreator, provider } = useCollaborateStore();
 
-  const isInRoom = status === "connected" && ydoc;
+  const isInRoom = status === "connected";
 
   // Get the Y.Map only when in room
   const contentMap = isInRoom && ydoc ? ydoc.getMap("content") : null;
 
   // Use our custom Y.js hook for automatic subscription and re-rendering
   const roomContentData = useY(contentMap) as { text?: string; position?: Position } | null;
-
-  // Handle initial content setup for room creators
-  useEffect(() => {
-    if (!isInRoom || !ydoc || !isCreator() || !contentMap) return;
-
-    // Only set initial content if the room is empty
-    if (contentMap.size === 0) {
-      console.log("Room creator - setting initial content:", localStore.text);
-      ydoc.transact(() => {
-        contentMap.set("text", localStore.text);
-        contentMap.set("position", localStore.position);
-      });
-    }
-
-    // Also set up a cleanup handler for when we leave
-    return () => {
-      // If we're the room creator and we're leaving, we don't need special cleanup
-      // as the collaborate store handles kicking other peers out
-    };
-  }, [isInRoom, ydoc, isCreator(), contentMap]);
 
   // If in room, return room content with room actions
   if (isInRoom && ydoc && contentMap) {
@@ -119,11 +98,11 @@ export function useContent() {
       text,
       tokens: tokenize(text),
       position,
+      // For live teleprompter scenarios, avoid setting
+      // the position of the teleprompter.
       setText: (text: string) => {
-        const newPosition = { start: -1, search: -1, end: -1, bounds: -1 };
         ydoc.transact(() => {
           contentMap.set("text", text);
-          contentMap.set("position", newPosition);
         });
 
         // Room creators also save to local storage
