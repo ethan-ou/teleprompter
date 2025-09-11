@@ -3,10 +3,12 @@ import { Tooltip, TooltipContext } from "@/components/Tooltip";
 import { Dialog, Input } from "@base-ui-components/react";
 import { UsersRound, Loader2 } from "lucide-react";
 import { useCollaborateStore } from "./store";
+import { useContent } from "../content/store";
 
 export function Collaborate() {
   const [joinRoomId, setJoinRoomId] = useState("");
   const [isOpen, setIsOpen] = useState(false);
+  const content = useContent();
 
   const { currentRoom, status, createRoom, joinRoom, leaveRoom } = useCollaborateStore();
 
@@ -15,9 +17,11 @@ export function Collaborate() {
 
   const handleCreateRoom = async () => {
     try {
-      const roomId = await createRoom();
+      const roomId = await createRoom({
+        text: content.text,
+        position: content.position,
+      });
       console.log(`Created and joined room: ${roomId}`);
-      setIsOpen(false);
     } catch (error) {
       console.error("Failed to create room:", error);
     }
@@ -29,7 +33,6 @@ export function Collaborate() {
     try {
       await joinRoom(joinRoomId.trim());
       setJoinRoomId("");
-      setIsOpen(false);
     } catch (error) {
       console.error("Failed to join room:", error);
     }
@@ -37,7 +40,6 @@ export function Collaborate() {
 
   const handleLeaveRoom = () => {
     leaveRoom();
-    setIsOpen(false);
   };
   return (
     <Dialog.Root open={isOpen} onOpenChange={setIsOpen}>

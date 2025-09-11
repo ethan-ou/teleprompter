@@ -66,10 +66,15 @@ export const useLocalContentStore = create<ContentState & ContentActions>()(
 
 /**
  * Content proxy hook that switches between local and room content
+ *
+ * Behavior:
+ * - Room creators: Changes are saved to both room and local storage
+ * - Room joiners: Changes are only proxied to the room, not saved locally
+ * - When leaving a room, creators retain their content, joiners return to their original local content
  */
 export function useContent() {
   const localStore = useLocalContentStore();
-  const { status, ydoc } = useCollaborateStore();
+  const { status, ydoc, isRoomCreator } = useCollaborateStore();
   const [roomContent, setRoomContent] = useState<{
     text: string;
     position: Position;
@@ -78,7 +83,6 @@ export function useContent() {
   // Determine if we're in room mode
   const isInRoom = status === "connected" && ydoc;
 
-  // Listen to room content changes
   useEffect(() => {
     if (!isInRoom || !ydoc) {
       setRoomContent(null);
@@ -91,30 +95,41 @@ export function useContent() {
       const text = contentMap.get("text") || "";
       const position = contentMap.get("position") || { start: -1, search: -1, end: -1, bounds: -1 };
 
+      console.log("Updating room content:", { text, position }); // Debug log
+
       setRoomContent({
         text: typeof text === "string" ? text : "",
         position: position as Position,
       });
     };
 
-    // Initial sync - check if room has content
-    updateRoomContent();
+    // Listen for changes first
+    contentMap.observeDeep(updateRoomContent);
 
-    // If room is empty and we have local content, populate it
-    if (contentMap.size === 0 && localStore.text) {
+    // Handle initial room content based on creator status
+    if (isRoomCreator) {
+      console.log("Room creator - setting initial content:", localStore.text); // Debug log
+      // Room creator: always populate room with their local content
       ydoc.transact(() => {
         contentMap.set("text", localStore.text);
         contentMap.set("position", localStore.position);
       });
-    }
 
-    // Listen for changes
-    contentMap.observeDeep(updateRoomContent);
+      // The observer will fire and update roomContent, but we can also set it immediately
+      setRoomContent({
+        text: localStore.text,
+        position: localStore.position,
+      });
+    } else {
+      // Room joiner: just get existing content
+      console.log("Room joiner - getting existing content"); // Debug log
+      updateRoomContent();
+    }
 
     return () => {
       contentMap.unobserveDeep(updateRoomContent);
     };
-  }, [isInRoom, ydoc, localStore.text, localStore.position]);
+  }, [isInRoom, ydoc, isRoomCreator]); // Remove localStore dependencies!
 
   // If in room, return room content with room actions
   if (isInRoom && ydoc) {
@@ -134,6 +149,11 @@ export function useContent() {
           contentMap.set("text", text);
           contentMap.set("position", newPosition);
         });
+
+        // If room creator, also save to local storage
+        if (isRoomCreator) {
+          localStore.setText(text);
+        }
       },
       setTokens: () => {
         // Tokens are computed automatically, no need to store them in room
@@ -149,6 +169,11 @@ export function useContent() {
           };
           contentMap.set("position", { ...currentPos, ...position });
         });
+
+        // If room creator, also save to local storage
+        if (isRoomCreator) {
+          localStore.setPosition(position);
+        }
       },
     };
   }

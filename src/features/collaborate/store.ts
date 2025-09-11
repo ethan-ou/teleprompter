@@ -1,17 +1,22 @@
 import { create } from "zustand";
 import * as Y from "yjs";
 import { TrysteroProvider } from "@/lib/y-webrtc-trystero";
+import { Position } from "../content/store";
 
 export interface RoomState {
   currentRoom: string | null;
   status: "disconnected" | "connecting" | "connected" | "error";
   provider: TrysteroProvider | null;
   ydoc: Y.Doc | null;
+  isRoomCreator: boolean;
 }
 
 export interface RoomActions {
-  createRoom: () => Promise<string>;
-  joinRoom: (roomId: string) => Promise<void>;
+  createRoom: (initialContent?: { text: string; position: Position }) => Promise<string>;
+  joinRoom: (
+    roomId: string,
+    initialContent?: { text: string; position: Position },
+  ) => Promise<void>;
   leaveRoom: () => void;
   getYDoc: () => Y.Doc | null;
 }
@@ -23,14 +28,19 @@ export const useCollaborateStore = create<RoomState & RoomActions>()((set, get) 
   status: "disconnected",
   provider: null,
   ydoc: null,
+  isRoomCreator: false,
 
-  createRoom: async (): Promise<string> => {
+  createRoom: async (initialContent?: { text: string; position: Position }): Promise<string> => {
     const roomId = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-    await get().joinRoom(roomId);
+    set({ isRoomCreator: true });
+    await get().joinRoom(roomId, initialContent);
     return roomId;
   },
 
-  joinRoom: async (roomId: string): Promise<void> => {
+  joinRoom: async (
+    roomId: string,
+    initialContent?: { text: string; position: Position },
+  ): Promise<void> => {
     const state = get();
 
     // Leave current room if connected
@@ -41,6 +51,8 @@ export const useCollaborateStore = create<RoomState & RoomActions>()((set, get) 
     set({
       status: "connecting",
       currentRoom: roomId,
+      // DON'T reset isRoomCreator here - it should already be set by createRoom
+      // isRoomCreator: false, // REMOVE this line
     });
 
     try {
@@ -50,6 +62,17 @@ export const useCollaborateStore = create<RoomState & RoomActions>()((set, get) 
         appId: APP_ID,
         maxConns: 5,
       });
+
+      // Initialize with content if provided and we're the room creator
+      const currentState = get(); // Get the current state to check isRoomCreator
+      if (initialContent && currentState.isRoomCreator) {
+        console.log("Initializing Y.Doc with content:", initialContent);
+        const contentMap = ydoc.getMap("content");
+        ydoc.transact(() => {
+          contentMap.set("text", initialContent.text);
+          contentMap.set("position", initialContent.position);
+        });
+      }
 
       set({
         provider,
@@ -63,6 +86,7 @@ export const useCollaborateStore = create<RoomState & RoomActions>()((set, get) 
         currentRoom: null,
         provider: null,
         ydoc: null,
+        isRoomCreator: false, // Only reset on error
       });
       throw error;
     }
@@ -84,6 +108,7 @@ export const useCollaborateStore = create<RoomState & RoomActions>()((set, get) 
       status: "disconnected",
       provider: null,
       ydoc: null,
+      isRoomCreator: false,
     });
   },
 
