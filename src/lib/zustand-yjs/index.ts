@@ -59,7 +59,7 @@ const yjs: YjsImpl = <S extends unknown>(
        * the new state to patchSharedType.
        */
       (partial, replace) => {
-        set(partial, replace);
+        replace === true ? set(partial as S, replace) : set(partial, replace);
         doc.transact(() => patchSharedType(map, get()));
       },
       get,
@@ -67,7 +67,7 @@ const yjs: YjsImpl = <S extends unknown>(
         ...api,
         // Create a new setState function as we did with set.
         setState: (partial, replace) => {
-          api.setState(partial, replace);
+          replace === true ? api.setState(partial as S, replace) : api.setState(partial, replace);
           doc.transact(() => patchSharedType(map, api.getState()));
         },
       },
@@ -87,4 +87,4 @@ const yjs: YjsImpl = <S extends unknown>(
   };
 };
 
-export default yjs as unknown as Yjs;
+export default yjs;
