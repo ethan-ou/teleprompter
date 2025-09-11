@@ -37,9 +37,9 @@ export const useCollaborateStore = create<RoomState & RoomActions>()((set, get) 
 
   createRoom: async (initialContent?: { text: string; position: Position }): Promise<string> => {
     const roomId = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-    set({ 
+    set({
       isRoomCreator: true,
-      roomCreatorId: selfId // Set ourselves as the room creator
+      roomCreatorId: selfId, // Set ourselves as the room creator
     });
     await get().joinRoom(roomId, initialContent);
     return roomId;
@@ -76,7 +76,7 @@ export const useCollaborateStore = create<RoomState & RoomActions>()((set, get) 
 
       // Set up peer tracking and room creator detection
       const currentState = get();
-      
+
       // If we're creating the room, store creator info in the Y.Doc
       if (currentState.isRoomCreator) {
         const roomMeta = ydoc.getMap("roomMeta");
@@ -100,10 +100,14 @@ export const useCollaborateStore = create<RoomState & RoomActions>()((set, get) 
       provider.on("peers", (event: any) => {
         const allPeers = [...event.trysteroPeers, ...event.bcPeers];
         set({ connectedPeers: allPeers });
-        
+
         // Check if room creator left
         const state = get();
-        if (state.roomCreatorId && !allPeers.includes(state.roomCreatorId) && state.roomCreatorId !== selfId) {
+        if (
+          state.roomCreatorId &&
+          !allPeers.includes(state.roomCreatorId) &&
+          state.roomCreatorId !== selfId
+        ) {
           console.log("Room creator left, leaving room");
           // Room creator left and we're not the creator - leave the room
           state.leaveRoom();
@@ -118,7 +122,7 @@ export const useCollaborateStore = create<RoomState & RoomActions>()((set, get) 
           set({ roomCreatorId: creatorId });
         }
       };
-      
+
       roomMeta.observe(updateCreatorInfo);
       updateCreatorInfo(); // Initial check
 

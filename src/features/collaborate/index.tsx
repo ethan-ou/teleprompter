@@ -10,7 +10,8 @@ export function Collaborate() {
   const [isOpen, setIsOpen] = useState(false);
   const content = useContent();
 
-  const { currentRoom, status, createRoom, joinRoom, leaveRoom, connectedPeers } = useCollaborateStore();
+  const { currentRoom, status, createRoom, joinRoom, leaveRoom, connectedPeers } =
+    useCollaborateStore();
 
   const isConnected = status === "connected";
   const isConnecting = status === "connecting";
@@ -59,7 +60,7 @@ export function Collaborate() {
                 <h3 className="text-lg font-semibold">Connected to Room</h3>
                 <p className="text-sm text-neutral-500">Room ID: {currentRoom}</p>
                 <p className="text-xs text-neutral-400">
-                  {connectedPeers.length + 1} user{connectedPeers.length !== 0 ? 's' : ''} connected
+                  {connectedPeers.length + 1} user{connectedPeers.length !== 0 ? "s" : ""} connected
                 </p>
               </div>
               <button
