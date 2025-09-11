@@ -1,6 +1,9 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { type Token, tokenize } from "@/lib/word-tokenizer";
+import yjs from "@/lib/zustand-yjs";
+import * as Y from "yjs";
+import { TrysteroProvider } from "@/lib/y-webrtc-trystero";
 
 export type Position = {
   start: number;
@@ -29,9 +32,19 @@ To enter your own script, press the Edit button with the pencil icon in the menu
 
 Credits to jlecomte for creating the original version of this teleprompter.`;
 
+const ROOM_ID = "23910jfsadid20";
+const APP_ID = "voice-teleprompter-2193021";
+const ydoc = new Y.Doc();
+// Initialize Trystero room with optional password
+// Note: Trystero always uses encryption, but you can add an additional password for room access
+const provider1 = new TrysteroProvider(ROOM_ID, ydoc, {
+  appId: APP_ID,
+  maxConns: 5,
+});
+
 export const useContentStore = create<ContentState & ContentActions>()(
   persist(
-    (set) => ({
+    yjs(ydoc, "content", (set) => ({
       text: initialText,
       tokens: tokenize(initialText),
       position: {
@@ -50,7 +63,7 @@ export const useContentStore = create<ContentState & ContentActions>()(
         })),
       setTokens: () => set((state) => ({ tokens: tokenize(state.text) })),
       setPosition: (position) => set((prev) => ({ position: { ...prev.position, ...position } })),
-    }),
+    })),
     {
       name: "teleprompter:content",
       partialize: (state) => ({ text: state.text }),
