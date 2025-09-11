@@ -1,23 +1,17 @@
 import { useState } from "react";
 import { Tooltip, TooltipContext } from "@/components/Tooltip";
 import { Dialog, Input } from "@base-ui-components/react";
-import { UsersRound, X } from "lucide-react";
+import { UsersRound, X, Copy, Check } from "lucide-react";
 import { useCollaborateStore } from "./store";
 import { useContent } from "../content/store";
 
 export function Collaborate() {
   const [joinRoomId, setJoinRoomId] = useState("");
   const [isOpen, setIsOpen] = useState(false);
+  const [copied, setCopied] = useState(false);
   const content = useContent();
 
-  const {
-    roomId: currentRoom,
-    status,
-    createRoom,
-    joinRoom,
-    leaveRoom,
-    provider,
-  } = useCollaborateStore();
+  const { roomId: currentRoom, status, createRoom, joinRoom, leaveRoom } = useCollaborateStore();
 
   const isConnected = status === "connected";
 
@@ -46,13 +40,29 @@ export function Collaborate() {
   const handleLeaveRoom = () => {
     leaveRoom();
   };
+
+  const handleCopyRoomId = async () => {
+    try {
+      await navigator.clipboard.writeText(currentRoom || "");
+      setCopied(true);
+    } catch (error) {
+      console.error("Failed to copy room ID:", error);
+    }
+  };
+
   return (
-    <Dialog.Root open={isOpen} onOpenChange={setIsOpen}>
+    <Dialog.Root
+      open={isOpen}
+      onOpenChange={(open) => {
+        setIsOpen(open);
+        setCopied(false);
+      }}
+    >
       <TooltipContext>
         <Dialog.Trigger type="button" className="button">
           <UsersRound className={`icon ${isConnected ? "yellow" : ""}`} />
         </Dialog.Trigger>
-        <Tooltip>{isConnected ? `Connected to ${currentRoom}` : "Collaborate"}</Tooltip>
+        <Tooltip>{isConnected ? `Connected to Room` : "Collaborate"}</Tooltip>
       </TooltipContext>
       <Dialog.Portal>
         <Dialog.Backdrop className="fixed inset-0 z-40 bg-black opacity-20 transition-all duration-150 data-[ending-style]:opacity-0 data-[starting-style]:opacity-0 dark:opacity-70" />
@@ -64,7 +74,25 @@ export function Collaborate() {
             <>
               <div className="text-center">
                 <h3 className="text-lg font-semibold">Connected to Room</h3>
-                <p className="text-sm text-neutral-500">Room ID: {currentRoom}</p>
+                <div className="mt-2">
+                  <div className="flex items-center justify-center gap-1">
+                    <code className="rounded border border-neutral-700 bg-neutral-800 px-3 py-1 font-mono select-all">
+                      {currentRoom}
+                    </code>
+                    <button
+                      type="button"
+                      onClick={handleCopyRoomId}
+                      className="button rounded border border-neutral-700"
+                      title={copied ? "Copied!" : "Copy Room ID"}
+                    >
+                      {copied ? (
+                        <Check className="p-0.5 text-green-400" />
+                      ) : (
+                        <Copy className="p-0.5" />
+                      )}
+                    </button>
+                  </div>
+                </div>
               </div>
               <button
                 type="button"
