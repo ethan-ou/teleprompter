@@ -1,16 +1,6 @@
-import { StateCreator, StoreMutatorIdentifier } from "zustand";
+import { StateCreator } from "zustand";
 import * as Y from "yjs";
 import { patchSharedType, patchStore } from "./patching";
-
-type Yjs = <
-  T extends unknown,
-  Mps extends [StoreMutatorIdentifier, unknown][] = [],
-  Mcs extends [StoreMutatorIdentifier, unknown][] = [],
->(
-  doc: Y.Doc,
-  name: string,
-  f: StateCreator<T, Mps, Mcs>,
-) => StateCreator<T, Mps, Mcs>;
 
 type YjsImpl = <T extends unknown>(
   doc: Y.Doc,

@@ -1,7 +1,7 @@
 import { useFullScreen } from "@/app/hooks";
 import { startTeleprompter, stopTeleprompter } from "@/app/recognizer";
 import { Align, useNavbarStore } from "./store";
-import { useContentStore } from "../content/store";
+import { useContent } from "../content/store";
 import { useInterval } from "@/app/hooks";
 
 import {
@@ -80,10 +80,7 @@ function ButtonSection({ focused }: { focused: boolean }) {
   const { status, toggleEdit, mirror, toggleMirror, resetTimer, hide, setHide, cast, setCast } =
     useNavbarStore((state) => state);
 
-  const setContent = useContentStore((state) => state.setText);
-  const tokens = useContentStore((state) => state.tokens);
-  const setTokens = useContentStore((state) => state.setTokens);
-  const setPosition = useContentStore((state) => state.setPosition);
+  const { setText: setContent, tokens, setTokens, setPosition } = useContent();
 
   const fullscreen = useFullScreen((active) => setHide(active));
 
