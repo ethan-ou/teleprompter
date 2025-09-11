@@ -1,7 +1,7 @@
 import { useRef } from "react";
 import { escape } from "@/lib/html-escaper";
 import { useNavbarStore } from "../navbar/store";
-import { useContentStore } from "./store";
+import { useContent } from "./store";
 import { useHotkeys } from "react-hotkeys-hook";
 import { getBoundsStart, resetTranscriptWindow } from "@/lib/speech-matcher";
 import { useEffectInterval } from "@/app/hooks";
@@ -13,9 +13,7 @@ export function Content() {
   const { status, mirror, fontSize, margin, opacity, align, toggleEdit } = useNavbarStore(
     (state) => state,
   );
-  const { text, setText, tokens, position, setPosition, setTokens } = useContentStore(
-    (state) => state,
-  );
+  const { text, setText, tokens, position, setPosition, setTokens } = useContent();
 
   const style: React.CSSProperties = {
     fontSize: `${fontSize}px`,

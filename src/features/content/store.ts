@@ -1,6 +1,9 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { type Token, tokenize } from "@/lib/word-tokenizer";
+import { useCollaborateStore } from "@/features/collaborate/store";
+import { useY } from "@/app/use-yjs";
+import { Doc } from "yjs";
 
 export type Position = {
   start: number;
@@ -29,7 +32,7 @@ To enter your own script, press the Edit button with the pencil icon in the menu
 
 Credits to jlecomte for creating the original version of this teleprompter.`;
 
-export const useContentStore = create<ContentState & ContentActions>()(
+export const useLocalContentStore = create<ContentState & ContentActions>()(
   persist(
     (set) => ({
       text: initialText,
@@ -43,10 +46,13 @@ export const useContentStore = create<ContentState & ContentActions>()(
       setText: (text: string) =>
         set(() => ({
           text: text,
-          start: -1,
-          search: -1,
-          end: -1,
-          bounds: -1,
+          tokens: tokenize(text),
+          position: {
+            start: -1,
+            search: -1,
+            end: -1,
+            bounds: -1,
+          },
         })),
       setTokens: () => set((state) => ({ tokens: tokenize(state.text) })),
       setPosition: (position) => set((prev) => ({ position: { ...prev.position, ...position } })),
@@ -58,3 +64,102 @@ export const useContentStore = create<ContentState & ContentActions>()(
     },
   ),
 );
+
+/**
+ * Content proxy hook that switches between local and room content
+ *
+ * Behavior:
+ * - Room creators: Changes are saved to both room and local storage
+ * - Room joiners: Changes are only proxied to the room, not saved locally
+ * - When leaving a room, creators retain their content, joiners return to their original local content
+ */
+export function useContent() {
+  const localStore = useLocalContentStore();
+  const { ydoc, isCreator, isConnected } = useCollaborateStore();
+
+  // Get the Y.Map only when in room
+  const contentMap = isConnected() && ydoc ? ydoc.getMap("content") : null;
+
+  // Use our custom Y.js hook for automatic subscription and re-rendering
+  const roomContentData = useY(contentMap) as { text?: string; position?: Position } | null;
+
+  // If in room, return room content with room actions
+  if (isConnected() && ydoc && roomContentData) {
+    const text = roomContentData?.text || "";
+    const position = roomContentData?.position || defaultPosition;
+
+    return {
+      text,
+      tokens: tokenize(text),
+      position,
+      ...createRoomContentActions(ydoc, contentMap, localStore, isCreator),
+    };
+  }
+
+  return localStore;
+}
+
+const defaultPosition: Position = {
+  start: -1,
+  search: -1,
+  end: -1,
+  bounds: -1,
+};
+
+function createRoomContentActions(
+  ydoc: Doc,
+  contentMap: any,
+  localStore: ContentState & ContentActions,
+  isCreator: () => boolean,
+) {
+  return {
+    setText: (text: string) => {
+      ydoc.transact(() => {
+        contentMap.set("text", text);
+      });
+
+      // Room creators also save to local storage
+      if (isCreator()) {
+        localStore.setText(text);
+      }
+    },
+    setTokens: () => {}, // Tokens are computed from text
+    setPosition: (position: Partial<Position>) => {
+      ydoc.transact(() => {
+        const currentPos = contentMap.get("position") || defaultPosition;
+        contentMap.set("position", { ...currentPos, ...position });
+      });
+
+      // Room creators also save to local storage
+      if (isCreator()) {
+        localStore.setPosition(position);
+      }
+    },
+  };
+}
+
+// Content accessor for non-React contexts
+export function getContent() {
+  const collaborate = useCollaborateStore.getState();
+  const local = useLocalContentStore.getState();
+
+  if (collaborate.isConnected() && collaborate.ydoc) {
+    const contentMap = collaborate.ydoc.getMap("content");
+    const text = (contentMap.get("text") as string) || "";
+    const position = (contentMap.get("position") as Position) || defaultPosition;
+
+    return {
+      tokens: tokenize(text),
+      position,
+      ...createRoomContentActions(collaborate.ydoc, contentMap, local, collaborate.isCreator),
+    };
+  }
+
+  return {
+    tokens: local.tokens,
+    position: local.position,
+    setText: local.setText,
+    setTokens: local.setTokens,
+    setPosition: local.setPosition,
+  };
+}
