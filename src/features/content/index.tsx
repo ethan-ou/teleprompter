@@ -31,31 +31,42 @@ export function Content() {
   };
 
   const lastRef = useRef<null | HTMLDivElement>(null);
+  const isScrollingRef = useRef(false);
 
   useEffectInterval(
     () => {
-      if (status !== "editing") {
-        if (lastRef.current && position.end > 0) {
-          scroll({
-            top: {
-              top: lastRef.current.offsetTop,
-              center:
-                lastRef.current.offsetTop -
-                document.documentElement.clientHeight / 2 +
-                fontSize * 2,
-              bottom:
-                lastRef.current.offsetTop -
-                (3 / 4) * document.documentElement.clientHeight +
-                fontSize * 2,
-            }[align],
-            behavior: "smooth",
-          });
-        } else {
-          scroll({
-            top: 0,
-            behavior: "smooth",
-          });
+      const performScroll = async () => {
+        isScrollingRef.current = true;
+
+        try {
+          if (lastRef.current && position.end > 0) {
+            await scroll({
+              top: {
+                top: lastRef.current.offsetTop,
+                center:
+                  lastRef.current.offsetTop -
+                  document.documentElement.clientHeight / 2 +
+                  fontSize * 2,
+                bottom:
+                  lastRef.current.offsetTop -
+                  (3 / 4) * document.documentElement.clientHeight +
+                  fontSize * 2,
+              }[align],
+              behavior: "smooth",
+            });
+          } else {
+            await scroll({
+              top: 0,
+              behavior: "smooth",
+            });
+          }
+        } finally {
+          isScrollingRef.current = false;
         }
+      };
+
+      if (status !== "editing" && !isScrollingRef.current) {
+        performScroll();
       }
     },
     status === "started" ? 2000 : null,
