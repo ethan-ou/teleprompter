@@ -10,7 +10,7 @@ const APP_ID = "voice-teleprompter-4DRPRcq3FJmdfwgHnKMOy";
 
 export interface RoomState {
   roomId: string | null;
-  status: "disconnected" | "connecting" | "connected" | "error";
+  status: "disconnected" | "connected" | "error";
   provider: TrysteroProvider | null;
   ydoc: Y.Doc | null;
   creatorId: string | null;
@@ -18,6 +18,7 @@ export interface RoomState {
 
 export interface RoomActions {
   isCreator: () => boolean;
+  isConnected: () => boolean;
   createRoom: (content: { text: string; position: Position }) => Promise<string>;
   joinRoom: (roomId: string, content?: { text: string; position: Position }) => Promise<void>;
   leaveRoom: () => void;
@@ -30,6 +31,7 @@ export const useCollaborateStore = create<RoomState & RoomActions>()((set, get) 
   ydoc: null,
   creatorId: null,
   isCreator: () => get().creatorId === selfId,
+  isConnected: () => get().status === "connected",
   createRoom: async (content: { text: string; position: Position }): Promise<string> => {
     const roomId = generatePassphrase({
       capitalize: true,
@@ -55,11 +57,6 @@ export const useCollaborateStore = create<RoomState & RoomActions>()((set, get) 
       throw new Error("Existing room found.");
     }
 
-    set({
-      status: "connecting",
-      roomId,
-    });
-
     try {
       const ydoc = new Y.Doc();
       const provider = new TrysteroProvider(roomId, ydoc, {
@@ -81,6 +78,7 @@ export const useCollaborateStore = create<RoomState & RoomActions>()((set, get) 
         provider,
         ydoc,
         status: "connected",
+        roomId,
       });
     } catch (error) {
       console.error("Failed to join room:", error);

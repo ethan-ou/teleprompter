@@ -18,9 +18,8 @@ export function Collaborate() {
     joinRoom,
     leaveRoom,
     isCreator,
+    isConnected,
   } = useCollaborateStore();
-
-  const isConnected = status === "connected";
 
   const handleCreateRoom = async () => {
     try {
@@ -70,9 +69,9 @@ export function Collaborate() {
     >
       <TooltipContext>
         <Dialog.Trigger type="button" className="button">
-          <UsersRound className={`icon ${isConnected ? "yellow" : ""}`} />
+          <UsersRound className={`icon ${isConnected() ? "yellow" : ""}`} />
         </Dialog.Trigger>
-        <Tooltip>{isConnected ? `Connected to Room` : "Collaborate"}</Tooltip>
+        <Tooltip>{isConnected() ? `Connected to Room` : "Collaborate"}</Tooltip>
       </TooltipContext>
       <Dialog.Portal>
         <Dialog.Backdrop className="fixed inset-0 z-40 bg-black opacity-20 transition-all duration-150 data-[ending-style]:opacity-0 data-[starting-style]:opacity-0 dark:opacity-70" />
@@ -80,7 +79,7 @@ export function Collaborate() {
           <Dialog.Close className="button absolute top-2 right-2">
             <X />
           </Dialog.Close>
-          {isConnected ? (
+          {isConnected() ? (
             <>
               <div className="flex flex-col items-center gap-2">
                 <h3 className="text-lg font-semibold">

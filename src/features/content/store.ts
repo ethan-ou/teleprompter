@@ -74,18 +74,16 @@ export const useLocalContentStore = create<ContentState & ContentActions>()(
  */
 export function useContent() {
   const localStore = useLocalContentStore();
-  const { status, ydoc, isCreator, provider } = useCollaborateStore();
-
-  const isInRoom = status === "connected";
+  const { status, ydoc, isCreator, isConnected } = useCollaborateStore();
 
   // Get the Y.Map only when in room
-  const contentMap = isInRoom && ydoc ? ydoc.getMap("content") : null;
+  const contentMap = isConnected() && ydoc ? ydoc.getMap("content") : null;
 
   // Use our custom Y.js hook for automatic subscription and re-rendering
   const roomContentData = useY(contentMap) as { text?: string; position?: Position } | null;
 
   // If in room, return room content with room actions
-  if (isInRoom && ydoc && contentMap) {
+  if (isConnected() && ydoc && contentMap) {
     const text = roomContentData?.text || "";
     const position = roomContentData?.position || {
       start: -1,
