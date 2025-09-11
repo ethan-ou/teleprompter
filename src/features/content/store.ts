@@ -75,7 +75,7 @@ export const useLocalContentStore = create<ContentState & ContentActions>()(
  */
 export function useContent() {
   const localStore = useLocalContentStore();
-  const { status, ydoc, isCreator: isRoomCreator } = useCollaborateStore();
+  const { status, ydoc, isCreator } = useCollaborateStore();
 
   const isInRoom = status === "connected" && ydoc;
 
@@ -87,7 +87,7 @@ export function useContent() {
 
   // Handle initial content setup for room creators
   useEffect(() => {
-    if (!isInRoom || !ydoc || !isRoomCreator || !contentMap) return;
+    if (!isInRoom || !ydoc || !isCreator() || !contentMap) return;
 
     // Only set initial content if the room is empty
     if (contentMap.size === 0) {
@@ -103,7 +103,7 @@ export function useContent() {
       // If we're the room creator and we're leaving, we don't need special cleanup
       // as the collaborate store handles kicking other peers out
     };
-  }, [isInRoom, ydoc, isRoomCreator, contentMap]);
+  }, [isInRoom, ydoc, isCreator(), contentMap]);
 
   // If in room, return room content with room actions
   if (isInRoom && ydoc && contentMap) {
@@ -127,7 +127,7 @@ export function useContent() {
         });
 
         // Room creators also save to local storage
-        if (isRoomCreator) {
+        if (isCreator()) {
           localStore.setText(text);
         }
       },
@@ -144,7 +144,7 @@ export function useContent() {
         });
 
         // Room creators also save to local storage
-        if (isRoomCreator) {
+        if (isCreator()) {
           localStore.setPosition(position);
         }
       },

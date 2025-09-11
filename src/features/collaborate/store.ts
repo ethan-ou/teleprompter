@@ -3,6 +3,7 @@ import * as Y from "yjs";
 import { TrysteroProvider } from "@/app/y-webrtc-trystero";
 import { selfId } from "@/app/y-webrtc-trystero";
 import { Position } from "../content/store";
+import { joinRoom } from "trystero/mqtt";
 
 const APP_ID = "voice-teleprompter-4DRPRcq3FJmdfwgHnKMOy";
 
@@ -11,12 +12,12 @@ export interface RoomState {
   status: "disconnected" | "connecting" | "connected" | "error";
   provider: TrysteroProvider | null;
   ydoc: Y.Doc | null;
-  isCreator: boolean;
   creatorId: string | null;
   peerIds: string[];
 }
 
 export interface RoomActions {
+  isCreator: () => boolean;
   createRoom: (content: { text: string; position: Position }) => Promise<string>;
   joinRoom: (roomId: string, content?: { text: string; position: Position }) => Promise<void>;
   leaveRoom: () => void;
@@ -28,14 +29,12 @@ export const useCollaborateStore = create<RoomState & RoomActions>()((set, get) 
   status: "disconnected",
   provider: null,
   ydoc: null,
-  isCreator: false,
   creatorId: null,
   peerIds: [],
-
+  isCreator: () => get().creatorId === selfId,
   createRoom: async (content: { text: string; position: Position }): Promise<string> => {
     const roomId = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
     set({
-      isCreator: true,
       creatorId: selfId,
     });
     await get().joinRoom(roomId, content);
@@ -48,34 +47,26 @@ export const useCollaborateStore = create<RoomState & RoomActions>()((set, get) 
   ): Promise<void> => {
     const state = get();
 
-    // Leave current room if connected
+    // TODO: What happens if there's an existing room found?
     if (state.roomId) {
       state.leaveRoom();
+      throw new Error("Existing room found.");
     }
 
     set({
       status: "connecting",
-      roomId: roomId,
-      // DON'T reset isRoomCreator here - it should already be set by createRoom
-      // isRoomCreator: false, // REMOVE this line
+      roomId,
     });
 
     try {
       const ydoc = new Y.Doc();
-
       const provider = new TrysteroProvider(roomId, ydoc, {
-        appId: APP_ID,
+        trysteroRoom: joinRoom({ appId: APP_ID }, roomId),
         maxConns: 5,
-        // Enable filtering of broadcast channel connections within same browser
-        // as recommended in the docs for better performance
-        filterBcConns: true,
       });
 
       // Set up peer tracking and room creator detection
-      const currentState = get();
-
-      // If we're creating the room, store creator info in the Y.Doc
-      if (currentState.isCreator) {
+      if (state.isCreator()) {
         const roomMeta = ydoc.getMap("roomMeta");
         ydoc.transact(() => {
           roomMeta.set("creatorId", selfId);
@@ -84,8 +75,7 @@ export const useCollaborateStore = create<RoomState & RoomActions>()((set, get) 
       }
 
       // Initialize with content if provided and we're the room creator
-      if (content && currentState.isCreator) {
-        console.log("Initializing Y.Doc with content:", content);
+      if (content && state.isCreator()) {
         const contentMap = ydoc.getMap("content");
         ydoc.transact(() => {
           contentMap.set("text", content.text);
@@ -95,6 +85,7 @@ export const useCollaborateStore = create<RoomState & RoomActions>()((set, get) 
 
       // Set up peer tracking via provider events
       provider.on("peers", (event) => {
+        console.log(event);
         const allPeers = [...event.trysteroPeers, ...event.bcPeers];
         set({ peerIds: allPeers });
 
@@ -112,12 +103,12 @@ export const useCollaborateStore = create<RoomState & RoomActions>()((set, get) 
       const updateCreatorInfo = () => {
         const creatorId = roomMeta.get("creatorId") as string | undefined;
         if (creatorId) {
-          set({ creatorId: creatorId });
+          set({ creatorId });
         }
       };
 
       roomMeta.observe(updateCreatorInfo);
-      updateCreatorInfo(); // Initial check
+      updateCreatorInfo();
 
       set({
         provider,
@@ -131,9 +122,8 @@ export const useCollaborateStore = create<RoomState & RoomActions>()((set, get) 
         roomId: null,
         provider: null,
         ydoc: null,
-        isCreator: false,
-        creatorId: null, // Only reset on error
-        peerIds: [], // Only reset on error
+        creatorId: null,
+        peerIds: [],
       });
       throw error;
     }
@@ -150,9 +140,6 @@ export const useCollaborateStore = create<RoomState & RoomActions>()((set, get) 
       }
 
       if (state.ydoc) {
-        // Clean up any observers before destroying
-        const roomMeta = state.ydoc.getMap("roomMeta");
-        roomMeta.unobserve(() => {});
         state.ydoc.destroy();
       }
     } catch (error) {
@@ -164,7 +151,6 @@ export const useCollaborateStore = create<RoomState & RoomActions>()((set, get) 
       status: "disconnected",
       provider: null,
       ydoc: null,
-      isCreator: false,
       creatorId: null,
       peerIds: [],
     });
