@@ -10,8 +10,14 @@ export function Collaborate() {
   const [isOpen, setIsOpen] = useState(false);
   const content = useContent();
 
-  const { currentRoom, status, createRoom, joinRoom, leaveRoom, connectedPeers } =
-    useCollaborateStore();
+  const {
+    roomId: currentRoom,
+    status,
+    createRoom,
+    joinRoom,
+    leaveRoom,
+    peerIds: connectedPeers,
+  } = useCollaborateStore();
 
   const isConnected = status === "connected";
   const isConnecting = status === "connecting";

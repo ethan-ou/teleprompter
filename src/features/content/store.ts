@@ -3,7 +3,7 @@ import { persist } from "zustand/middleware";
 import { type Token, tokenize } from "@/lib/word-tokenizer";
 import { useEffect } from "react";
 import { useCollaborateStore } from "@/features/collaborate/store";
-import { useY } from "@/lib/use-yjs";
+import { useY } from "@/app/use-yjs";
 
 export type Position = {
   start: number;
@@ -75,7 +75,7 @@ export const useLocalContentStore = create<ContentState & ContentActions>()(
  */
 export function useContent() {
   const localStore = useLocalContentStore();
-  const { status, ydoc, isRoomCreator } = useCollaborateStore();
+  const { status, ydoc, isCreator: isRoomCreator } = useCollaborateStore();
 
   const isInRoom = status === "connected" && ydoc;
 
