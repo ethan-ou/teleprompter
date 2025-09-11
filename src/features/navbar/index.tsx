@@ -172,14 +172,6 @@ function ButtonSection({ focused }: { focused: boolean }) {
   };
   useActionHotkeys(restartAction);
 
-  // const collaborateAction = {
-  //   action: () => {
-  //     setCollaborate(!collaborate);
-  //   },
-  //   disabled: false,
-  //   keys: [""],
-  // };
-
   return (
     <>
       <TooltipContext aria-disabled={startAction.disabled || mobileOrTablet}>
