@@ -1,5 +1,5 @@
-# Simple workflow for deploying static content to GitHub Pages
-name: Deploy static content to Pages
+# Workflow for building and deploying the teleprompter monorepo
+name: Build and Deploy
 
 on:
   # Runs on pushes targeting the default branch
@@ -21,31 +21,66 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  # Single deploy job since we're just deploying
-  deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+  # Build job for both frontend and backend
+  build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
       - name: Set up Node
         uses: actions/setup-node@v4
         with:
           node-version: "lts/*"
           cache: "npm"
+
       - name: Install dependencies
         run: npm ci
-      - name: Build
-        run: npm run build
+
+      - name: Build shared package
+        run: npm run build -w @teleprompter/shared
+
+      - name: Build backend
+        run: npm run build -w @teleprompter/backend
+
+      - name: Build frontend
+        run: npm run build -w @teleprompter/frontend
+
+      - name: Upload frontend build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-dist
+          path: "./apps/frontend/dist"
+
+      - name: Upload backend build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-dist
+          path: "./apps/backend/dist"
+
+  # Deploy frontend to GitHub Pages
+  deploy-frontend:
+    needs: build
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download frontend build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: frontend-dist
+          path: "./dist"
+
       - name: Setup Pages
         uses: actions/configure-pages@v4
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
           # Upload dist folder
           path: "./dist"
+
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4

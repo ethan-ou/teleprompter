@@ -2,34 +2,20 @@
   "name": "teleprompter",
   "version": "0.0.0",
   "type": "module",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
   "scripts": {
-    "dev": "vite",
-    "start": "vite",
-    "build": "vite build",
-    "preview": "vite preview"
-  },
-  "dependencies": {
-    "@base-ui-components/react": "^1.0.0-beta.3",
-    "lucide-react": "^0.542.0",
-    "react": "^19.1.1",
-    "react-dom": "^19.1.1",
-    "react-hotkeys-hook": "^5.1.0",
-    "trystero": "^0.21.8",
-    "y-protocols": "^1.0.6",
-    "yjs": "^13.6.27",
-    "zustand": "^5.0.8"
+    "dev": "concurrently \"npm run dev -w @teleprompter/frontend\" \"npm run dev -w @teleprompter/backend\"",
+    "dev:frontend": "npm run dev -w @teleprompter/frontend",
+    "dev:backend": "npm run dev -w @teleprompter/backend",
+    "build": "npm run build -w @teleprompter/shared && npm run build -w @teleprompter/frontend && npm run build -w @teleprompter/backend",
+    "build:frontend": "npm run build -w @teleprompter/shared && npm run build -w @teleprompter/frontend",
+    "build:backend": "npm run build -w @teleprompter/shared && npm run build -w @teleprompter/backend"
   },
   "devDependencies": {
-    "@tailwindcss/vite": "^4.1.12",
-    "@types/dom-speech-recognition": "^0.0.6",
-    "@types/node": "^24.3.0",
-    "@types/react": "^19.1.11",
-    "@types/react-dom": "^19.1.7",
-    "@vitejs/plugin-react": "^5.0.2",
-    "prettier": "^3.6.2",
-    "prettier-plugin-tailwindcss": "^0.6.14",
-    "tailwindcss": "^4.1.12",
-    "typescript": "^5.9.2",
-    "vite": "npm:rolldown-vite@latest"
+    "concurrently": "^8.2.0"
   }
 }

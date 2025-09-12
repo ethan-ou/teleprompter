@@ -1,0 +1,22 @@
+{
+  "name": "@teleprompter/backend",
+  "version": "0.0.0",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "start": "node dist/server.js",
+    "build": "tsc",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@hocuspocus/server": "^2.14.0",
+    "y-protocols": "^1.0.6",
+    "yjs": "^13.6.27"
+  },
+  "devDependencies": {
+    "@types/node": "^24.3.0",
+    "tsx": "^4.19.2",
+    "typescript": "^5.9.2"
+  }
+}

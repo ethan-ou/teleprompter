@@ -1,17 +1,13 @@
 import { create } from "zustand";
 import * as Y from "yjs";
-import { TrysteroProvider } from "@/app/y-webrtc-trystero";
-import { selfId } from "@/app/y-webrtc-trystero";
+import { HocuspocusProvider } from "@hocuspocus/provider";
 import { Position } from "../content/store";
-import { joinRoom } from "trystero";
 import { generatePassphrase } from "@/lib/generate-passphrase";
-
-const APP_ID = "voice-teleprompter-4DRPRcq3FJmdfwgHnKMOy";
 
 export interface RoomState {
   roomId: string | null;
-  status: "disconnected" | "connected" | "error";
-  provider: TrysteroProvider | null;
+  status: "disconnected" | "connecting" | "connected" | "error";
+  provider: HocuspocusProvider | null;
   ydoc: Y.Doc | null;
   creatorId: string | null;
 }
@@ -24,23 +20,26 @@ export interface RoomActions {
   leaveRoom: () => void;
 }
 
+// Generate a unique client ID for this session
+const clientId = crypto.randomUUID();
+
 export const useCollaborateStore = create<RoomState & RoomActions>()((set, get) => ({
   roomId: null,
   status: "disconnected",
   provider: null,
   ydoc: null,
   creatorId: null,
-  isCreator: () => get().creatorId === selfId,
+  isCreator: () => get().creatorId === clientId,
   isConnected: () => get().status === "connected",
+
   createRoom: async (content: { text: string; position: Position }): Promise<string> => {
     const roomId = generatePassphrase({
       capitalize: true,
       numWords: 3,
       wordSeparator: "",
     });
-    set({
-      creatorId: selfId,
-    });
+
+    set({ creatorId: clientId });
     await get().joinRoom(roomId, content);
     return roomId;
   },
@@ -51,52 +50,41 @@ export const useCollaborateStore = create<RoomState & RoomActions>()((set, get) 
   ): Promise<void> => {
     const state = get();
 
-    // TODO: What happens if there's an existing room found?
     if (state.roomId) {
       state.leaveRoom();
-      throw new Error("Existing room found.");
     }
+
+    set({ status: "connecting" });
 
     try {
       const ydoc = new Y.Doc();
-      const provider = new TrysteroProvider(roomId, ydoc, {
-        trysteroRoom: joinRoom(
-          {
-            appId: APP_ID,
-            turnConfig: [
-              {
-                urls: "stun:stun.relay.metered.ca:80",
-              },
-              {
-                urls: "turn:standard.relay.metered.ca:80",
-                username: "2067430dcd7003f6f22de535",
-                credential: "NOp0t02fAg2VlzyY",
-              },
-              {
-                urls: "turn:standard.relay.metered.ca:80?transport=tcp",
-                username: "2067430dcd7003f6f22de535",
-                credential: "NOp0t02fAg2VlzyY",
-              },
-              {
-                urls: "turn:standard.relay.metered.ca:443",
-                username: "2067430dcd7003f6f22de535",
-                credential: "NOp0t02fAg2VlzyY",
-              },
-              {
-                urls: "turns:standard.relay.metered.ca:443?transport=tcp",
-                username: "2067430dcd7003f6f22de535",
-                credential: "NOp0t02fAg2VlzyY",
-              },
-            ],
-          },
-          roomId,
-        ),
-        maxConns: 5,
-        filterBcConns: false,
+      const provider = new HocuspocusProvider({
+        url: "ws://localhost:8080",
+        name: roomId,
+        document: ydoc,
+      });
+
+      // Wait for connection
+      await new Promise<void>((resolve, reject) => {
+        const timeout = setTimeout(() => {
+          reject(new Error("Connection timeout"));
+        }, 10000);
+
+        provider.on("status", (event: { status: string }) => {
+          if (event.status === "connected") {
+            clearTimeout(timeout);
+            resolve();
+          }
+        });
+
+        provider.on("disconnect", () => {
+          clearTimeout(timeout);
+          reject(new Error("Failed to connect"));
+        });
       });
 
       // Initialize with content if provided and we're the room creator
-      if (content && state.isCreator()) {
+      if (content && state.creatorId === clientId) {
         const contentMap = ydoc.getMap("content");
         ydoc.transact(() => {
           contentMap.set("text", content.text);
@@ -123,12 +111,11 @@ export const useCollaborateStore = create<RoomState & RoomActions>()((set, get) 
     }
   },
 
-  leaveRoom: async () => {
+  leaveRoom: () => {
     const state = get();
 
     try {
       if (state.provider) {
-        await state.provider.trystero.leave();
         state.provider.destroy();
       }
 
