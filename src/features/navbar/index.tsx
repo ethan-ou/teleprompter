@@ -2,6 +2,7 @@ import { useFullScreen } from "@/app/hooks";
 import { startTeleprompter, stopTeleprompter } from "@/app/recognizer";
 import { Align, useNavbarStore } from "./store";
 import { useContent } from "../content/store";
+import { useCollaborateStore } from "../collaborate/store";
 import { useInterval } from "@/app/hooks";
 
 import {
@@ -21,7 +22,6 @@ import {
   MonitorUp,
   UsersRound,
 } from "lucide-react";
-
 import { useHotkeys } from "react-hotkeys-hook";
 import { useState } from "react";
 import { DragInput } from "@/components/DragInput";
@@ -29,8 +29,6 @@ import { Tooltip, TooltipContext } from "@/components/Tooltip";
 import { clsx } from "@/lib/css";
 import { isMobileOrTablet } from "@/lib/device";
 import { getBoundsStart, resetTranscriptWindow } from "@/lib/speech-matcher";
-import { Dialog, Input, Tabs } from "@base-ui-components/react";
-import { Collaborate } from "../collaborate";
 
 const mobileOrTablet = isMobileOrTablet();
 
@@ -77,8 +75,20 @@ export function Navbar() {
 }
 
 function ButtonSection({ focused }: { focused: boolean }) {
-  const { status, toggleEdit, mirror, toggleMirror, resetTimer, hide, setHide, cast, setCast } =
-    useNavbarStore((state) => state);
+  const {
+    status,
+    toggleEdit,
+    mirror,
+    toggleMirror,
+    resetTimer,
+    hide,
+    setHide,
+    cast,
+    setCast,
+    setCollaborate: setCollaborateOpen,
+  } = useNavbarStore((state) => state);
+
+  const { isConnected } = useCollaborateStore();
 
   const { setText: setContent, tokens, setTokens, setPosition } = useContent();
 
@@ -291,7 +301,17 @@ function ButtonSection({ focused }: { focused: boolean }) {
           </Tooltip>
         </TooltipContext>
       )}
-      <Collaborate />
+      <TooltipContext>
+        <button
+          type="button"
+          className="button"
+          onClick={() => setCollaborateOpen(true)}
+          aria-label="Collaborate"
+        >
+          <UsersRound className={`icon ${isConnected() ? "yellow" : ""}`} />
+        </button>
+        <Tooltip>{isConnected() ? "Connected to Room" : "Collaborate"}</Tooltip>
+      </TooltipContext>
     </>
   );
 }

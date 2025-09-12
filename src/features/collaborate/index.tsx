@@ -1,15 +1,16 @@
-import { useRef, useState } from "react";
-import { Tooltip, TooltipContext } from "@/components/Tooltip";
+import { useState } from "react";
 import { Dialog, Input } from "@base-ui-components/react";
-import { UsersRound, X, Copy, Check } from "lucide-react";
+import { X, Copy, Check } from "lucide-react";
 import { useCollaborateStore } from "./store";
 import { useContent } from "../content/store";
+import { useNavbarStore } from "../navbar/store";
 
 export function Collaborate() {
   const [joinRoomId, setJoinRoomId] = useState("");
-  const [isOpen, setIsOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const content = useContent();
+  const collaborate = useNavbarStore((state) => state.collaborate);
+  const setCollaborate = useNavbarStore((state) => state.setCollaborate);
 
   const {
     roomId: currentRoom,
@@ -61,19 +62,13 @@ export function Collaborate() {
 
   return (
     <Dialog.Root
-      open={isOpen}
+      open={collaborate}
       modal="trap-focus"
       onOpenChange={(open) => {
-        setIsOpen(open);
+        setCollaborate(open);
         setCopied(false);
       }}
     >
-      <TooltipContext>
-        <Dialog.Trigger type="button" className="button">
-          <UsersRound className={`icon ${isConnected() ? "yellow" : ""}`} />
-        </Dialog.Trigger>
-        <Tooltip>{isConnected() ? `Connected to Room` : "Collaborate"}</Tooltip>
-      </TooltipContext>
       <Dialog.Portal>
         <Dialog.Backdrop className="fixed inset-0 z-40 bg-black opacity-20 transition-all duration-150 data-[ending-style]:opacity-0 data-[starting-style]:opacity-0 dark:opacity-70" />
         <Dialog.Popup className="fixed top-1/2 left-1/2 z-50 flex w-96 max-w-[calc(100vw-3rem)] -translate-x-1/2 -translate-y-1/2 flex-col items-center gap-4 rounded-lg bg-neutral-900 p-6 text-neutral-100 outline outline-neutral-700 transition-all duration-150 data-[ending-style]:scale-90 data-[ending-style]:opacity-0 data-[starting-style]:scale-90 data-[starting-style]:opacity-0">
