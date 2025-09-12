@@ -6,7 +6,7 @@ import { Collaborate } from "./features/collaborate";
 import { isMobileOrTablet } from "./lib/device";
 
 const mobileOrTablet = isMobileOrTablet();
-console.log(mobileOrTablet);
+
 const App = () => {
   return (
     <div className="app">

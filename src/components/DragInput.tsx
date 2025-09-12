@@ -32,15 +32,8 @@ export function DragInput({
   value: number;
   onValueChange: (value: number) => void;
   speed?: number;
-} & React.DetailedHTMLProps<
-  React.InputHTMLAttributes<HTMLInputElement>,
-  HTMLInputElement
->) {
-  const constrain = useCallback(createConstraints(min, max, step), [
-    min,
-    max,
-    step,
-  ]);
+} & React.DetailedHTMLProps<React.InputHTMLAttributes<HTMLInputElement>, HTMLInputElement>) {
+  const constrain = useCallback(createConstraints(min, max, step), [min, max, step]);
 
   const inputRef = useRef<HTMLInputElement>(null);
   const [dragging, setDragging] = useState<boolean>(false);
@@ -70,9 +63,7 @@ export function DragInput({
   const onUpdate = useCallback(
     (event: MouseEvent) => {
       if (dragging && startValue) {
-        onValueChange(
-          constrain(snapshot + (event.clientX - startValue) * speed),
-        );
+        onValueChange(constrain(snapshot + (event.clientX - startValue) * speed));
       }
     },
     [dragging, startValue, onValueChange, constrain, snapshot, speed],
@@ -100,7 +91,7 @@ export function DragInput({
 
   return (
     <label
-      className="flex touch-none items-center gap-2 py-0.5 px-1 align-middle text-lg focus-within:outline-2 focus-within:outline-blue-500"
+      className="flex touch-none items-center gap-2 px-1 py-0.5 align-middle text-lg focus-within:outline-2 focus-within:outline-blue-500"
       onClick={(e) => e.preventDefault()}
       title={title}
     >
@@ -118,9 +109,7 @@ export function DragInput({
         max={max}
         autoComplete="false"
         spellCheck="false"
-        onBlur={(e) =>
-          onValueChange(constrain(parseInt(e.currentTarget.value, 10) || 0))
-        }
+        onBlur={(e) => onValueChange(constrain(parseInt(e.currentTarget.value, 10) || 0))}
         onKeyUp={(e) => {
           if (e.key === "Enter") {
             onValueChange(constrain(parseInt(e.currentTarget.value, 10) || 0));
@@ -128,6 +117,7 @@ export function DragInput({
           }
         }}
         onClick={(e) => e.currentTarget.select()}
+        onChange={(e) => onValueChange(+e.target.value)}
         {...props}
         className="w-full cursor-default border-0 focus-visible:outline-0"
       />
