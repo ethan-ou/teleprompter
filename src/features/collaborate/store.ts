@@ -3,7 +3,7 @@ import * as Y from "yjs";
 import { TrysteroProvider } from "@/app/y-webrtc-trystero";
 import { selfId } from "@/app/y-webrtc-trystero";
 import { Position } from "../content/store";
-import { joinRoom } from "trystero/torrent";
+import { joinRoom } from "trystero";
 import { generatePassphrase } from "@/lib/generate-passphrase";
 
 const APP_ID = "voice-teleprompter-4DRPRcq3FJmdfwgHnKMOy";
