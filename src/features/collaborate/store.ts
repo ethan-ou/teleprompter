@@ -3,7 +3,7 @@ import * as Y from "yjs";
 import { TrysteroProvider } from "@/app/y-webrtc-trystero";
 import { selfId } from "@/app/y-webrtc-trystero";
 import { Position } from "../content/store";
-import { joinRoom } from "trystero/mqtt";
+import { joinRoom } from "trystero";
 import { generatePassphrase } from "@/lib/generate-passphrase";
 
 const APP_ID = "voice-teleprompter-4DRPRcq3FJmdfwgHnKMOy";
@@ -63,33 +63,31 @@ export const useCollaborateStore = create<RoomState & RoomActions>()((set, get) 
         trysteroRoom: joinRoom(
           {
             appId: APP_ID,
-            rtcConfig: {
-              iceServers: [
-                {
-                  urls: "stun:stun.relay.metered.ca:80",
-                },
-                {
-                  urls: "turn:standard.relay.metered.ca:80",
-                  username: "2067430dcd7003f6f22de535",
-                  credential: "NOp0t02fAg2VlzyY",
-                },
-                {
-                  urls: "turn:standard.relay.metered.ca:80?transport=tcp",
-                  username: "2067430dcd7003f6f22de535",
-                  credential: "NOp0t02fAg2VlzyY",
-                },
-                {
-                  urls: "turn:standard.relay.metered.ca:443",
-                  username: "2067430dcd7003f6f22de535",
-                  credential: "NOp0t02fAg2VlzyY",
-                },
-                {
-                  urls: "turns:standard.relay.metered.ca:443?transport=tcp",
-                  username: "2067430dcd7003f6f22de535",
-                  credential: "NOp0t02fAg2VlzyY",
-                },
-              ],
-            },
+            turnConfig: [
+              {
+                urls: "stun:stun.relay.metered.ca:80",
+              },
+              {
+                urls: "turn:standard.relay.metered.ca:80",
+                username: "2067430dcd7003f6f22de535",
+                credential: "NOp0t02fAg2VlzyY",
+              },
+              {
+                urls: "turn:standard.relay.metered.ca:80?transport=tcp",
+                username: "2067430dcd7003f6f22de535",
+                credential: "NOp0t02fAg2VlzyY",
+              },
+              {
+                urls: "turn:standard.relay.metered.ca:443",
+                username: "2067430dcd7003f6f22de535",
+                credential: "NOp0t02fAg2VlzyY",
+              },
+              {
+                urls: "turns:standard.relay.metered.ca:443?transport=tcp",
+                username: "2067430dcd7003f6f22de535",
+                credential: "NOp0t02fAg2VlzyY",
+              },
+            ],
           },
           roomId,
         ),
