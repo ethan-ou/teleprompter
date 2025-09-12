@@ -3,7 +3,7 @@ import * as Y from "yjs";
 import { TrysteroProvider } from "@/app/y-webrtc-trystero";
 import { selfId } from "@/app/y-webrtc-trystero";
 import { Position } from "../content/store";
-import { joinRoom } from "trystero/firebase";
+import { joinRoom } from "trystero";
 import { generatePassphrase } from "@/lib/generate-passphrase";
 
 const APP_ID = "voice-teleprompter-4DRPRcq3FJmdfwgHnKMOy";
@@ -62,8 +62,7 @@ export const useCollaborateStore = create<RoomState & RoomActions>()((set, get) 
       const provider = new TrysteroProvider(roomId, ydoc, {
         trysteroRoom: joinRoom(
           {
-            appId:
-              "https://voice-activated-teleprompter-default-rtdb.asia-southeast1.firebasedatabase.app/",
+            appId: APP_ID,
           },
           roomId,
         ),
