@@ -62,6 +62,7 @@ export function Collaborate() {
   return (
     <Dialog.Root
       open={isOpen}
+      modal="trap-focus"
       onOpenChange={(open) => {
         setIsOpen(open);
         setCopied(false);
@@ -75,7 +76,7 @@ export function Collaborate() {
       </TooltipContext>
       <Dialog.Portal>
         <Dialog.Backdrop className="fixed inset-0 z-40 bg-black opacity-20 transition-all duration-150 data-[ending-style]:opacity-0 data-[starting-style]:opacity-0 dark:opacity-70" />
-        <Dialog.Popup className="fixed top-1/2 left-1/2 z-50 -mt-8 flex w-96 max-w-[calc(100vw-3rem)] -translate-x-1/2 -translate-y-1/2 flex-col items-center gap-4 rounded-lg bg-neutral-900 p-6 text-neutral-100 outline outline-neutral-700 transition-all duration-150 data-[ending-style]:scale-90 data-[ending-style]:opacity-0 data-[starting-style]:scale-90 data-[starting-style]:opacity-0">
+        <Dialog.Popup className="fixed top-1/2 left-1/2 z-50 flex w-96 max-w-[calc(100vw-3rem)] -translate-x-1/2 -translate-y-1/2 flex-col items-center gap-4 rounded-lg bg-neutral-900 p-6 text-neutral-100 outline outline-neutral-700 transition-all duration-150 data-[ending-style]:scale-90 data-[ending-style]:opacity-0 data-[starting-style]:scale-90 data-[starting-style]:opacity-0">
           <Dialog.Close className="button absolute top-2 right-2">
             <X />
           </Dialog.Close>
@@ -120,8 +121,12 @@ export function Collaborate() {
             </>
           ) : (
             <>
-              <h3 className="text-lg font-semibold">Join Collaboration</h3>
-
+              <div className="flex flex-col items-center text-center">
+                <Dialog.Title className="text-lg font-semibold">Collaborate Mode</Dialog.Title>
+                <Dialog.Description className="text-center text-sm text-neutral-400">
+                  Edit and sync transcript with peers
+                </Dialog.Description>
+              </div>
               <button
                 type="button"
                 onClick={handleCreateRoom}
@@ -158,6 +163,9 @@ export function Collaborate() {
                 </button>
               </div>
 
+              <p className="text-center text-sm text-neutral-400">
+                Devices require a shared network connection
+              </p>
               {status === "error" && (
                 <p className="text-sm text-red-400">Failed to connect to room. Please try again.</p>
               )}
