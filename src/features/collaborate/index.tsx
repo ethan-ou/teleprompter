@@ -83,10 +83,9 @@ export function Collaborate() {
           {isConnected() ? (
             <>
               <div className="flex flex-col items-center gap-2">
-                <h3 className="text-lg font-semibold">
+                <Dialog.Title className="text-lg font-semibold">
                   Connected to Room {isCreator() ? "(Host)" : "(Guest)"}
-                </h3>
-
+                </Dialog.Title>
                 <div>
                   <div className="flex items-center justify-center gap-1">
                     <code className="rounded border border-neutral-700 bg-neutral-800 px-3 py-1 font-mono select-all">
@@ -121,12 +120,7 @@ export function Collaborate() {
             </>
           ) : (
             <>
-              <div className="flex flex-col items-center text-center">
-                <Dialog.Title className="text-lg font-semibold">Collaborate Mode</Dialog.Title>
-                <Dialog.Description className="text-center text-sm text-neutral-400">
-                  Edit and sync transcript with peers
-                </Dialog.Description>
-              </div>
+              <Dialog.Title className="text-lg font-semibold">Collaborate Mode</Dialog.Title>
               <button
                 type="button"
                 onClick={handleCreateRoom}
