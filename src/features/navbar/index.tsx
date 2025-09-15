@@ -4,7 +4,7 @@ import { Align, useNavbarStore } from "./store";
 import { useContent } from "../content/store";
 import { useCollaborateStore } from "../collaborate/store";
 import { useInterval } from "@/app/hooks";
-
+import { Tooltip } from "@base-ui-components/react/tooltip";
 import {
   Pencil,
   MoveHorizontal,
@@ -25,10 +25,10 @@ import {
 import { useHotkeys } from "react-hotkeys-hook";
 import { useState } from "react";
 import { DragInput } from "@/components/DragInput";
-import { Tooltip, TooltipContext } from "@/components/Tooltip";
 import { clsx } from "@/lib/css";
 import { isMobileOrTablet } from "@/lib/device";
 import { getBoundsStart, resetTranscriptWindow } from "@/lib/speech-matcher";
+import { TooltipPopup } from "@/components/Tooltip";
 
 const mobileOrTablet = isMobileOrTablet();
 
@@ -46,30 +46,32 @@ export function Navbar() {
         hide ? "fixed -translate-y-full" : "sticky translate-y-0",
       )}
     >
-      <div
-        className="flex flex-wrap items-center gap-x-1"
-        onFocus={() => setFocused(() => true)}
-        onBlur={() => setFocused(() => false)}
-      >
-        <ButtonSection focused={focused} />
-      </div>
-      <div className="flex justify-center text-3xl text-neutral-300 max-[1000px]:hidden">
-        <TimerSection />
-      </div>
-      <div
-        className="flex flex-wrap items-center justify-center gap-x-4 gap-y-0.5 text-neutral-300 lg:justify-end"
-        onFocus={() => setFocused(() => true)}
-        onBlur={() => setFocused(() => false)}
-      >
-        <SliderSection />
-      </div>
-      <button
-        type="button"
-        onClick={() => setHide(!hide)}
-        className="group absolute -bottom-4 left-1/2 z-20 flex h-8 w-2/3 -translate-x-1/2 translate-y-1/2 justify-center p-1 hover:cursor-pointer focus:outline-0"
-      >
-        <div className="h-2 w-1/2 rounded-full transition delay-75 group-hover:bg-neutral-700/85 group-focus:bg-neutral-700/85 group-focus:outline-2 group-active:bg-neutral-700/85"></div>
-      </button>
+      <Tooltip.Provider>
+        <div
+          className="flex flex-wrap items-center gap-x-1"
+          onFocus={() => setFocused(() => true)}
+          onBlur={() => setFocused(() => false)}
+        >
+          <ButtonSection focused={focused} />
+        </div>
+        <div className="flex justify-center text-3xl text-neutral-300 max-[1000px]:hidden">
+          <TimerSection />
+        </div>
+        <div
+          className="flex flex-wrap items-center justify-center gap-x-4 gap-y-0.5 text-neutral-300 lg:justify-end"
+          onFocus={() => setFocused(() => true)}
+          onBlur={() => setFocused(() => false)}
+        >
+          <SliderSection />
+        </div>
+        <button
+          type="button"
+          onClick={() => setHide(!hide)}
+          className="group absolute -bottom-4 left-1/2 z-20 flex h-8 w-2/3 -translate-x-1/2 translate-y-1/2 justify-center p-1 hover:cursor-pointer focus:outline-0"
+        >
+          <div className="h-2 w-1/2 rounded-full transition delay-75 group-hover:bg-neutral-700/85 group-focus:bg-neutral-700/85 group-focus:outline-2 group-active:bg-neutral-700/85"></div>
+        </button>
+      </Tooltip.Provider>
     </nav>
   );
 }
@@ -184,8 +186,8 @@ function ButtonSection({ focused }: { focused: boolean }) {
 
   return (
     <>
-      <TooltipContext aria-disabled={startAction.disabled || mobileOrTablet}>
-        <button
+      <Tooltip.Root aria-disabled={startAction.disabled || mobileOrTablet}>
+        <Tooltip.Trigger
           type="button"
           className={clsx(
             "button group/button flex items-center gap-2 rounded-md disabled:border-neutral-900 disabled:bg-transparent hover:disabled:border-neutral-900 hover:disabled:bg-transparent sm:mr-1 sm:border",
@@ -212,13 +214,13 @@ function ButtonSection({ focused }: { focused: boolean }) {
           >
             {status === "started" ? "Stop " : "Start"}
           </span>
-        </button>
-        <Tooltip>
+        </Tooltip.Trigger>
+        <TooltipPopup>
           {status === "started" ? "Stop" : "Start"} <kbd>Space</kbd>
-        </Tooltip>
-      </TooltipContext>
-      <TooltipContext aria-disabled={editAction.disabled || mobileOrTablet}>
-        <button
+        </TooltipPopup>
+      </Tooltip.Root>
+      <Tooltip.Root aria-disabled={editAction.disabled || mobileOrTablet}>
+        <Tooltip.Trigger
           type="button"
           className="button"
           onClick={editAction.action}
@@ -226,26 +228,26 @@ function ButtonSection({ focused }: { focused: boolean }) {
           aria-label="Edit Text"
         >
           <Pencil className={`icon ${status === "editing" ? "yellow" : ""}`} />
-        </button>
-        <Tooltip>
+        </Tooltip.Trigger>
+        <TooltipPopup>
           Edit <kbd>E</kbd>
-        </Tooltip>
-      </TooltipContext>
-      <TooltipContext aria-disabled={restartAction.disabled || mobileOrTablet}>
-        <button
+        </TooltipPopup>
+      </Tooltip.Root>
+      <Tooltip.Root aria-disabled={restartAction.disabled || mobileOrTablet}>
+        <Tooltip.Trigger
           className="button"
           onClick={restartAction.action}
           disabled={restartAction.disabled}
           aria-label="Reset to Top"
         >
           <Undo2 className="icon" />
-        </button>
-        <Tooltip>
+        </Tooltip.Trigger>
+        <TooltipPopup>
           Reset to Top <kbd>R</kbd>
-        </Tooltip>
-      </TooltipContext>
-      <TooltipContext aria-disabled={clearAction.disabled || mobileOrTablet}>
-        <button
+        </TooltipPopup>
+      </Tooltip.Root>
+      <Tooltip.Root aria-disabled={clearAction.disabled || mobileOrTablet}>
+        <Tooltip.Trigger
           type="button"
           className="button"
           onClick={clearAction.action}
@@ -253,13 +255,13 @@ function ButtonSection({ focused }: { focused: boolean }) {
           aria-label="Clear Text"
         >
           <Trash2 className="icon" />
-        </button>
-        <Tooltip>
+        </Tooltip.Trigger>
+        <TooltipPopup>
           Clear <kbd>Del</kbd>
-        </Tooltip>
-      </TooltipContext>
-      <TooltipContext aria-disabled={mirrorAction.disabled || mobileOrTablet}>
-        <button
+        </TooltipPopup>
+      </Tooltip.Root>
+      <Tooltip.Root aria-disabled={mirrorAction.disabled || mobileOrTablet}>
+        <Tooltip.Trigger
           type="button"
           className="button"
           onClick={mirrorAction.action}
@@ -267,13 +269,13 @@ function ButtonSection({ focused }: { focused: boolean }) {
           aria-label="Mirror"
         >
           <MoveHorizontal className={`icon ${mirror ? "yellow" : ""}`} />
-        </button>
-        <Tooltip>
+        </Tooltip.Trigger>
+        <TooltipPopup>
           Mirror <kbd>M</kbd>
-        </Tooltip>
-      </TooltipContext>
-      <TooltipContext aria-disabled={fullscreenAction.disabled || mobileOrTablet}>
-        <button
+        </TooltipPopup>
+      </Tooltip.Root>
+      <Tooltip.Root aria-disabled={fullscreenAction.disabled || mobileOrTablet}>
+        <Tooltip.Trigger
           type="button"
           className="button"
           onClick={fullscreenAction.action}
@@ -281,37 +283,37 @@ function ButtonSection({ focused }: { focused: boolean }) {
           aria-label={fullscreen.active ? "Exit Fullscreen" : "Fullscreen"}
         >
           <Expand className={`icon ${fullscreen.active ? "yellow" : ""}`} />
-        </button>
-        <Tooltip>
+        </Tooltip.Trigger>
+        <TooltipPopup>
           {fullscreen.active ? "Exit Fullscreen" : "Fullscreen"} <kbd>F</kbd>
-        </Tooltip>
-      </TooltipContext>
+        </TooltipPopup>
+      </Tooltip.Root>
       {!mobileOrTablet && (
-        <TooltipContext aria-disabled={castScreenAction.disabled || mobileOrTablet}>
-          <button
+        <Tooltip.Root aria-disabled={castScreenAction.disabled || mobileOrTablet}>
+          <Tooltip.Trigger
             className="button"
             onClick={castScreenAction.action}
             disabled={castScreenAction.disabled}
             aria-label={cast ? "Stop Casting" : "Cast Screen"}
           >
             <MonitorUp className={`icon ${cast ? "yellow" : ""}`} />
-          </button>
-          <Tooltip>
+          </Tooltip.Trigger>
+          <TooltipPopup>
             {cast ? "Stop Casting" : "Cast Screen"} <kbd>S</kbd>
-          </Tooltip>
-        </TooltipContext>
+          </TooltipPopup>
+        </Tooltip.Root>
       )}
-      <TooltipContext>
-        <button
+      <Tooltip.Root>
+        <Tooltip.Trigger
           type="button"
           className="button"
           onClick={() => setCollaborateOpen(true)}
           aria-label="Collaborate"
         >
           <UsersRound className={`icon ${isConnected() ? "yellow" : ""}`} />
-        </button>
-        <Tooltip>{isConnected() ? "Connected to Room" : "Collaborate"}</Tooltip>
-      </TooltipContext>
+        </Tooltip.Trigger>
+        <TooltipPopup>{isConnected() ? "Connected to Room" : "Collaborate"}</TooltipPopup>
+      </Tooltip.Root>
     </>
   );
 }
@@ -380,108 +382,126 @@ function SliderSection() {
 
   return (
     <>
-      <TooltipContext aria-disabled={mobileOrTablet}>
-        <div className="w-20">
-          <DragInput
-            value={sizeSlider.value}
-            onValueChange={sizeSlider.action}
-            step={sizeSlider.step}
-            min={sizeSlider.min}
-            max={sizeSlider.max}
-            aria-label="Font Size"
-          >
-            <AArrowUp className="size-7" />
-          </DragInput>
-        </div>
-        <Tooltip>
+      <Tooltip.Root aria-disabled={mobileOrTablet}>
+        <Tooltip.Trigger
+          render={(props) => (
+            <div {...props} className="w-20">
+              <DragInput
+                value={sizeSlider.value}
+                onValueChange={sizeSlider.action}
+                step={sizeSlider.step}
+                min={sizeSlider.min}
+                max={sizeSlider.max}
+                aria-label="Font Size"
+              >
+                <AArrowUp className="size-7" />
+              </DragInput>
+            </div>
+          )}
+        />
+        <TooltipPopup>
           Font Size{" "}
           <span className="text-neutral-400">
             <kbd>-</kbd>
             <kbd>+</kbd>
           </span>
-        </Tooltip>
-      </TooltipContext>
-      <TooltipContext aria-disabled={mobileOrTablet}>
-        <div className="w-[4.75rem]">
-          <DragInput
-            value={marginSlider.value}
-            onValueChange={marginSlider.action}
-            step={marginSlider.step}
-            min={marginSlider.min}
-            max={marginSlider.max}
-            speed={0.5}
-            aria-label="Margin"
-          >
-            <Minimize2 className="size-7 rotate-45" />
-          </DragInput>
-        </div>
-        <Tooltip>
+        </TooltipPopup>
+      </Tooltip.Root>
+      <Tooltip.Root aria-disabled={mobileOrTablet}>
+        <Tooltip.Trigger
+          render={(props) => (
+            <div {...props} className="w-[4.75rem]">
+              <DragInput
+                value={marginSlider.value}
+                onValueChange={marginSlider.action}
+                step={marginSlider.step}
+                min={marginSlider.min}
+                max={marginSlider.max}
+                speed={0.5}
+                aria-label="Margin"
+              >
+                <Minimize2 className="size-7 rotate-45" />
+              </DragInput>
+            </div>
+          )}
+        />
+        <TooltipPopup>
           Margin{" "}
           <span className="text-neutral-400">
             <kbd>{"["}</kbd>
             <kbd>{"]"}</kbd>
           </span>
-        </Tooltip>
-      </TooltipContext>
-      <TooltipContext aria-disabled={mobileOrTablet}>
-        <div className="w-20">
-          <DragInput
-            value={contrastSlider.value}
-            onValueChange={contrastSlider.action}
-            step={contrastSlider.step}
-            min={contrastSlider.min}
-            max={contrastSlider.max}
-            aria-label="Brightness"
-          >
-            {contrastSlider.value > 80 ? (
-              <Sun />
-            ) : contrastSlider.value > 50 ? (
-              <SunMedium />
-            ) : (
-              <SunDim />
-            )}
-          </DragInput>
-        </div>
-        <Tooltip>
+        </TooltipPopup>
+      </Tooltip.Root>
+      <Tooltip.Root aria-disabled={mobileOrTablet}>
+        <Tooltip.Trigger
+          render={(props) => (
+            <div {...props} className="w-20">
+              <DragInput
+                value={contrastSlider.value}
+                onValueChange={contrastSlider.action}
+                step={contrastSlider.step}
+                min={contrastSlider.min}
+                max={contrastSlider.max}
+                aria-label="Brightness"
+              >
+                {contrastSlider.value > 80 ? (
+                  <Sun />
+                ) : contrastSlider.value > 50 ? (
+                  <SunMedium />
+                ) : (
+                  <SunDim />
+                )}
+              </DragInput>
+            </div>
+          )}
+        />
+        <TooltipPopup>
           Brightness{" "}
           <span className="text-neutral-400">
             <kbd>;</kbd>
             <kbd>'</kbd>
           </span>
-        </Tooltip>
-      </TooltipContext>
+        </TooltipPopup>
+      </Tooltip.Root>
       <div>
-        <label
-          className="flex gap-1 px-1 focus-within:outline-2 focus-within:outline-blue-500"
-          aria-label="Align"
-        >
-          <TooltipContext aria-disabled={mobileOrTablet}>
-            <AlignCenter />
-            <Tooltip>
-              Align{" "}
-              <span className="text-neutral-400">
-                <kbd>T</kbd>
-                <kbd>C</kbd>
-                <kbd>B</kbd>
-              </span>
-            </Tooltip>
-          </TooltipContext>
-          <select
-            className="border-0 focus-visible:outline-0"
-            onChange={(e) => setAlign(e.target.value as Align)}
-            value={align}
-          >
-            <option className="bg-black" value="top">
-              Top
-            </option>
-            <option className="bg-black" value="center">
-              Center
-            </option>
-            <option className="bg-black" value="bottom">
-              Bottom
-            </option>
-          </select>
-        </label>
+        <Tooltip.Root aria-disabled={mobileOrTablet}>
+          <Tooltip.Trigger
+            render={(props) => (
+              <label
+                {...props}
+                className="flex gap-1 px-1 focus-within:outline-2 focus-within:outline-blue-500"
+                aria-label="Align"
+              >
+                <AlignCenter />
+                <select
+                  className="border-0 focus-visible:outline-0"
+                  onChange={(e) => setAlign(e.target.value as Align)}
+                  value={align}
+                >
+                  <option className="bg-black" value="top">
+                    Top
+                  </option>
+                  <option className="bg-black" value="center">
+                    Center
+                  </option>
+                  <option className="bg-black" value="bottom">
+                    Bottom
+                  </option>
+                </select>
+              </label>
+            )}
+          />
+
+          <TooltipPopup>
+            Align{" "}
+            <span className="text-neutral-400">
+              <kbd>T</kbd>
+              <kbd>C</kbd>
+              <kbd>B</kbd>
+            </span>
+          </TooltipPopup>
+        </Tooltip.Root>
       </div>
     </>
   );
