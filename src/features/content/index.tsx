@@ -1,54 +1,84 @@
-import { useRef } from "react";
+import { useRef, useMemo } from "react";
 import { useNavbarStore } from "../navbar/store";
 import { useContent } from "./store";
 import { useHotkeys } from "react-hotkeys-hook";
 import { getBoundsStart, resetTranscriptWindow } from "@/lib/speech-matcher";
-import { useEffectInterval } from "@/app/hooks";
+import { useLayoutEffectInterval } from "@/app/hooks";
 import { getNextSentence, getPrevSentence } from "@/lib/word-tokenizer";
 import { scroll } from "@/lib/smooth-scroll";
 import { Text } from "@/components/Text";
 
 export function Content() {
-  const { status, mirror, fontSize, margin, opacity, align, toggleEdit } = useNavbarStore(
-    (state) => state,
-  );
+  const { status, fontSize, margin, opacity, align, toggleEdit } = useNavbarStore((state) => state);
   const { text, setText, tokens, position, setPosition, setTokens } = useContent();
 
-  const style: React.CSSProperties = {
-    fontSize: `${fontSize}px`,
-    paddingLeft: `${margin}vw`,
-    // Add more space to the right side for improved readability
-    paddingRight: `${margin * 0.8 - Math.min(fontSize / 80, 1) * 0.4}vw`,
-    opacity: opacity / 100,
-    paddingTop: {
-      top: "1rem",
-      center: `calc(50vh - ${fontSize * 2}px)`,
-      bottom: `calc(${(3 / 4) * 100}vh -  ${fontSize * 2}px)`,
-    }[align],
-  };
+  const style: React.CSSProperties = useMemo(
+    () => ({
+      fontSize: `${fontSize}px`,
+      paddingLeft: `${margin}vw`,
+      // Add more space to the right side for improved readability
+      paddingRight: `${margin * 0.8 - Math.min(fontSize / 80, 1) * 0.4}vw`,
+      opacity: opacity / 100,
+      paddingTop: {
+        top: "1rem",
+        center: `calc(50vh - ${fontSize * 2}px)`,
+        bottom: `calc(${(3 / 4) * 100}vh -  ${fontSize * 2}px)`,
+      }[align],
+    }),
+    [fontSize, margin, opacity, align],
+  );
 
-  const lastRef = useRef<null | HTMLDivElement>(null);
+  const lastRef = useRef<HTMLDivElement>(null);
   const isScrollingRef = useRef(false);
+  const prevValuesRef = useRef({
+    positionEnd: -1,
+    align: "",
+    fontSize: -1,
+    offsetTop: -1,
+  });
 
-  useEffectInterval(
+  useLayoutEffectInterval(
     () => {
       const performScroll = async () => {
         isScrollingRef.current = true;
 
         try {
           if (lastRef.current && position.end > 0) {
+            const currentValues = {
+              positionEnd: position.end,
+              align,
+              fontSize,
+              offsetTop: lastRef.current.offsetTop,
+            };
+
+            // Only scroll if values have changed
+            const hasChanged = Object.keys(currentValues).some(
+              (key) =>
+                prevValuesRef.current[key as keyof typeof currentValues] !==
+                currentValues[key as keyof typeof currentValues],
+            );
+
+            if (!hasChanged) {
+              isScrollingRef.current = false;
+              return;
+            }
+
+            prevValuesRef.current = currentValues;
+
+            const scrollPositions = {
+              top: lastRef.current.offsetTop,
+              center:
+                lastRef.current.offsetTop -
+                document.documentElement.clientHeight / 2 +
+                fontSize * 2,
+              bottom:
+                lastRef.current.offsetTop -
+                (3 / 4) * document.documentElement.clientHeight +
+                fontSize * 2,
+            };
+
             await scroll({
-              top: {
-                top: lastRef.current.offsetTop,
-                center:
-                  lastRef.current.offsetTop -
-                  document.documentElement.clientHeight / 2 +
-                  fontSize * 2,
-                bottom:
-                  lastRef.current.offsetTop -
-                  (3 / 4) * document.documentElement.clientHeight +
-                  fontSize * 2,
-              }[align],
+              top: scrollPositions[align],
               behavior: "smooth",
             });
           } else {
