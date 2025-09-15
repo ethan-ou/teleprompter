@@ -1,13 +1,12 @@
 import { useRef } from "react";
-import { escape } from "@/lib/html-escaper";
 import { useNavbarStore } from "../navbar/store";
 import { useContent } from "./store";
 import { useHotkeys } from "react-hotkeys-hook";
 import { getBoundsStart, resetTranscriptWindow } from "@/lib/speech-matcher";
 import { useEffectInterval } from "@/app/hooks";
-import { clsx } from "@/lib/css";
-import { getNextSentence, getNextWordIndex, getPrevSentence } from "@/lib/word-tokenizer";
+import { getNextSentence, getPrevSentence } from "@/lib/word-tokenizer";
 import { scroll } from "@/lib/smooth-scroll";
+import { Text } from "@/components/Text";
 
 export function Content() {
   const { status, mirror, fontSize, margin, opacity, align, toggleEdit } = useNavbarStore(
@@ -162,51 +161,7 @@ export function Content() {
           />
         </div>
       ) : (
-        <div
-          className={clsx("content select-none", status === "started" ? "content-transition" : "")}
-          style={{
-            ...style,
-            transform: `scaleX(${mirror ? "-1" : "1"})`,
-          }}
-        >
-          {tokens.map((token, index) => (
-            <span
-              // Position ref a little after the end index to scroll past line breaks and punctuation.
-              {...(index === Math.min(getNextWordIndex(tokens, position.end), tokens.length - 1)
-                ? { ref: lastRef }
-                : {})}
-              key={token.index}
-              onClick={() => {
-                const selectedPosition = index - 1;
-                const bounds = getBoundsStart(tokens, selectedPosition);
-                setPosition({
-                  start: selectedPosition,
-                  search: selectedPosition,
-                  end: selectedPosition,
-                  ...(bounds !== undefined && {
-                    bounds: Math.min(bounds, tokens.length),
-                  }),
-                });
-              }}
-              className={
-                token.index <= position.start
-                  ? "final-transcript"
-                  : token.index <= position.end
-                    ? "interim-transcript"
-                    : status === "started" && token.index > position.bounds + 20
-                      ? "opacity-40"
-                      : status === "started" && token.index > position.bounds + 10
-                        ? "opacity-60"
-                        : status === "started" && token.index > position.bounds
-                          ? "opacity-80"
-                          : ""
-              }
-              dangerouslySetInnerHTML={{
-                __html: escape(token.value).replace(/\n/g, "<br>"),
-              }}
-            />
-          ))}
-        </div>
+        <Text style={style} lastRef={lastRef} />
       )}
     </main>
   );
