@@ -1,12 +1,10 @@
-import { useCollaborateStore } from "@/features/collaborate/store";
-import { useContent, useLocalContentStore } from "@/features/content/store";
+import { useContent } from "@/features/content/store";
 import { useNavbarStore } from "@/features/navbar/store";
 import { clsx } from "@/lib/css";
 import { escape } from "@/lib/html-escaper";
 import { getBoundsStart } from "@/lib/speech-matcher";
 import { getNextWordIndex, type Token as TokenType } from "@/lib/word-tokenizer";
 import { memo, useCallback, useMemo } from "react";
-import { useShallow } from "zustand/react/shallow";
 
 interface TextProps {
   style: React.CSSProperties;
@@ -16,25 +14,9 @@ interface TextProps {
 export function Text({ style, lastRef }: TextProps) {
   const { status, mirror } = useNavbarStore();
 
-  // Check if we're in a collaborative session
-  const { isConnected } = useCollaborateStore();
-
-  // Use shallow comparison for local store to avoid unnecessary re-renders
-  const localContent = useLocalContentStore(
-    useShallow((state) => ({
-      tokens: state.tokens,
-      position: state.position,
-    })),
-  );
-
   // For collaborative sessions, we need to use the useContent hook
   // which handles room content properly
-  const collaborativeContent = useContent();
-
-  // Use collaborative content if connected, otherwise use local content
-  const { tokens, position } = isConnected()
-    ? { tokens: collaborativeContent.tokens, position: collaborativeContent.position }
-    : localContent;
+  const { tokens, position } = useContent();
 
   return (
     <div
