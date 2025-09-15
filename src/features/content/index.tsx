@@ -28,14 +28,8 @@ export function Content() {
     [fontSize, margin, opacity, align],
   );
 
-  const lastRef = useRef<HTMLDivElement>(null);
+  const lastRef = useRef<null | HTMLDivElement>(null);
   const isScrollingRef = useRef(false);
-  const prevValuesRef = useRef({
-    positionEnd: -1,
-    align: "",
-    fontSize: -1,
-    offsetTop: -1,
-  });
 
   useLayoutEffectInterval(
     () => {
@@ -44,41 +38,18 @@ export function Content() {
 
         try {
           if (lastRef.current && position.end > 0) {
-            const currentValues = {
-              positionEnd: position.end,
-              align,
-              fontSize,
-              offsetTop: lastRef.current.offsetTop,
-            };
-
-            // Only scroll if values have changed
-            const hasChanged = Object.keys(currentValues).some(
-              (key) =>
-                prevValuesRef.current[key as keyof typeof currentValues] !==
-                currentValues[key as keyof typeof currentValues],
-            );
-
-            if (!hasChanged) {
-              isScrollingRef.current = false;
-              return;
-            }
-
-            prevValuesRef.current = currentValues;
-
-            const scrollPositions = {
-              top: lastRef.current.offsetTop,
-              center:
-                lastRef.current.offsetTop -
-                document.documentElement.clientHeight / 2 +
-                fontSize * 2,
-              bottom:
-                lastRef.current.offsetTop -
-                (3 / 4) * document.documentElement.clientHeight +
-                fontSize * 2,
-            };
-
             await scroll({
-              top: scrollPositions[align],
+              top: {
+                top: lastRef.current.offsetTop,
+                center:
+                  lastRef.current.offsetTop -
+                  document.documentElement.clientHeight / 2 +
+                  fontSize * 2,
+                bottom:
+                  lastRef.current.offsetTop -
+                  (3 / 4) * document.documentElement.clientHeight +
+                  fontSize * 2,
+              }[align],
               behavior: "smooth",
             });
           } else {
