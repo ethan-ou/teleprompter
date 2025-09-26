@@ -1,4 +1,4 @@
-import { useCallback, useRef, useMemo } from "react";
+import { useCallback, useRef, useMemo, useEffect } from "react";
 import { useNavbarStore } from "../navbar/store";
 import { useContent } from "./store";
 import { useHotkeys } from "react-hotkeys-hook";
@@ -41,7 +41,7 @@ export function Content() {
   const isScrollingRef = useRef(false);
 
   // The interval callback is wrapped in useCallback to ensure its reference
-  // is stable for the useEffectInterval dependency check.
+  // is stable for the useInterval dependency check.
   const scrollCallback = useCallback(async () => {
     isScrollingRef.current = true;
 
@@ -80,6 +80,13 @@ export function Content() {
     },
     status === "started" ? 2000 : null,
   );
+
+  // Retrigger scroll in case font size and margin changes while stopped
+  useEffect(() => {
+    if (status === "stopped") {
+      scrollCallback();
+    }
+  }, [fontSize, margin, status])
 
   const mainRef = useRef<HTMLElement | null>(null);
   const textAreaRef = useRef<HTMLTextAreaElement | null>(null);
