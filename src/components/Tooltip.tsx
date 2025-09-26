@@ -1,4 +1,4 @@
-import { clsx } from "@/lib/css";
+import { cn } from "@/lib/css";
 import { Tooltip } from "@base-ui-components/react/tooltip";
 import { ComponentProps } from "react";
 

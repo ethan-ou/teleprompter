@@ -1,6 +1,6 @@
 import { useContent } from "@/features/content/store";
 import { useNavbarStore } from "@/features/navbar/store";
-import { clsx } from "@/lib/css";
+import { cn } from "@/lib/css";
 import { escape } from "@/lib/html-escaper";
 import { getBoundsStart } from "@/lib/speech-matcher";
 import { getNextWordIndex, type Token as TokenType } from "@/lib/word-tokenizer";
@@ -20,7 +20,7 @@ export function Text({ style, lastRef }: TextProps) {
 
   return (
     <div
-      className={clsx("content select-none", status === "started" ? "content-transition" : "")}
+      className={cn("content select-none", status === "started" ? "content-transition" : "")}
       style={{
         ...style,
         transform: `scaleX(${mirror ? "-1" : "1"})`,

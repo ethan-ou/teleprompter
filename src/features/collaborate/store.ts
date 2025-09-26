@@ -2,7 +2,7 @@ import { create } from "zustand";
 import * as Y from "yjs";
 import { TrysteroProvider } from "@/app/y-webrtc-trystero";
 import { selfId } from "@/app/y-webrtc-trystero";
-import { Position } from "../content/store";
+import type { Position } from "../content/store";
 import { joinRoom } from "trystero/mqtt";
 import { generatePassphrase } from "@/lib/generate-passphrase";
 

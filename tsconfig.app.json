@@ -1,5 +1,6 @@
 {
   "extends": "@tsconfig/svelte/tsconfig.json",
+
   "compilerOptions": {
     "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",
     "target": "ES2022",
@@ -15,7 +16,11 @@
      */
     "allowJs": true,
     "checkJs": true,
-    "moduleDetection": "force"
+    "moduleDetection": "force",
+    "baseUrl": "src",
+    "paths": {
+      "@/*": ["./*"],
+    },
   },
   "include": ["src/**/*.ts", "src/**/*.js", "src/**/*.svelte"]
 }

@@ -1,13 +1,19 @@
 <script lang="ts">
+  import Status from "./features/status.svelte";
+  import Navbar from "./features/navbar/index.svelte";
+  import Content from "./features/content/index.svelte";
+  import Capture from "./features/capture/index.svelte";
+  import Collaborate from "./features/collaborate/index.svelte";
+  import { isMobileOrTablet } from "./lib/device";
 
+  const mobileOrTablet = isMobileOrTablet();
 </script>
 
-<main>
-  <p>
-    Check out <a href="https://github.com/sveltejs/kit#readme" target="_blank" rel="noreferrer">SvelteKit</a>, the official Svelte app framework powered by Vite!
-  </p>
 
-  <p class="read-the-docs">
-    Click on the Vite and Svelte logos to learn more
-  </p>
-</main>
+<Status />
+<Navbar />
+{#if !mobileOrTablet}
+  <Capture />
+{/if}
+<Content />
+<Collaborate />

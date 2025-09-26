@@ -17,7 +17,7 @@ export interface NavbarState {
   collaborate: boolean;
 }
 
-export interface NavbarActions {
+export interface navbarStore {
   start: () => void;
   stop: () => void;
   toggleEdit: () => void;
@@ -33,7 +33,7 @@ export interface NavbarActions {
   setCollaborate: (value: boolean) => void;
 }
 
-export const useNavbarStore = create<NavbarState & NavbarActions>()(
+export const useNavbarStore = create<NavbarState & navbarStore>()(
   persist(
     (set) => ({
       status: "stopped",

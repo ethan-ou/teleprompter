@@ -1,14 +1,6 @@
-export function clsx(...args: (string | undefined)[]) {
-  var i = 0,
-    tmp,
-    str = "",
-    len = args.length;
-  for (; i < len; i++) {
-    if ((tmp = args[i])) {
-      if (typeof tmp === "string") {
-        str += (str && " ") + tmp;
-      }
-    }
-  }
-  return str;
+import { clsx, type ClassValue } from "clsx";
+import { twMerge } from "tailwind-merge";
+
+export function cn(...inputs: ClassValue[]): string {
+	return twMerge(clsx(inputs));
 }
