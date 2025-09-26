@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState, forwardRef, useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
 
 const minValue = (value: number, min: number | string | undefined) =>
   min !== undefined ? Math.max(value, +Number(min)) : value;

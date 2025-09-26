@@ -8,8 +8,7 @@ import * as math from "lib0/math";
 import { createMutex } from "lib0/mutex";
 import { ObservableV2 as ObservableV2Base } from "lib0/observable";
 import * as random from "lib0/random";
-
-import { selfId, joinRoom as defaultJoinRoom, Room as TrysteroRoom } from "trystero";
+import { joinRoom as defaultJoinRoom, selfId, Room as TrysteroRoom } from "trystero";
 import * as awarenessProtocol from "y-protocols/awareness";
 import * as syncProtocol from "y-protocols/sync";
 import { Doc as YDoc } from "yjs";
@@ -546,7 +545,7 @@ const openRoom = (
  */
 
 // Export types for TypeScript consumers
-export {};
+export { };
 
 /**
  * @typedef {Object} TrysteroProviderEvents
