@@ -1,10 +1,10 @@
 import { defineConfig } from "vite";
-import react from "@vitejs/plugin-react";
+import { svelte } from '@sveltejs/vite-plugin-svelte'
 import { resolve } from "path";
 import tailwindcss from "@tailwindcss/vite";
 
 export default defineConfig(({ command }) => ({
-  plugins: [react(), tailwindcss()],
+  plugins: [svelte(), tailwindcss()],
   base: command === "build" ? "/teleprompter/" : "/",
   resolve: {
     alias: {
