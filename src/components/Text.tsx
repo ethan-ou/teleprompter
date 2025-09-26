@@ -4,7 +4,7 @@ import { clsx } from "@/lib/css";
 import { escape } from "@/lib/html-escaper";
 import { getBoundsStart } from "@/lib/speech-matcher";
 import { getNextWordIndex, type Token as TokenType } from "@/lib/word-tokenizer";
-import { memo, useCallback, useMemo } from "react";
+import { memo, useMemo } from "react";
 
 interface TextProps {
   style: React.CSSProperties;
@@ -12,86 +12,79 @@ interface TextProps {
 }
 
 export function Text({ style, lastRef }: TextProps) {
-  const { status, mirror } = useNavbarStore();
+  const status = useNavbarStore(state => state.status);
+  const { tokens, position, setPosition } = useContent();
+  const { start, end, bounds } = position;
 
-  // For collaborative sessions, we need to use the useContent hook
-  // which handles room content properly
-  const { tokens, position } = useContent();
+  // Memoize all tokens to prevent unnecessary re-renders in the map function
+  const memoizedTokens = useMemo(() => {
+    return tokens.map((token, index) => {
+      let className = "";
+      if (token.index <= start) {
+        className = "final-transcript";
+      } else if (token.index <= end) {
+        className = "interim-transcript";
+      } else if (status === "started") {
+        if (token.index > bounds + 20) {
+          className = "opacity-40";
+        } else if (token.index > bounds + 10) {
+          className = "opacity-60";
+        } else if (token.index > bounds) {
+          className = "opacity-80";
+        }
+      }
+
+      const isLastRef = index === Math.min(getNextWordIndex(tokens, end), tokens.length - 1);
+      const ref = isLastRef ? (lastRef as React.RefObject<HTMLSpanElement>) : undefined;
+
+      // Memoize click handler here
+      const handleClick = () => {
+        const selectedPosition = index - 1;
+        const newBounds = getBoundsStart(tokens, selectedPosition);
+        setPosition({
+          start: selectedPosition,
+          search: selectedPosition,
+          end: selectedPosition,
+          ...(newBounds !== undefined && {
+            bounds: Math.min(newBounds, tokens.length),
+          }),
+        });
+      };
+
+      return (
+        <Token
+          key={token.index}
+          token={token}
+          className={className}
+          ref={ref}
+          onClick={handleClick}
+        />
+      );
+    });
+  }, [tokens, start, end, bounds, status, lastRef, setPosition]);
 
   return (
     <div
       className={clsx("content select-none", status === "started" ? "content-transition" : "")}
       style={{
         ...style,
-        transform: `scaleX(${mirror ? "-1" : "1"})`,
+        transform: `scaleX(${useNavbarStore.getState().mirror ? "-1" : "1"})`,
       }}
     >
-      {tokens.map((token, index) => {
-        const isLastRef =
-          index === Math.min(getNextWordIndex(tokens, position.end), tokens.length - 1);
-
-        return (
-          <Token
-            key={token.index}
-            token={token}
-            index={index}
-            tokens={tokens}
-            ref={isLastRef ? (lastRef as React.RefObject<HTMLSpanElement>) : undefined}
-          />
-        );
-      })}
+      {memoizedTokens}
     </div>
   );
 }
 
 interface TokenProps {
   token: TokenType;
-  index: number;
-  tokens: TokenType[];
+  className: string;
   ref?: React.Ref<HTMLSpanElement>;
+  onClick: () => void;
 }
 
 export const Token = memo<TokenProps>(
-  ({ token, index, tokens, ref }) => {
-    const { position, setPosition } = useContent();
-    const { status } = useNavbarStore();
-
-    // Memoize click handler to prevent unnecessary re-renders
-    const handleClick = useCallback(() => {
-      const selectedPosition = index - 1;
-      const bounds = getBoundsStart(tokens, selectedPosition);
-      setPosition({
-        start: selectedPosition,
-        search: selectedPosition,
-        end: selectedPosition,
-        ...(bounds !== undefined && {
-          bounds: Math.min(bounds, tokens.length),
-        }),
-      });
-    }, [index, tokens, setPosition]);
-
-    // Memoize className calculation
-    const className = useMemo(() => {
-      if (token.index <= position.start) {
-        return "final-transcript";
-      }
-      if (token.index <= position.end) {
-        return "interim-transcript";
-      }
-      if (status === "started") {
-        if (token.index > position.bounds + 20) {
-          return "opacity-40";
-        }
-        if (token.index > position.bounds + 10) {
-          return "opacity-60";
-        }
-        if (token.index > position.bounds) {
-          return "opacity-80";
-        }
-      }
-      return "";
-    }, [token.index, position.start, position.end, position.bounds, status]);
-
+  ({ token, className, ref, onClick }) => {
     // Memoize the HTML content
     const htmlContent = useMemo(
       () => ({
@@ -104,21 +97,18 @@ export const Token = memo<TokenProps>(
       <span
         ref={ref}
         key={token.index}
-        onClick={handleClick}
+        onClick={onClick}
         className={className}
         dangerouslySetInnerHTML={htmlContent}
       />
     );
   },
+  // Custom comparison to ensure memo works
   (prevProps, nextProps) => {
-    // Custom comparison function for memo
-    // Only re-render if the token content, index, or relevant position/status changes
     return (
       prevProps.token.index === nextProps.token.index &&
       prevProps.token.value === nextProps.token.value &&
-      prevProps.index === nextProps.index &&
-      // Compare tokens array reference (since it's memoized from zustand)
-      prevProps.tokens === nextProps.tokens
+      prevProps.className === nextProps.className
     );
   },
 );

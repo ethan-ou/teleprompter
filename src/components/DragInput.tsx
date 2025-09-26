@@ -34,52 +34,41 @@ export function DragInput({
   speed?: number;
 } & React.DetailedHTMLProps<React.InputHTMLAttributes<HTMLInputElement>, HTMLInputElement>) {
   const constrain = useCallback(createConstraints(min, max, step), [min, max, step]);
-
   const inputRef = useRef<HTMLInputElement>(null);
-  const [dragging, setDragging] = useState<boolean>(false);
 
-  // We are creating a snapshot of the values when the drag starts
-  // because the [value] will itself change & we need the original
-  // [value] to calculate during a drag.
-  const [snapshot, setSnapshot] = useState(value);
+  // Use refs to store the mutable drag state
+  const draggingRef = useRef<boolean>(false);
+  const startValueRef = useRef<number>(0);
+  const snapshotRef = useRef<number>(0);
 
-  // This captures the starting position of the drag and is used to
-  // calculate the diff in positions of the cursor.
-  const [startValue, setStartValue] = useState(0);
-
-  // Start the drag to change operation when the mouse button is down.
   const onStart = useCallback(
     (event: React.MouseEvent<HTMLSpanElement, MouseEvent>) => {
-      setStartValue(() => event.clientX);
-      setSnapshot(() => value);
-      setDragging(() => true);
+      // Update ref values directly, no re-render
+      draggingRef.current = true;
+      startValueRef.current = event.clientX;
+      snapshotRef.current = value;
       document.documentElement.style.cursor = "ew-resize";
       document.body.style.pointerEvents = "none";
     },
-    [value, setStartValue, setSnapshot, setDragging],
+    [value]
   );
 
-  // Only change the value if the drag was actually started.
   const onUpdate = useCallback(
-    (event: MouseEvent) => {
-      if (dragging && startValue) {
-        onValueChange(constrain(snapshot + (event.clientX - startValue) * speed));
+    (event: PointerEvent) => {
+      if (draggingRef.current) {
+        const newDelta = (event.clientX - startValueRef.current) * speed;
+        onValueChange(constrain(snapshotRef.current + newDelta));
       }
     },
-    [dragging, startValue, onValueChange, constrain, snapshot, speed],
+    [constrain, speed, onValueChange]
   );
 
-  // Stop the drag operation now.
   const onEnd = useCallback(() => {
-    setStartValue(() => 0);
-    setDragging(() => false);
+    draggingRef.current = false;
     document.documentElement.style.cursor = "";
     document.body.style.pointerEvents = "";
-  }, [setStartValue, setDragging]);
+  }, []);
 
-  // We use document events to update and end the drag operation
-  // because the mouse may not be present over the label during
-  // the operation..
   useEffect(() => {
     document.addEventListener("pointermove", onUpdate);
     document.addEventListener("pointerup", onEnd);

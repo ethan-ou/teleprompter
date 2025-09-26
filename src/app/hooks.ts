@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback, useMemo, useLayoutEffect } from "react";
+import { useState, useRef, useEffect, useCallback, useMemo } from "react";
 
 export const useFullScreen = (onChange?: (active: boolean) => void) => {
   const [active, setActive] = useState<boolean>(false);
@@ -72,14 +72,4 @@ export function useInterval(callback: () => void, delay: number | null) {
       clearInterval(id);
     };
   }, [delay]);
-}
-
-export function useLayoutEffectInterval(callback: () => void, delay: number | null) {
-  useLayoutEffect(() => {
-    if (delay === null) {
-      callback();
-    }
-  });
-
-  useInterval(callback, delay);
 }
