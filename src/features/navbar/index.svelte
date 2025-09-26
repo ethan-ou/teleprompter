@@ -1,6 +1,6 @@
 <script lang="ts">
   import { createFullscreen } from "@/app/fullscreen.svelte";
-  import { startTeleprompter, stopTeleprompter } from "@/app/recognizer";
+  import { recognizerStore } from "@/app/recognizer.svelte";
   import { navbarStore } from "./store.svelte";
   import { contentStore } from "../content/store.svelte";
   import { collaborateStore } from "../collaborate/store.svelte";
@@ -58,18 +58,18 @@
 
   // Hotkey handlers
   function handleKeydown(event: KeyboardEvent) {
-    if (focused) return; // Don't trigger when focused on inputs
+    if (focused || navbarStore.status === "editing") return; // Don't trigger when focused on inputs
 
     switch (event.code) {
       case "Space":
         if (navbarStore.status !== "editing") {
           event.preventDefault();
-          navbarStore.status === "stopped" ? startTeleprompter() : stopTeleprompter();
+          navbarStore.status === "stopped" ? recognizerStore.startTeleprompter() : recognizerStore.stopTeleprompter();
         }
         break;
       case "Escape":
         if (navbarStore.status === "started") {
-          stopTeleprompter();
+          recognizerStore.stopTeleprompter();
         }
         break;
       case "KeyE":
@@ -179,42 +179,11 @@
   );
 
   // Brightness icon based on opacity
-  const brightnessIcon = $derived(
+  const BrightnessIcon = $derived(
     navbarStore.opacity > 80 ? Sun :
     navbarStore.opacity > 50 ? SunMedium :
     SunDim
   );
-
-  // Reactive bindings for DragInput components
-  let fontSize = $state(navbarStore.fontSize);
-  let margin = $state(navbarStore.margin); 
-  let opacity = $state(navbarStore.opacity);
-  let align = $state(navbarStore.align);
-
-  // Keep local state in sync with store
-  $effect(() => {
-    fontSize = navbarStore.fontSize;
-    margin = navbarStore.margin;
-    opacity = navbarStore.opacity;
-    align = navbarStore.align;
-  });
-
-  // Update store when local state changes
-  $effect(() => {
-    navbarStore.setFontSize(fontSize);
-  });
-  
-  $effect(() => {
-    navbarStore.setMargin(margin);
-  });
-  
-  $effect(() => {
-    navbarStore.setOpacity(opacity);
-  });
-  
-  $effect(() => {
-    navbarStore.setAlign(align);
-  });
 </script>
 
 <svelte:window onkeydown={handleKeydown} />
@@ -244,7 +213,7 @@
               : "sm:border-green-500/30 sm:bg-green-700/10 sm:hover:border-green-500/40 sm:hover:bg-green-700/20",
           )}
           disabled={navbarStore.status === "editing"}
-          onclick={() => navbarStore.status === "stopped" ? startTeleprompter() : stopTeleprompter()}
+          onclick={() => navbarStore.status === "stopped" ? recognizerStore.startTeleprompter() : recognizerStore.stopTeleprompter()}
           aria-label={navbarStore.status === "started" ? "Stop" : "Start"}
         >
           {#if navbarStore.status === "stopped" || navbarStore.status === "editing"}
@@ -404,7 +373,7 @@
         <Tooltip.Trigger>
           <div class="w-20">
             <DragInput
-              bind:value={fontSize}
+              bind:value={navbarStore.fontSize}
               step={5}
               min={15}
               max={150}
@@ -424,7 +393,7 @@
         <Tooltip.Trigger>
           <div class="w-[4.75rem]">
             <DragInput
-              bind:value={margin}
+              bind:value={navbarStore.margin}
               step={2}
               min={0}
               max={44}
@@ -445,13 +414,13 @@
         <Tooltip.Trigger>
           <div class="w-20">
             <DragInput
-              bind:value={opacity}
+              bind:value={navbarStore.opacity}
               step={10}
               min={20}
               max={100}
               aria-label="Brightness"
             >
-              <brightnessIcon></brightnessIcon>
+              <BrightnessIcon />
             </DragInput>
           </div>
         </Tooltip.Trigger>
@@ -471,7 +440,7 @@
               <TextAlignCenter />
               <select
                 class="border-0 focus-visible:outline-0"
-                bind:value={align}
+                bind:value={navbarStore.align}
               >
                 <option class="bg-black" value="top">Top</option>
                 <option class="bg-black" value="center">Center</option>

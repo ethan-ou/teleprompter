@@ -159,7 +159,7 @@
       <!-- Use an invisible div to force an increase in textarea sizing.
            This should have exactly the same size and properties as the textarea. -->
       <div class="content invisible col-start-1 row-start-1" style={styleCSS}>
-        {contentStore.text}
+        {contentStore.text()}
       </div>
       <textarea
         bind:this={textAreaRef}

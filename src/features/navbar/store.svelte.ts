@@ -1,149 +1,81 @@
+import { localStore } from "@/app/local-store.svelte";
+
 export type Status = "editing" | "started" | "stopped";
 export type Align = "top" | "center" | "bottom";
 
-/**
- * Defines the persistent settings state structure.
- * Note: Non-persistent fields like 'status' and 'timer' are initialized 
- * but are intentionally excluded from the localStorage save/load logic.
- */
-export interface NavbarState {
-    status: Status;
-    mirror: boolean;
-    hide: boolean;
-    fontSize: number;
-    margin: number;
-    opacity: number;
-    timer: number;
-    cast: boolean;
-    align: Align;
-    collaborate: boolean;
+// Define the shape of the persistent state
+interface PersistentNavbarState {
+  mirror: boolean;
+  hide: boolean;
+  fontSize: number;
+  margin: number;
+  opacity: number;
+  align: Align;
 }
-
-// --- Initial Constants and Configuration ---
 
 const LOCAL_STORAGE_KEY = 'teleprompter:settings';
 
-// Define default initial state
-const initialState: NavbarState = {
-    status: "stopped",
-    mirror: false,
-    hide: false,
-    fontSize: 60,
-    margin: 10,
-    opacity: 80,
-    timer: 0,
-    cast: false,
-    align: "top",
-    collaborate: false,
+// Define the default persistent state
+const defaultPersistentState: PersistentNavbarState = {
+  mirror: false,
+  hide: false,
+  fontSize: 60,
+  margin: 10,
+  opacity: 80,
+  align: "top",
 };
 
 // --- Core Rune Store Function ---
 
 function createNavbarStore() {
-    // 1. Define mutable state using $state, initialized with defaults
-    const state = $state<NavbarState>({ ...initialState });
+  // Use localStore to handle the persistent state automatically
+  const settings = localStore(LOCAL_STORAGE_KEY, defaultPersistentState);
 
-    // --- Persistence Logic ---
+  // Define the non-persistent state separately
+  let status = $state<Status>("stopped");
+  let timer = $state<number>(0);
+  let cast = $state<boolean>(false);
+  let collaborate = $state<boolean>(false);
 
-    /**
-     * Loads settings from localStorage into the $state object.
-     */
-    function loadFromStorage() {
-        if (typeof localStorage !== 'undefined') {
-            const existing = localStorage.getItem(LOCAL_STORAGE_KEY);
-            if (existing) {
-                try {
-                    const parsed = JSON.parse(existing);
-                    // Merge loaded properties into the current state object
-                    Object.assign(state, parsed);
-                } catch (e) {
-                    console.warn(`Failed to load ${LOCAL_STORAGE_KEY} from localStorage:`, e);
-                }
-            }
-        }
-    }
+  // --- Actions/Mutators ---
+  
+  const actions = {
+    start: () => { status = "started"; },
+    stop: () => { status = "stopped"; },
+    toggleEdit: () => { 
+      status = status === "editing" ? "stopped" : "editing";
+    },
+    toggleMirror: () => { settings.value.mirror = !settings.value.mirror; },
+    setHide: (value: boolean) => { settings.value.hide = value; },
+    setCast: (value: boolean) => { cast = value; },
+    setFontSize: (value: number) => { settings.value.fontSize = value; },
+    setMargin: (value: number) => { settings.value.margin = value; },
+    setOpacity: (value: number) => { settings.value.opacity = value; },
+    incrementTimer: () => { timer += 1; },
+    resetTimer: () => { timer = 0; },
+    setAlign: (value: Align) => { settings.value.align = value; },
+    setCollaborate: (value: boolean) => { collaborate = value; },
+  };
 
-    /**
-     * Saves only the persistent properties to localStorage.
-     * This logic is simplified compared to the old store's update() hook.
-     */
-    function saveToStorage() {
-        if (typeof localStorage !== 'undefined') {
-            try {
-                // Explicitly select only the properties we want to persist
-                const persistedState = {
-                    mirror: state.mirror,
-                    hide: state.hide,
-                    fontSize: state.fontSize,
-                    margin: state.margin,
-                    opacity: state.opacity,
-                    align: state.align,
-                };
-                localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(persistedState));
-            } catch (e) {
-                console.error(`Failed to save ${LOCAL_STORAGE_KEY} to localStorage:`, e);
-            }
-        }
-    }
+  // --- Public Interface (Runes Store pattern) ---
+  return {
+    // Expose non-persistent state via getters
+    get status() { return status; },
+    get timer() { return timer; },
+    get cast() { return cast; },
+    get collaborate() { return collaborate; },
 
-    // Load initial data *before* any effects run
-    $effect.pre(() => {
-        loadFromStorage();
-    });
+    // Expose persistent state from the localStore instance
+    get mirror() { return settings.value.mirror; },
+    get hide() { return settings.value.hide; },
+    get fontSize() { return settings.value.fontSize; },
+    get margin() { return settings.value.margin; },
+    get opacity() { return settings.value.opacity; },
+    get align() { return settings.value.align; },
 
-    // 2. Use $effect to automatically persist changes to specific properties.
-    // The effect will rerun any time a dependency (e.g., state.mirror) changes.
-    $effect(() => {
-        // Dependencies are implicitly tracked here:
-        // state.mirror, state.hide, state.fontSize, state.margin, state.opacity, state.align
-        state.mirror;
-        state.hide;
-        state.fontSize;
-        state.margin;
-        state.opacity;
-        state.align;
-        
-        saveToStorage();
-    });
-
-    // --- Actions/Mutators ---
-    
-    // Actions now directly mutate the shared 'state' object
-    const actions = {
-        start: () => { state.status = "started"; },
-        stop: () => { state.status = "stopped"; },
-        toggleEdit: () => { 
-            state.status = state.status === "editing" ? "stopped" : "editing";
-        },
-        toggleMirror: () => { state.mirror = !state.mirror; },
-        setHide: (value: boolean) => { state.hide = value; },
-        setCast: (value: boolean) => { state.cast = value; },
-        setFontSize: (value: number) => { state.fontSize = value; },
-        setMargin: (value: number) => { state.margin = value; },
-        setOpacity: (value: number) => { state.opacity = value; },
-        incrementTimer: () => { state.timer += 1; },
-        resetTimer: () => { state.timer = 0; },
-        setAlign: (value: Align) => { state.align = value; },
-        setCollaborate: (value: boolean) => { state.collaborate = value; },
-    };
-
-    // 3. Return the public interface (Runes Store pattern)
-    return {
-        // Expose state properties via getters for reactive consumption
-        get status() { return state.status; },
-        get mirror() { return state.mirror; },
-        get hide() { return state.hide; },
-        get fontSize() { return state.fontSize; },
-        get margin() { return state.margin; },
-        get opacity() { return state.opacity; },
-        get timer() { return state.timer; },
-        get cast() { return state.cast; },
-        get align() { return state.align; },
-        get collaborate() { return state.collaborate; },
-
-        // Expose all actions
-        ...actions,
-    };
+    // Expose all actions
+    ...actions,
+  };
 }
 
 export const navbarStore = createNavbarStore();
