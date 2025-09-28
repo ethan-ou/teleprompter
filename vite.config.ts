@@ -4,7 +4,11 @@ import { resolve } from "path";
 import tailwindcss from "@tailwindcss/vite";
 
 export default defineConfig(({ command }) => ({
-  plugins: [react(), tailwindcss()],
+  plugins: [react({
+      babel: {
+        plugins: ['babel-plugin-react-compiler'],
+      },
+    }), tailwindcss()],
   base: command === "build" ? "/teleprompter/" : "/",
   resolve: {
     alias: {
