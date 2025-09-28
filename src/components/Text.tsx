@@ -13,6 +13,7 @@ interface TextProps {
 
 export function Text({ style, lastRef }: TextProps) {
   const status = useNavbarStore(state => state.status);
+  const mirror = useNavbarStore(state => state.mirror);
   const { tokens, position, setPosition } = useContent();
   const { start, end, bounds } = position;
 
@@ -68,7 +69,7 @@ export function Text({ style, lastRef }: TextProps) {
       className={clsx("content select-none", status === "started" ? "content-transition" : "")}
       style={{
         ...style,
-        transform: `scaleX(${useNavbarStore.getState().mirror ? "-1" : "1"})`,
+        transform: `scaleX(${mirror ? "-1" : "1"})`,
       }}
     >
       {memoizedTokens}
