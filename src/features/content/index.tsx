@@ -1,12 +1,17 @@
-import { useCallback, useRef, useMemo, useEffect } from "react";
-import { useNavbarStore } from "../navbar/store";
-import { useContent } from "./store";
-import { useHotkeys } from "react-hotkeys-hook";
-import { getBoundsStart, resetTranscriptWindow } from "@/lib/speech-matcher";
 import { useInterval } from "@/app/hooks";
-import { getNextSentence, getPrevSentence } from "@/lib/word-tokenizer";
+import { type Position, useContent } from "@/features/content/store";
+import { useNavbarStore } from "@/features/navbar/store";
+import { clsx } from "@/lib/css";
 import { scroll } from "@/lib/smooth-scroll";
-import { Text } from "@/components/Text";
+import { getBoundsStart, resetTranscriptWindow } from "@/lib/speech-matcher";
+import {
+  getNextSentence,
+  getNextWordIndex,
+  getPrevSentence,
+  type Token as TokenType,
+} from "@/lib/word-tokenizer";
+import { memo, useCallback, useEffect, useMemo, useRef } from "react";
+import { useHotkeys } from "react-hotkeys-hook";
 import { useCollaborateStore } from "../collaborate/store";
 
 export function Content() {
@@ -22,7 +27,6 @@ export function Content() {
 
   const { search, end } = position;
 
-  // Memoize the style object, dependencies are already correct.
   const style: React.CSSProperties = useMemo(
     () => ({
       fontSize: `${fontSize}px`,
@@ -33,17 +37,15 @@ export function Content() {
       paddingTop: {
         top: "1rem",
         center: `calc(50vh - ${fontSize * 2}px)`,
-        bottom: `calc(${(3 / 4) * 100}vh -  ${fontSize * 2}px)`,
+        bottom: `calc(${(3 / 4) * 100}vh - ${fontSize * 2}px)`,
       }[align],
     }),
     [fontSize, margin, opacity, align],
   );
 
-  const lastRef = useRef<null | HTMLDivElement>(null);
+  const lastRef = useRef<HTMLSpanElement>(null);
   const isScrollingRef = useRef(false);
 
-  // The interval callback is wrapped in useCallback to ensure its reference
-  // is stable for the useInterval dependency check.
   const scrollCallback = useCallback(async () => {
     isScrollingRef.current = true;
 
@@ -53,9 +55,7 @@ export function Content() {
           top: {
             top: lastRef.current.offsetTop,
             center:
-              lastRef.current.offsetTop -
-              document.documentElement.clientHeight / 2 +
-              fontSize * 2,
+              lastRef.current.offsetTop - document.documentElement.clientHeight / 2 + fontSize * 2,
             bottom:
               lastRef.current.offsetTop -
               (3 / 4) * document.documentElement.clientHeight +
@@ -72,7 +72,7 @@ export function Content() {
     } finally {
       isScrollingRef.current = false;
     }
-  }, [end, fontSize, align]); // Dependencies on state values used within the async function
+  }, [end, fontSize, align]);
 
   useInterval(
     () => {
@@ -88,13 +88,11 @@ export function Content() {
     if (status === "stopped") {
       scrollCallback();
     }
-  }, [fontSize, margin, status])
+  }, [fontSize, margin, status]);
 
   const mainRef = useRef<HTMLElement | null>(null);
   const textAreaRef = useRef<HTMLTextAreaElement | null>(null);
 
-  // Hotkey callbacks are wrapped in useCallback where necessary, and dependencies are cleaned.
-  // ctrl+a is fine as is, dependencies are empty.
   useHotkeys(
     "ctrl+a",
     () => {
@@ -115,7 +113,6 @@ export function Content() {
     [],
   );
 
-  // Hotkey for ESC: dependencies are already correct.
   useHotkeys(
     "esc",
     () => (toggleEdit(), setTokens()),
@@ -126,9 +123,7 @@ export function Content() {
     [toggleEdit, setTokens],
   );
 
-  // Hotkey for moving backward: dependencies cleaned.
-  // Utility functions (getPrevSentence, getBoundsStart) are stable and removed from deps.
-  const handleMoveBackward = useCallback(() => {
+  const handleMoveBack = useCallback(() => {
     const token = getPrevSentence(tokens, search);
     if (token) {
       const selectedPosition = token.index - 1;
@@ -141,17 +136,15 @@ export function Content() {
       });
       resetTranscriptWindow();
     }
-  }, [tokens, search, setPosition]); // Only include state and setters
+  }, [tokens, search, setPosition]);
 
   useHotkeys(
     ["ArrowLeft", "ArrowUp", "PageUp"],
-    handleMoveBackward,
+    handleMoveBack,
     { enabled: status !== "editing" },
-    [handleMoveBackward, status],
+    [handleMoveBack, status],
   );
 
-  // Hotkey for moving forward: dependencies cleaned.
-  // Utility functions (getNextSentence, getBoundsStart) are stable and removed from deps.
   const handleMoveForward = useCallback(() => {
     const token = getNextSentence(tokens, search);
     if (token) {
@@ -165,7 +158,7 @@ export function Content() {
       });
       resetTranscriptWindow();
     }
-  }, [tokens, search, setPosition]); // Only include state and setters
+  }, [tokens, search, setPosition]);
 
   useHotkeys(
     ["ArrowRight", "ArrowDown", "PageDown"],
@@ -198,3 +191,104 @@ export function Content() {
     </main>
   );
 }
+
+const getTokenClassname = (token: TokenType, position: Position, status: string) => {
+  if (token.value.trim() === "") {
+    return "";
+  }
+
+  if (token.index <= position.start) {
+    return "final-transcript";
+  } else if (token.index <= position.end) {
+    return "interim-transcript";
+  } else if (status === "started") {
+    if (token.index > position.bounds + 20) {
+      return "opacity-40";
+    } else if (token.index > position.bounds + 10) {
+      return "opacity-60";
+    } else if (token.index > position.bounds) {
+      return "opacity-80";
+    }
+  }
+
+  return "";
+};
+
+export function Text({
+  style,
+  lastRef,
+}: {
+  style: React.CSSProperties;
+  lastRef: React.RefObject<HTMLSpanElement | null>;
+}) {
+  const status = useNavbarStore((state) => state.status);
+  const mirror = useNavbarStore((state) => state.mirror);
+  const { tokens, position, setPosition } = useContent();
+
+  const memoizedTokens = useMemo(() => {
+    return tokens.map((token, index) => {
+      const isLastRef =
+        index === Math.min(getNextWordIndex(tokens, position.end), tokens.length - 1);
+      const ref = isLastRef ? lastRef : undefined;
+
+      const handleClick = () => {
+        const selectedPosition = index - 1;
+        const newBounds = getBoundsStart(tokens, selectedPosition);
+        setPosition({
+          start: selectedPosition,
+          search: selectedPosition,
+          end: selectedPosition,
+          ...(newBounds !== undefined && {
+            bounds: Math.min(newBounds, tokens.length),
+          }),
+        });
+      };
+
+      return (
+        <Token
+          key={token.index}
+          token={token}
+          className={getTokenClassname(token, position, status)}
+          ref={ref}
+          onClick={handleClick}
+        />
+      );
+    });
+  }, [tokens, position.start, position.end, position.bounds, status, lastRef, setPosition]);
+
+  return (
+    <div
+      className={clsx("content select-none", status === "started" ? "content-transition" : "")}
+      style={{
+        ...style,
+        transform: `scaleX(${mirror ? "-1" : "1"})`,
+      }}
+    >
+      {memoizedTokens}
+    </div>
+  );
+}
+
+export const Token = memo<{
+  token: TokenType;
+  className: string;
+  ref?: React.Ref<HTMLSpanElement>;
+  onClick: () => void;
+}>(
+  ({ token, className, ref, onClick }) => {
+    return (
+      <span ref={ref} key={token.index} onClick={onClick} className={className}>
+        {token.value}
+      </span>
+    );
+  },
+  (prevProps, nextProps) => {
+    return (
+      prevProps.token.index === nextProps.token.index &&
+      prevProps.token.value === nextProps.token.value &&
+      prevProps.className === nextProps.className
+    );
+  },
+);
+
+Token.displayName = "Token";
