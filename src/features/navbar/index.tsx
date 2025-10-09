@@ -64,14 +64,14 @@ export function Navbar() {
         >
           <SliderSection />
         </div>
-        <button
-          type="button"
-          onClick={() => setHide(!hide)}
-          className="group absolute -bottom-4 left-1/2 z-20 flex h-8 w-2/3 -translate-x-1/2 translate-y-1/2 justify-center p-1 hover:cursor-pointer focus:outline-0"
-        >
-          <div className="h-2 w-1/2 rounded-full transition delay-75 group-hover:bg-neutral-700/85 group-focus:bg-neutral-700/85 group-focus:outline-2 group-active:bg-neutral-700/85"></div>
-        </button>
       </Tooltip.Provider>
+      <button
+        type="button"
+        onClick={() => setHide(!hide)}
+        className="group absolute -bottom-4 left-1/2 z-20 flex h-8 w-2/3 -translate-x-1/2 translate-y-1/2 justify-center p-1 hover:cursor-pointer focus:outline-0"
+      >
+        <div className="h-2 w-full max-w-2xl rounded-full transition delay-75 group-hover:bg-neutral-700/85 group-focus:bg-neutral-700/85 group-focus:outline-2 group-active:bg-neutral-700/85"></div>
+      </button>
     </nav>
   );
 }
