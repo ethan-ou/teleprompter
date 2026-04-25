@@ -14,7 +14,6 @@ export interface NavbarState {
   timer: number;
   cast: boolean;
   align: Align;
-  collaborate: boolean;
 }
 
 export interface NavbarActions {
@@ -30,7 +29,6 @@ export interface NavbarActions {
   incrementTimer: () => void;
   resetTimer: () => void;
   setAlign: (value: Align) => void;
-  setCollaborate: (value: boolean) => void;
 }
 
 export const useNavbarStore = create<NavbarState & NavbarActions>()(
@@ -45,7 +43,6 @@ export const useNavbarStore = create<NavbarState & NavbarActions>()(
       timer: 0,
       cast: false,
       align: "top",
-      collaborate: false,
       toggleEdit: () =>
         set((state) => ({
           status: state.status === "editing" ? "stopped" : "editing",
@@ -61,7 +58,6 @@ export const useNavbarStore = create<NavbarState & NavbarActions>()(
       incrementTimer: () => set((state) => ({ timer: state.timer + 1 })),
       resetTimer: () => set(() => ({ timer: 0 })),
       setAlign: (value: Align) => set(() => ({ align: value })),
-      setCollaborate: (value: boolean) => set(() => ({ collaborate: value })),
     }),
     {
       name: "teleprompter:settings",

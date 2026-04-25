@@ -1,10 +1,9 @@
 import { useFullScreen } from "@/app/hooks";
 import { startTeleprompter, stopTeleprompter } from "@/app/recognizer";
 import { Align, useNavbarStore } from "./store";
-import { useContent } from "../content/store";
-import { useCollaborateStore } from "../collaborate/store";
+import { useContentStore } from "../content/store";
 import { useInterval } from "@/app/hooks";
-import { Tooltip } from "@base-ui-components/react/tooltip";
+import { Tooltip } from "@base-ui/react";
 import {
   Pencil,
   MoveHorizontal,
@@ -20,14 +19,13 @@ import {
   SunMedium,
   Undo2,
   MonitorUp,
-  UsersRound,
 } from "lucide-react";
 import { useHotkeys } from "react-hotkeys-hook";
 import { useState } from "react";
 import { DragInput } from "@/components/DragInput";
 import { clsx } from "@/lib/css";
 import { isMobileOrTablet } from "@/lib/device";
-import { getBoundsStart, resetTranscriptWindow } from "@/lib/speech-matcher";
+import { useTrackerStore } from "@/features/tracker/store";
 import { TooltipPopup } from "@/components/Tooltip";
 
 const mobileOrTablet = isMobileOrTablet();
@@ -77,22 +75,10 @@ export function Navbar() {
 }
 
 function ButtonSection({ focused }: { focused: boolean }) {
-  const {
-    status,
-    toggleEdit,
-    mirror,
-    toggleMirror,
-    resetTimer,
-    hide,
-    setHide,
-    cast,
-    setCast,
-    setCollaborate: setCollaborateOpen,
-  } = useNavbarStore((state) => state);
+  const { status, toggleEdit, mirror, toggleMirror, resetTimer, hide, setHide, cast, setCast } =
+    useNavbarStore((state) => state);
 
-  const { isConnected } = useCollaborateStore();
-
-  const { setText: setContent, tokens, setTokens, setPosition } = useContent();
+  const { setText: setContent, setTokens } = useContentStore();
 
   const fullscreen = useFullScreen((active) => setHide(active));
 
@@ -167,16 +153,8 @@ function ButtonSection({ focused }: { focused: boolean }) {
 
   const restartAction = {
     action: () => {
-      const selectedPosition = -1;
-      const boundStart = getBoundsStart(tokens, 0);
-      setPosition({
-        start: selectedPosition,
-        end: selectedPosition,
-        search: selectedPosition,
-        ...(boundStart !== undefined && { bounds: boundStart }),
-      });
+      useTrackerStore.getState().seek(-1);
       resetTimer();
-      resetTranscriptWindow();
       window.scrollTo({ top: 0, behavior: "smooth" });
     },
     disabled: status === "editing",
@@ -303,17 +281,6 @@ function ButtonSection({ focused }: { focused: boolean }) {
           </TooltipPopup>
         </Tooltip.Root>
       )}
-      <Tooltip.Root>
-        <Tooltip.Trigger
-          type="button"
-          className="button"
-          onClick={() => setCollaborateOpen(true)}
-          aria-label="Collaborate"
-        >
-          <UsersRound className={`icon ${isConnected() ? "yellow" : ""}`} />
-        </Tooltip.Trigger>
-        <TooltipPopup>{isConnected() ? "Connected to Room" : "Collaborate"}</TooltipPopup>
-      </Tooltip.Root>
     </>
   );
 }
