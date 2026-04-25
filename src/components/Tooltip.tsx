@@ -1,5 +1,5 @@
 import { clsx } from "@/lib/css";
-import { Tooltip } from "@base-ui-components/react/tooltip";
+import { Tooltip } from "@base-ui/react";
 import { ComponentProps } from "react";
 
 export function TooltipPopup({

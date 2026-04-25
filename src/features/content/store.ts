@@ -3,10 +3,7 @@ import { persist } from "zustand/middleware";
 import { type Token, tokenize } from "@/lib/word-tokenizer";
 
 export type Position = {
-  start: number;
-  search: number;
-  end: number;
-  bounds: number;
+  confirmedIndex: number;  // full-sequence index of last spoken word (forward-only)
 };
 
 export interface ContentState {
@@ -34,22 +31,12 @@ export const useContentStore = create<ContentState & ContentActions>()(
     (set) => ({
       text: initialText,
       tokens: tokenize(initialText),
-      position: {
-        start: -1,
-        search: -1,
-        end: -1,
-        bounds: -1,
-      },
+      position: { confirmedIndex: -1 },
       setText: (text: string) =>
         set(() => ({
           text: text,
           tokens: tokenize(text),
-          position: {
-            start: -1,
-            search: -1,
-            end: -1,
-            bounds: -1,
-          },
+          position: { confirmedIndex: -1 },
         })),
       setTokens: () => set((state) => ({ tokens: tokenize(state.text) })),
       setPosition: (position) => set((prev) => ({ position: { ...prev.position, ...position } })),
