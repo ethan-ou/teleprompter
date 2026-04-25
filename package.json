@@ -10,15 +10,10 @@
   },
   "dependencies": {
     "@base-ui-components/react": "^1.0.0-beta.3",
-    "@multiformats/multiaddr-matcher": "^3.0.1",
-    "libp2p": "^2.1.8",
     "lucide-react": "^0.542.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "react-hotkeys-hook": "^5.1.0",
-    "trystero": "^0.21.8",
-    "y-protocols": "^1.0.6",
-    "yjs": "^13.6.27",
     "zustand": "^5.0.8"
   },
   "devDependencies": {

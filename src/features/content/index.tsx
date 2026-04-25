@@ -1,5 +1,5 @@
 import { useInterval } from "@/app/hooks";
-import { type Position, useContent } from "@/features/content/store";
+import { type Position, useContentStore } from "@/features/content/store";
 import { useNavbarStore } from "@/features/navbar/store";
 import { clsx } from "@/lib/css";
 import { scroll } from "@/lib/smooth-scroll";
@@ -12,7 +12,6 @@ import {
 } from "@/lib/word-tokenizer";
 import { memo, useCallback, useEffect, useMemo, useRef } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
-import { useCollaborateStore } from "../collaborate/store";
 
 export function Content() {
   const status = useNavbarStore((state) => state.status);
@@ -21,9 +20,7 @@ export function Content() {
   const opacity = useNavbarStore((state) => state.opacity);
   const align = useNavbarStore((state) => state.align);
   const toggleEdit = useNavbarStore((state) => state.toggleEdit);
-  const isConnected = useCollaborateStore((state) => state.isConnected);
-
-  const { text, setText, tokens, position, setPosition, setTokens } = useContent();
+  const { text, setText, tokens, position, setPosition, setTokens } = useContentStore();
 
   const { search, end } = position;
 
@@ -80,7 +77,7 @@ export function Content() {
         scrollCallback();
       }
     },
-    status === "started" || isConnected() ? 2000 : null,
+    status === "started" ? 2000 : null,
   );
 
   // Retrigger scroll in case font size and margin changes while stopped
@@ -223,7 +220,7 @@ export function Text({
 }) {
   const status = useNavbarStore((state) => state.status);
   const mirror = useNavbarStore((state) => state.mirror);
-  const { tokens, position, setPosition } = useContent();
+  const { tokens, position, setPosition } = useContentStore();
 
   const memoizedTokens = useMemo(() => {
     return tokens.map((token, index) => {

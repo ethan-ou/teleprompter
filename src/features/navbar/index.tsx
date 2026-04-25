@@ -1,8 +1,7 @@
 import { useFullScreen } from "@/app/hooks";
 import { startTeleprompter, stopTeleprompter } from "@/app/recognizer";
 import { Align, useNavbarStore } from "./store";
-import { useContent } from "../content/store";
-import { useCollaborateStore } from "../collaborate/store";
+import { useContentStore } from "../content/store";
 import { useInterval } from "@/app/hooks";
 import { Tooltip } from "@base-ui-components/react/tooltip";
 import {
@@ -20,7 +19,6 @@ import {
   SunMedium,
   Undo2,
   MonitorUp,
-  UsersRound,
 } from "lucide-react";
 import { useHotkeys } from "react-hotkeys-hook";
 import { useState } from "react";
@@ -87,12 +85,9 @@ function ButtonSection({ focused }: { focused: boolean }) {
     setHide,
     cast,
     setCast,
-    setCollaborate: setCollaborateOpen,
   } = useNavbarStore((state) => state);
 
-  const { isConnected } = useCollaborateStore();
-
-  const { setText: setContent, tokens, setTokens, setPosition } = useContent();
+  const { setText: setContent, tokens, setTokens, setPosition } = useContentStore();
 
   const fullscreen = useFullScreen((active) => setHide(active));
 
@@ -303,17 +298,6 @@ function ButtonSection({ focused }: { focused: boolean }) {
           </TooltipPopup>
         </Tooltip.Root>
       )}
-      <Tooltip.Root>
-        <Tooltip.Trigger
-          type="button"
-          className="button"
-          onClick={() => setCollaborateOpen(true)}
-          aria-label="Collaborate"
-        >
-          <UsersRound className={`icon ${isConnected() ? "yellow" : ""}`} />
-        </Tooltip.Trigger>
-        <TooltipPopup>{isConnected() ? "Connected to Room" : "Collaborate"}</TooltipPopup>
-      </Tooltip.Root>
     </>
   );
 }
