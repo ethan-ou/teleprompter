@@ -53,8 +53,8 @@ export function seekMatch(fullSeqIndex: number, scriptTokens: ScriptToken[]): Ma
 
 const BUFFER_SIZE = 6;
 const MIN_WINDOW = 3;
-const REGION_BACK = 10;
-const REGION_FORWARD = 50;
+const REGION_BACK = 20;
+const REGION_FORWARD = 80;
 const POSITION_PENALTY = 0.03;
 
 const HIGH_THRESHOLD = 0.1; // ≤10% normalised edit distance
@@ -82,13 +82,19 @@ export function updateMatch(
   const scoringWindow = [...state.buffer, ...transcriptTokens].slice(-BUFFER_SIZE);
   if (scoringWindow.length < MIN_WINDOW) return noChange;
 
-  const transcriptText = scoringWindow.map((t) => t.value).join(" ").toLowerCase();
+  const transcriptText = scoringWindow
+    .map((t) => t.value)
+    .join(" ")
+    .toLowerCase();
 
   // Centre search on matchStart + 2: the speaker is typically ~2 words ahead of
   // where the last window started.
   const expectedPos = state.currentWordPos + 2;
   const regionStart = Math.max(0, expectedPos - REGION_BACK);
-  const regionEnd = Math.min(scriptTokens.length - scoringWindow.length, expectedPos + REGION_FORWARD);
+  const regionEnd = Math.min(
+    scriptTokens.length - scoringWindow.length,
+    expectedPos + REGION_FORWARD,
+  );
 
   type Candidate = { wordPos: number; score: number };
   const candidates: Candidate[] = [];
