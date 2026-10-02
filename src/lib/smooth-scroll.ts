@@ -11,12 +11,15 @@ function easeInOutQuad(t: number): number {
  *
  * Usage:
  * scroll({ left: 0, top: 500, duration: 1000, behavior: 'smooth' })
+ *
+ * Aborting `signal` stops the animation where it is and resolves the promise.
  */
 export function scroll(options: {
   left?: number;
   top?: number;
   behavior?: "auto" | "smooth";
   duration?: number;
+  signal?: AbortSignal;
 }): Promise<void> {
   const x = options.left ?? 0;
   const y = options.top ?? 0;
@@ -36,6 +39,11 @@ export function scroll(options: {
     let startTime: number | null = null;
 
     const animate = (currentTime: number) => {
+      if (options.signal?.aborted) {
+        resolve();
+        return;
+      }
+
       if (!startTime) {
         startTime = currentTime;
       }

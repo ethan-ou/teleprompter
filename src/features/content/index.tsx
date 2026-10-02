@@ -3,8 +3,8 @@ import { useContentStore } from "@/features/content/store";
 import { useTrackerStore } from "@/features/tracker/store";
 import { useNavbarStore } from "@/features/navbar/store";
 import { clsx } from "@/lib/css";
-import { scroll } from "@/lib/smooth-scroll";
-import { getNextSentence, getNextWordIndex, getPrevSentence, type Token as TokenType } from "@/lib/word-tokenizer";
+import { isScrolling, jumpTo, scrollToToken } from "@/features/content/scroller";
+import { getNextSentence, getPrevSentence, type Token as TokenType } from "@/lib/word-tokenizer";
 import { memo, useCallback, useEffect, useMemo, useRef } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 
@@ -34,48 +34,23 @@ export function Content() {
     [fontSize, margin, opacity, align],
   );
 
-  const lastRef = useRef<HTMLSpanElement>(null);
-  const isScrollingRef = useRef(false);
-
-  const scrollCallback = useCallback(async () => {
-    isScrollingRef.current = true;
-
-    try {
-      if (lastRef.current && displayIndex > 0) {
-        await scroll({
-          top: {
-            top: lastRef.current.offsetTop,
-            center:
-              lastRef.current.offsetTop - document.documentElement.clientHeight / 2 + fontSize * 2,
-            bottom:
-              lastRef.current.offsetTop -
-              (3 / 4) * document.documentElement.clientHeight +
-              fontSize * 2,
-          }[align],
-          behavior: "smooth",
-        });
-      } else {
-        await scroll({ top: 0, behavior: "smooth" });
-      }
-    } finally {
-      isScrollingRef.current = false;
-    }
-  }, [displayIndex, fontSize, align]);
-
+  // Speech-driven movement is batched: every interval, scroll once to the latest position.
+  // Skipped while a scroll is running, e.g. a manual jump, which scrolls immediately on its own.
   useInterval(
     () => {
-      if (status !== "editing" && !isScrollingRef.current) {
-        scrollCallback();
+      if (!isScrolling()) {
+        scrollToToken(useTrackerStore.getState().currentPosition);
       }
     },
     status === "started" ? 2000 : null,
   );
 
+  // Layout changes move the text, so re-align to the current position
   useEffect(() => {
     if (status === "stopped") {
-      scrollCallback();
+      scrollToToken(useTrackerStore.getState().currentPosition);
     }
-  }, [fontSize, margin, status]);
+  }, [fontSize, margin, align, status]);
 
   const mainRef = useRef<HTMLElement | null>(null);
   const textAreaRef = useRef<HTMLTextAreaElement | null>(null);
@@ -112,7 +87,7 @@ export function Content() {
   const handleMoveBack = useCallback(() => {
     const token = getPrevSentence(tokens, confirmedIndex);
     if (token) {
-      useTrackerStore.getState().seek(token.index - 1);
+      jumpTo(token.index - 1);
     }
   }, [tokens, confirmedIndex]);
 
@@ -126,7 +101,7 @@ export function Content() {
   const handleMoveForward = useCallback(() => {
     const token = getNextSentence(tokens, confirmedIndex);
     if (token) {
-      useTrackerStore.getState().seek(token.index - 1);
+      jumpTo(token.index - 1);
     }
   }, [tokens, confirmedIndex]);
 
@@ -154,7 +129,7 @@ export function Content() {
           />
         </div>
       ) : (
-        <Text style={style} lastRef={lastRef} displayIndex={displayIndex} />
+        <Text style={style} displayIndex={displayIndex} />
       )}
     </main>
   );
@@ -186,11 +161,9 @@ const getTokenClassname = (
 
 export function Text({
   style,
-  lastRef,
   displayIndex,
 }: {
   style: React.CSSProperties;
-  lastRef: React.RefObject<HTMLSpanElement | null>;
   displayIndex: number;
 }) {
   const status = useNavbarStore((state) => state.status);
@@ -199,26 +172,15 @@ export function Text({
   const confirmedIndex = useContentStore((s) => s.position.confirmedIndex);
 
   const memoizedTokens = useMemo(() => {
-    return tokens.map((token, index) => {
-      const isLastRef =
-        index === Math.min(getNextWordIndex(tokens, displayIndex), tokens.length - 1);
-      const ref = isLastRef ? lastRef : undefined;
-
-      const handleClick = () => {
-        useTrackerStore.getState().seek(token.index - 1);
-      };
-
-      return (
-        <Token
-          key={token.index}
-          token={token}
-          className={getTokenClassname(token, confirmedIndex, displayIndex, status)}
-          ref={ref}
-          onClick={handleClick}
-        />
-      );
-    });
-  }, [tokens, confirmedIndex, displayIndex, status, lastRef]);
+    return tokens.map((token) => (
+      <Token
+        key={token.index}
+        token={token}
+        className={getTokenClassname(token, confirmedIndex, displayIndex, status)}
+        onClick={() => jumpTo(token.index - 1)}
+      />
+    ));
+  }, [tokens, confirmedIndex, displayIndex, status]);
 
   return (
     <div
@@ -233,12 +195,12 @@ export function Text({
 export const Token = memo<{
   token: TokenType;
   className: string;
-  ref?: React.Ref<HTMLSpanElement>;
   onClick: () => void;
 }>(
-  ({ token, className, ref, onClick }) => {
+  ({ token, className, onClick }) => {
     return (
-      <span ref={ref} key={token.index} onClick={onClick} className={className}>
+      // data-token-index lets the scroller find a token's position on the page
+      <span data-token-index={token.index} onClick={onClick} className={className}>
         {token.value}
       </span>
     );
