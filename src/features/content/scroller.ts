@@ -1,3 +1,4 @@
+import { discardPendingSpeech } from "@/app/recognizer";
 import { useContentStore } from "@/features/content/store";
 import { useNavbarStore } from "@/features/navbar/store";
 import { useTrackerStore } from "@/features/tracker/store";
@@ -58,9 +59,11 @@ export async function scrollToToken(index: number, duration?: number) {
 
 /**
  * Manual jump (arrow keys, clicking a word, reset): move the tracker and scroll there right away,
- * rather than waiting for the next periodic scroll.
+ * rather than waiting for the next periodic scroll. Speech that's still being recognised is
+ * discarded, otherwise words said before the jump would match the old position and pull back to it.
  */
 export function jumpTo(index: number) {
+  discardPendingSpeech();
   useTrackerStore.getState().seek(index);
   return scrollToToken(index, JUMP_SCROLL_DURATION);
 }

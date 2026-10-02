@@ -38,6 +38,11 @@ export const startTeleprompter = () => {
   }
 };
 
+// Called on manual jumps, so speech from before the jump can't pull the position back
+export const discardPendingSpeech = () => {
+  speechRecognizer?.discardPending();
+};
+
 export const stopTeleprompter = () => {
   if (speechRecognizer !== null) {
     speechRecognizer.stop();

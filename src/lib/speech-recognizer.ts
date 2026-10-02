@@ -24,6 +24,7 @@ export default class SpeechRecognizer {
   private endSubscribers: EmptySubscriberFunction[] = [];
 
   private running: boolean = false;
+  private discarding: boolean = false;
   private startedAt: number = new Date().getTime();
   private mobileOrTablet: boolean = isMobileOrTablet();
   private previousRestarts: number[] = [];
@@ -90,7 +91,11 @@ export default class SpeechRecognizer {
         Speech recognition automatically stops after a while.
         Add restarts if the recognition stops.
       */
-      if (this.running) {
+      if (this.running && this.discarding) {
+        // Deliberate restart from discardPending(), so don't count it towards the loop check
+        this.discarding = false;
+        this.recognizer.start();
+      } else if (this.running) {
         const now = Date.now();
         this.previousRestarts.push(now);
         this.previousRestarts = this.previousRestarts.filter(
@@ -138,6 +143,17 @@ export default class SpeechRecognizer {
     this.recognizer.stop();
     this.running = false;
     this.previousRestarts = [];
+  }
+
+  /**
+   * Throw away speech that hasn't been finalised yet, including audio still being processed,
+   * so nothing said before now is delivered as a result. Recognition restarts via onend.
+   */
+  discardPending(): void {
+    if (this.running && !this.discarding) {
+      this.discarding = true;
+      this.recognizer.abort();
+    }
   }
 
   onstart(subscriber: EmptySubscriberFunction): void {
