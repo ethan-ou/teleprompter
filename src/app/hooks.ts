@@ -1,5 +1,9 @@
 import { useState, useRef, useEffect, useCallback, useMemo } from "react";
 
+// The Keyboard Lock API is Chromium-only and not in TypeScript's DOM types
+type Keyboard = { lock: (keyCodes?: string[]) => Promise<void>; unlock: () => void };
+const getKeyboard = () => (navigator as Navigator & { keyboard?: Keyboard }).keyboard;
+
 export const useFullScreen = (onChange?: (active: boolean) => void) => {
   const [active, setActive] = useState<boolean>(false);
   const node = useRef<HTMLElement>(document.documentElement);
@@ -15,9 +19,7 @@ export const useFullScreen = (onChange?: (active: boolean) => void) => {
 
   const enter = useCallback(() => {
     const keyboardLock = () => {
-      if ("keyboard" in navigator && "lock" in navigator.keyboard) {
-        navigator.keyboard.lock(["Escape"]);
-      }
+      getKeyboard()?.lock(["Escape"]);
     };
 
     if (document.fullscreenElement) {
@@ -32,7 +34,7 @@ export const useFullScreen = (onChange?: (active: boolean) => void) => {
 
   const exit = useCallback(() => {
     if (document.fullscreenElement === node.current) {
-      return document.exitFullscreen().then(() => navigator.keyboard.unlock());
+      return document.exitFullscreen().then(() => getKeyboard()?.unlock());
     }
     return Promise.resolve();
   }, []);

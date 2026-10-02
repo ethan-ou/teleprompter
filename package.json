@@ -7,6 +7,7 @@
     "start": "vite",
     "build": "vite build",
     "preview": "vite preview",
+    "typecheck": "tsc -p tsconfig.json && tsc -p tsconfig.node.json",
     "lint": "oxlint",
     "format": "oxfmt ."
   },
@@ -19,6 +20,7 @@
     "zustand": "^5.0.12"
   },
   "devDependencies": {
+    "@rolldown/plugin-babel": "^0.2.4",
     "@tailwindcss/vite": "^4.2.4",
     "@types/dom-speech-recognition": "^0.0.9",
     "@types/node": "^25.6.0",
