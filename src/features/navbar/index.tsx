@@ -163,7 +163,7 @@ function ButtonSection({ focused }: { focused: boolean }) {
 
   return (
     <>
-      <Tooltip.Root aria-disabled={startAction.disabled || mobileOrTablet}>
+      <Tooltip.Root disabled={startAction.disabled || mobileOrTablet}>
         <Tooltip.Trigger
           type="button"
           className={clsx(
@@ -176,7 +176,7 @@ function ButtonSection({ focused }: { focused: boolean }) {
                 "sm:border-green-500/30 sm:bg-green-700/10 sm:hover:border-green-500/40 sm:hover:bg-green-700/20",
             }[status],
           )}
-          disabled={startAction.disabled}
+          render={<button type="button" disabled={startAction.disabled} />}
           onClick={startAction.action}
           aria-label={status === "started" ? "Stop" : "Start"}
         >
@@ -202,12 +202,12 @@ function ButtonSection({ focused }: { focused: boolean }) {
           {status === "started" ? "Stop" : "Start"} <kbd>Space</kbd>
         </TooltipPopup>
       </Tooltip.Root>
-      <Tooltip.Root aria-disabled={editAction.disabled || mobileOrTablet}>
+      <Tooltip.Root disabled={editAction.disabled || mobileOrTablet}>
         <Tooltip.Trigger
           type="button"
           className="button"
           onClick={editAction.action}
-          disabled={editAction.disabled}
+          render={<button type="button" disabled={editAction.disabled} />}
           aria-label="Edit Text"
         >
           <Pencil className={`icon ${status === "editing" ? "yellow" : ""}`} />
@@ -216,11 +216,11 @@ function ButtonSection({ focused }: { focused: boolean }) {
           Edit <kbd>E</kbd>
         </TooltipPopup>
       </Tooltip.Root>
-      <Tooltip.Root aria-disabled={restartAction.disabled || mobileOrTablet}>
+      <Tooltip.Root disabled={restartAction.disabled || mobileOrTablet}>
         <Tooltip.Trigger
           className="button"
           onClick={restartAction.action}
-          disabled={restartAction.disabled}
+          render={<button type="button" disabled={restartAction.disabled} />}
           aria-label="Reset to Top"
         >
           <Undo2 className="icon" />
@@ -229,12 +229,12 @@ function ButtonSection({ focused }: { focused: boolean }) {
           Reset to Top <kbd>R</kbd>
         </TooltipPopup>
       </Tooltip.Root>
-      <Tooltip.Root aria-disabled={clearAction.disabled || mobileOrTablet}>
+      <Tooltip.Root disabled={clearAction.disabled || mobileOrTablet}>
         <Tooltip.Trigger
           type="button"
           className="button"
           onClick={clearAction.action}
-          disabled={clearAction.disabled}
+          render={<button type="button" disabled={clearAction.disabled} />}
           aria-label="Clear Text"
         >
           <Trash2 className="icon" />
@@ -243,12 +243,12 @@ function ButtonSection({ focused }: { focused: boolean }) {
           Clear <kbd>Del</kbd>
         </TooltipPopup>
       </Tooltip.Root>
-      <Tooltip.Root aria-disabled={mirrorAction.disabled || mobileOrTablet}>
+      <Tooltip.Root disabled={mirrorAction.disabled || mobileOrTablet}>
         <Tooltip.Trigger
           type="button"
           className="button"
           onClick={mirrorAction.action}
-          disabled={mirrorAction.disabled}
+          render={<button type="button" disabled={mirrorAction.disabled} />}
           aria-label="Mirror"
         >
           <MoveHorizontal className={`icon ${mirror ? "yellow" : ""}`} />
@@ -257,12 +257,12 @@ function ButtonSection({ focused }: { focused: boolean }) {
           Mirror <kbd>M</kbd>
         </TooltipPopup>
       </Tooltip.Root>
-      <Tooltip.Root aria-disabled={fullscreenAction.disabled || mobileOrTablet}>
+      <Tooltip.Root disabled={fullscreenAction.disabled || mobileOrTablet}>
         <Tooltip.Trigger
           type="button"
           className="button"
           onClick={fullscreenAction.action}
-          disabled={fullscreenAction.disabled}
+          render={<button type="button" disabled={fullscreenAction.disabled} />}
           aria-label={fullscreen.active ? "Exit Fullscreen" : "Fullscreen"}
         >
           <Expand className={`icon ${fullscreen.active ? "yellow" : ""}`} />
@@ -272,11 +272,11 @@ function ButtonSection({ focused }: { focused: boolean }) {
         </TooltipPopup>
       </Tooltip.Root>
       {!mobileOrTablet && (
-        <Tooltip.Root aria-disabled={castScreenAction.disabled || mobileOrTablet}>
+        <Tooltip.Root disabled={castScreenAction.disabled || mobileOrTablet}>
           <Tooltip.Trigger
             className="button"
             onClick={castScreenAction.action}
-            disabled={castScreenAction.disabled}
+            render={<button type="button" disabled={castScreenAction.disabled} />}
             aria-label={cast ? "Stop Casting" : "Cast Screen"}
           >
             <MonitorUp className={`icon ${cast ? "yellow" : ""}`} />
@@ -354,7 +354,7 @@ function SliderSection() {
 
   return (
     <>
-      <Tooltip.Root aria-disabled={mobileOrTablet}>
+      <Tooltip.Root disabled={mobileOrTablet}>
         <Tooltip.Trigger
           render={(props) => (
             <div {...props} className="w-20">
@@ -379,7 +379,7 @@ function SliderSection() {
           </span>
         </TooltipPopup>
       </Tooltip.Root>
-      <Tooltip.Root aria-disabled={mobileOrTablet}>
+      <Tooltip.Root disabled={mobileOrTablet}>
         <Tooltip.Trigger
           render={(props) => (
             <div {...props} className="w-[4.75rem]">
@@ -405,7 +405,7 @@ function SliderSection() {
           </span>
         </TooltipPopup>
       </Tooltip.Root>
-      <Tooltip.Root aria-disabled={mobileOrTablet}>
+      <Tooltip.Root disabled={mobileOrTablet}>
         <Tooltip.Trigger
           render={(props) => (
             <div {...props} className="w-20">
@@ -437,7 +437,7 @@ function SliderSection() {
         </TooltipPopup>
       </Tooltip.Root>
       <div>
-        <Tooltip.Root aria-disabled={mobileOrTablet}>
+        <Tooltip.Root disabled={mobileOrTablet}>
           <Tooltip.Trigger
             render={(props) => (
               <label
