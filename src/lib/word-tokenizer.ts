@@ -23,7 +23,8 @@ export const tokenize = (text: string | null) => {
     // Special case for text within between [ and ], which I use as hints in my teleprompter text
     if (s === "[") {
       const hintLength = text.substring(i).indexOf("]");
-      s = hintLength > 0 ? text.substring(i, i + hintLength + 1) : s.substring(i);
+      // An unclosed "[" (e.g. while typing) is treated as a plain delimiter character
+      s = hintLength > 0 ? text.substring(i, i + hintLength + 1) : s;
       inToken = false;
     } else {
       inToken = /[A-Za-zА-Яа-я0-9_]/.test(s);
