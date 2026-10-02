@@ -8,7 +8,7 @@ export default defineConfig(({ command }) => ({
   base: command === "build" ? "/teleprompter/" : "/",
   resolve: {
     alias: {
-      "@": resolve(__dirname, "./src"),
+      "@": resolve(import.meta.dirname, "./src"),
     },
   },
 }));
