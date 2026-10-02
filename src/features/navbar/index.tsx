@@ -25,7 +25,7 @@ import { useState } from "react";
 import { DragInput } from "@/components/DragInput";
 import { clsx } from "@/lib/css";
 import { isMobileOrTablet } from "@/lib/device";
-import { useTrackerStore } from "@/features/tracker/store";
+import { jumpTo } from "@/features/content/scroller";
 import { TooltipPopup } from "@/components/Tooltip";
 
 const mobileOrTablet = isMobileOrTablet();
@@ -153,9 +153,8 @@ function ButtonSection({ focused }: { focused: boolean }) {
 
   const restartAction = {
     action: () => {
-      useTrackerStore.getState().seek(-1);
+      jumpTo(-1);
       resetTimer();
-      window.scrollTo({ top: 0, behavior: "smooth" });
     },
     disabled: status === "editing",
     keys: ["r"],
@@ -168,26 +167,32 @@ function ButtonSection({ focused }: { focused: boolean }) {
         <Tooltip.Trigger
           type="button"
           className={clsx(
-            "button group/button flex items-center gap-2 rounded-md disabled:border-neutral-900 disabled:bg-transparent hover:disabled:border-neutral-900 hover:disabled:bg-transparent sm:mr-1 sm:border",
-            status === "started"
-              ? "sm:border-red-500/30 sm:bg-red-700/10 sm:hover:border-red-500/40 sm:hover:bg-red-700/20"
-              : "sm:border-green-500/30 sm:bg-green-700/10 sm:hover:border-green-500/40 sm:hover:bg-green-700/20",
+            "button group/button flex items-center gap-2 rounded-md sm:mr-1 sm:border",
+            {
+              editing: "sm:border-neutral-900",
+              started:
+                "sm:border-red-500/30 sm:bg-red-700/10 sm:hover:border-red-500/40 sm:hover:bg-red-700/20",
+              stopped:
+                "sm:border-green-500/30 sm:bg-green-700/10 sm:hover:border-green-500/40 sm:hover:bg-green-700/20",
+            }[status],
           )}
           disabled={startAction.disabled}
           onClick={startAction.action}
           aria-label={status === "started" ? "Stop" : "Start"}
         >
           {status === "stopped" || status === "editing" ? (
-            <Play className={`icon ${status !== "editing" && "green-fill"}`} />
+            <Play className={clsx("icon", status !== "editing" ? "green-fill" : undefined)} />
           ) : (
             <Pause className="icon red-fill" />
           )}
           <span
             className={clsx(
-              "hidden pr-1 group-disabled/button:text-neutral-800 sm:inline",
-              status === "started"
-                ? "pr-1.5 text-red-300/90 group-hover/button:text-red-300"
-                : "pr-1 text-green-300/80 group-hover/button:text-green-300/90",
+              "hidden pr-1 sm:inline",
+              {
+                editing: "text-neutral-800",
+                started: "pr-1.5 text-red-300/90 group-hover/button:text-red-300",
+                stopped: "text-green-300/80 group-hover/button:text-green-300/90",
+              }[status],
             )}
           >
             {status === "started" ? "Stop " : "Start"}
