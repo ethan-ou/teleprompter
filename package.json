@@ -12,26 +12,26 @@
     "format": "oxfmt ."
   },
   "dependencies": {
-    "@base-ui/react": "^1.4.1",
-    "lucide-react": "^1.11.0",
-    "react": "^19.2.0",
-    "react-dom": "^19.2.0",
-    "react-hotkeys-hook": "^5.2.4",
-    "zustand": "^5.0.12"
+    "@base-ui/react": "^1.8.0",
+    "lucide-react": "^1.49.0",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
+    "react-hotkeys-hook": "^5.3.3",
+    "zustand": "^5.0.15"
   },
   "devDependencies": {
     "@rolldown/plugin-babel": "^0.2.4",
-    "@tailwindcss/vite": "^4.2.4",
-    "@types/dom-speech-recognition": "^0.0.9",
-    "@types/node": "^25.6.0",
-    "@types/react": "^19.2.14",
-    "@types/react-dom": "^19.2.3",
-    "@vitejs/plugin-react": "^6.0.1",
+    "@tailwindcss/vite": "^4.3.3",
+    "@types/dom-speech-recognition": "^0.0.12",
+    "@types/node": "^26.6.4",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^6.1.1",
     "babel-plugin-react-compiler": "^1.0.0",
-    "oxfmt": "^0.46.0",
-    "oxlint": "^1.61.0",
-    "tailwindcss": "^4.2.4",
-    "typescript": "^6.0.3",
-    "vite": "^8.0.10"
+    "oxfmt": "^0.71.0",
+    "oxlint": "^1.86.0",
+    "tailwindcss": "^4.3.3",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.2"
   }
 }
